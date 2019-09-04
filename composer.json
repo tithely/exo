@@ -1,0 +1,15 @@
+{
+    "name": "tithely/exo",
+    "description": "A flexible database migration library",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^7.3",
+        "phpunit/phpunit": "8.3.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Exo\\": "src/"
+        }
+    }
+}
