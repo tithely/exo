@@ -12,7 +12,7 @@ class History
     private $migrations = [];
 
     /**
-     * Returns migrations reduced by table.
+     * Returns operations reduced by table.
      *
      * @param TableOperation[] $operations
      * @return TableOperation[]
