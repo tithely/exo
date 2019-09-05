@@ -53,6 +53,12 @@ class TableOperation extends AbstractOperation
             throw new \InvalidArgumentException('Cannot apply further operations to a dropped table.');
         }
 
+        // Collect existing columns
+        $columns = [];
+        foreach ($this->columnOperations as $columnOperation) {
+            $columns[$columnOperation->getColumn()] = $columnOperation;
+        }
+
         if ($this->operation === self::CREATE) {
             if ($operation->operation === self::CREATE) {
                 throw new \InvalidArgumentException('Cannot recreate an existing table.');
@@ -61,11 +67,6 @@ class TableOperation extends AbstractOperation
             // Skip creation of tables that will be dropped
             if ($operation->operation === self::DROP) {
                 return null;
-            }
-
-            $columns = [];
-            foreach ($this->columnOperations as $columnOperation) {
-                $columns[$columnOperation->getColumn()] = $columnOperation;
             }
 
             foreach ($operation->columnOperations as $columnOperation) {
@@ -91,7 +92,7 @@ class TableOperation extends AbstractOperation
                 // Apply new column operation
                 switch ($columnOperation->getOperation()) {
                     case ColumnOperation::ADD:
-                        array_splice($columns, $offset, 0, [$columnOperation->getColumn() => $columnOperation]);
+                        array_splice($columns, $offset, 0, [$columnOperation]);
                         break;
                     case ColumnOperation::MODIFY:
                         $addOperation = new ColumnOperation(
@@ -100,7 +101,7 @@ class TableOperation extends AbstractOperation
                             $columnOperation->getOptions()
                         );
 
-                        array_splice($columns, $offset, 0, [$columnOperation->getColumn() => $addOperation]);
+                        array_splice($columns, $offset, 0, [$addOperation]);
                         break;
                 }
             }
@@ -108,6 +109,34 @@ class TableOperation extends AbstractOperation
             // Skip modification of tables that will be dropped
             if ($operation->operation === self::DROP) {
                 return $operation;
+            }
+
+            foreach ($operation->columnOperations as $columnOperation) {
+                $originalOperation = $columnOperation->getOperation();
+
+                // Remove existing operation for the column
+                foreach ($columns as $existing => $column) {
+                    if ($column->getColumn() === $columnOperation->getColumn()) {
+                        unset($columns[$existing]);
+                        $originalOperation = $column->getOperation();
+                        break;
+                    }
+                }
+
+                // Apply new column operation
+                switch ($columnOperation->getOperation()) {
+                    case ColumnOperation::ADD:
+                    case ColumnOperation::DROP:
+                        $columns[] = $columnOperation;
+                        break;
+                    case ColumnOperation::MODIFY:
+                        $columns[] = new ColumnOperation(
+                            $columnOperation->getColumn(),
+                            $originalOperation,
+                            $columnOperation->getOptions()
+                        );
+                        break;
+                }
             }
         }
 
