@@ -57,12 +57,22 @@ abstract class StatementBuilder
         $length = $options['length'] ?? 255;
 
         switch ($type) {
-            case 'uuid':
-                return 'CHAR(36)';
+            case 'bool':
+                return 'SMALLINT(1)';
             case 'char':
                 return sprintf('CHAR(%d)', $length);
+            case 'date':
+                return 'DATE';
+            case 'decimal':
+                return sprintf('DECIMAL(%d, %d)', $options['precision'] ?? 10, $options['scale'] ?? 0);
+            case 'integer':
+                return 'INTEGER';
             case 'string':
                 return sprintf('VARCHAR(%d)', $length);
+            case 'timestamp':
+                return 'TIMESTAMP';
+            case 'uuid':
+                return 'CHAR(36)';
             default:
                 throw new \InvalidArgumentException('Unknown column type "%s".', $type);
         }

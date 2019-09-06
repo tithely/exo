@@ -73,6 +73,8 @@ class MysqlStatementBuilder extends StatementBuilder
         $type = $options['type'] ?? 'string';
 
         switch ($type) {
+            case 'datetime':
+                return 'DATETIME';
             case 'json':
                 return 'JSON';
             default:
