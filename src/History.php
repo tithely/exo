@@ -29,7 +29,9 @@ class History
             }
         }
 
-        return array_values($reduced);
+        return array_filter(array_values($reduced), function ($operation) {
+            return !is_null($operation);
+        });
     }
 
     /**
@@ -77,5 +79,15 @@ class History
         }
 
         return $operations;
+    }
+
+    /**
+     * Returns an ordered array of versions present in the history.
+     *
+     * @return string[]
+     */
+    public function getVersions()
+    {
+        return array_map('strval', array_keys($this->migrations));
     }
 }

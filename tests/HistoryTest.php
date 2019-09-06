@@ -6,6 +6,13 @@ use Exo\Operation\TableOperation;
 
 class HistoryTest extends \PHPUnit\Framework\TestCase
 {
+    public function testGetVersions()
+    {
+        $versions = $this->getHistory()->getVersions();
+
+        $this->assertEquals(['1', '2', '3'], $versions);
+    }
+
     public function testPlay()
     {
         $operations = $this

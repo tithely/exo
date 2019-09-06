@@ -74,7 +74,7 @@ abstract class StatementBuilder
             case 'uuid':
                 return 'CHAR(36)';
             default:
-                throw new \InvalidArgumentException('Unknown column type "%s".', $type);
+                throw new \InvalidArgumentException(sprintf('Unknown column type "%s".', $type));
         }
     }
 
