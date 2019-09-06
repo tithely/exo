@@ -19,5 +19,5 @@ operation factories.
 **Histories** are versioned collections of migrations that provide facilities for playing and
 rewinding sets of operations.
 
-*Handlers* are used to execute histories against database connections. Specific source and
+**Handlers** are used to execute histories against database connections. Specific source and
 target versions are used to determine which sets of operations are applied.
