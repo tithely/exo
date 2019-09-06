@@ -23,7 +23,7 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals('email', $operation->getColumnOperations()[0]->getColumn());
         $this->assertEquals(ColumnOperation::ADD, $operation->getColumnOperations()[0]->getOperation());
-        $this->assertEquals(['type' => 'string', 'length' => 255, 'first' => true], $operation->getColumnOperations()[0]->getOptions());
+        $this->assertEquals(['type' => 'string', 'length' => 255], $operation->getColumnOperations()[0]->getOptions());
 
         $this->assertEquals('username', $operation->getColumnOperations()[1]->getColumn());
         $this->assertEquals(ColumnOperation::ADD, $operation->getColumnOperations()[1]->getOperation());

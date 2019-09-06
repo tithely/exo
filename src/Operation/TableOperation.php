@@ -70,15 +70,17 @@ class TableOperation extends AbstractOperation
             }
 
             foreach ($operation->columnOperations as $columnOperation) {
+                $options = $columnOperation->getOptions();
+
                 // Calculate column position
                 $offset = count($columns);
 
-                if ($columnOperation->getOptions()['first'] ?? false) {
+                if ($options['first'] ?? false) {
                     $offset = 0;
                 }
 
-                if ($columnOperation->getOptions()['after'] ?? null) {
-                    $offset = array_search($columnOperation->getOptions()['after'], array_keys($columns));
+                if ($options['after'] ?? null) {
+                    $offset = array_search($options['after'], array_keys($columns)) + 1;
                 }
 
                 // Remove existing operation for the column
@@ -89,16 +91,17 @@ class TableOperation extends AbstractOperation
                     }
                 }
 
+                // Remove modifiers
+                unset($options['first'], $options['after']);
+
                 // Apply new column operation
                 switch ($columnOperation->getOperation()) {
                     case ColumnOperation::ADD:
-                        array_splice($columns, $offset, 0, [$columnOperation]);
-                        break;
                     case ColumnOperation::MODIFY:
                         $addOperation = new ColumnOperation(
                             $columnOperation->getColumn(),
                             ColumnOperation::ADD,
-                            $columnOperation->getOptions()
+                            $options
                         );
 
                         array_splice($columns, $offset, 0, [$addOperation]);
