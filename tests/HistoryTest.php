@@ -39,6 +39,32 @@ class HistoryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(TableOperation::CREATE, $operations[1]->getOperation());
     }
 
+    public function testRewind()
+    {
+        $operations = $this
+            ->getHistory()
+            ->rewind('3', '2');
+
+        $this->assertCount(2, $operations);
+        $this->assertEquals('posts', $operations[0]->getTable());
+        $this->assertEquals(TableOperation::DROP, $operations[0]->getOperation());
+        $this->assertEquals('users', $operations[1]->getTable());
+        $this->assertEquals(TableOperation::ALTER, $operations[1]->getOperation());
+    }
+
+    public function testRewindReduced()
+    {
+        $operations = $this
+            ->getHistory()
+            ->rewind('3', '1', true);
+
+        $this->assertCount(2, $operations);
+        $this->assertEquals('posts', $operations[0]->getTable());
+        $this->assertEquals(TableOperation::DROP, $operations[0]->getOperation());
+        $this->assertEquals('users', $operations[1]->getTable());
+        $this->assertEquals(TableOperation::DROP, $operations[1]->getOperation());
+    }
+
     private function getHistory()
     {
         $history = new History();

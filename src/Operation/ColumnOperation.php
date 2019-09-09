@@ -38,6 +38,16 @@ class ColumnOperation extends AbstractOperation
     }
 
     /**
+     * Returns the reverse of the operation.
+     *
+     * @return static
+     */
+    public function reverse()
+    {
+        return $this;
+    }
+
+    /**
      * Returns the column name.
      *
      * @return string

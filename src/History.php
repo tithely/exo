@@ -82,6 +82,42 @@ class History
     }
 
     /**
+     * Returns an array of reversed operations spanning the supplied
+     * version numbers. If reduce is true, operations for the same
+     * table will be reduced into a single operation.
+     *
+     * @param string $from
+     * @param string $to
+     * @param bool   $reduce
+     * @return TableOperation[]
+     */
+    public function rewind(string $from, string $to, bool $reduce = false)
+    {
+        $operations = [];
+        $inRange = false;
+
+        foreach ($this->migrations as $version => $migration) {
+            if (strval($version) === $to) {
+                $inRange = true;
+            }
+
+            if ($inRange) {
+                array_unshift($operations, $migration->getOperation()->reverse());
+            }
+
+            if (strval($version) === $from) {
+                $inRange = false;
+            }
+        }
+
+        if ($reduce) {
+            return self::reduce($operations);
+        }
+
+        return $operations;
+    }
+
+    /**
      * Returns an ordered array of versions present in the history.
      *
      * @return string[]

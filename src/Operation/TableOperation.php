@@ -38,6 +38,35 @@ class TableOperation extends AbstractOperation
     }
 
     /**
+     * Returns the reverse of the operation.
+     *
+     * @return static
+     */
+    public function reverse()
+    {
+        switch ($this->getOperation()) {
+            case self::CREATE:
+                $operation = TableOperation::DROP;
+                $columns = [];
+                break;
+            case self::DROP:
+                $operation = TableOperation::CREATE;
+                $columns = [];
+                break;
+            default:
+                $operation = $this->getOperation();
+                $columns = $this->getColumnOperations();
+                break;
+        }
+
+        return new TableOperation(
+            $this->table,
+            $operation,
+            $columns
+        );
+    }
+
+    /**
      * Returns a new operation by applying another operation.
      *
      * @param TableOperation $operation
