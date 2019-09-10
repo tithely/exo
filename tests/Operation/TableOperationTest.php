@@ -126,4 +126,18 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(ColumnOperation::MODIFY, $operation->getColumnOperations()[2]->getOperation());
         $this->assertEquals(['type' => 'string', 'length' => 64], $operation->getColumnOperations()[2]->getOptions());
     }
+
+    public function testReverseDrop()
+    {
+        $base = new TableOperation('users', TableOperation::DROP, []);
+
+        $create = new TableOperation('users', TableOperation::CREATE, [
+            new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
+            new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
+        ]);
+
+        $operation = $base->reverse([$create]);
+
+        $this->assertEquals($create, $operation);
+    }
 }
