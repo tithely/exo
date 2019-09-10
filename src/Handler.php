@@ -72,6 +72,41 @@ class Handler
     }
 
     /**
+     * Performs a rollback from current to target version.
+     *
+     * @param string      $current
+     * @param string|null $target
+     * @param bool        $reduce
+     * @return HandlerResult[]
+     */
+    public function rollback(string $current, ?string $target, bool $reduce)
+    {
+        $versions = $this->history->getVersions();
+        $versions = array_slice(
+            $versions,
+            $target ? array_search($target, $versions) : 0,
+            array_search($current, $versions)
+        );
+
+        $operations = $this->history->rewind($current, $versions[0], $reduce);
+        $results = [];
+
+        foreach ($operations as $operation) {
+            $sql = $this->getBuilder()->build($operation);
+            $result = $this->db->exec($sql);
+
+            $results[] = new HandlerResult(
+                null,
+                $result !== false,
+                $sql,
+                $result === false ? $this->db->errorInfo() : null
+            );
+        }
+
+        return $results;
+    }
+
+    /**
      * Constructs a statement builder based on the PDO driver.
      *
      * @return StatementBuilder
