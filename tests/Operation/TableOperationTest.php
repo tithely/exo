@@ -110,7 +110,7 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
         ]);
 
-        $operation = $base->reverse([$create]);
+        $operation = $base->reverse($create);
 
         $this->assertEquals('users', $operation->getTable());
         $this->assertEquals(TableOperation::ALTER, $operation->getOperation());
@@ -136,7 +136,7 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
         ]);
 
-        $operation = $base->reverse([$create]);
+        $operation = $base->reverse($create);
 
         $this->assertEquals($create, $operation);
     }

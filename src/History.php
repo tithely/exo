@@ -94,6 +94,7 @@ class History
     public function rewind(string $from, string $to, bool $reduce = false)
     {
         $operations = [];
+        $tables = [];
         $inRange = false;
 
         foreach ($this->migrations as $version => $migration) {
@@ -102,7 +103,22 @@ class History
             }
 
             if ($inRange) {
-                array_unshift($operations, $migration->getOperation()->reverse());
+                // Build history to target version
+                $history = [];
+                $versions = $this->getVersions();
+                $versions = array_slice($versions, 0, array_search($version, $versions));
+
+                if (!empty($versions)) {
+                    $history = $this->play($versions[0], array_pop($versions), true);
+                }
+
+                foreach ($history as $operation) {
+                    $tables[$operation->getTable()] = $operation;
+                }
+
+                // Reverse the operation
+                $operation = $migration->getOperation();
+                array_unshift($operations, $operation->reverse($tables[$operation->getTable()] ?? null));
             }
 
             if (strval($version) === $from) {

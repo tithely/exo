@@ -40,10 +40,10 @@ class TableOperation extends AbstractOperation
     /**
      * Returns the reverse of the operation.
      *
-     * @param TableOperation[] $previous
+     * @param TableOperation|null $original
      * @return static
      */
-    public function reverse(array $previous = [])
+    public function reverse(TableOperation $original = null)
     {
         if ($this->getOperation() === TableOperation::CREATE) {
             return new TableOperation(
@@ -53,14 +53,8 @@ class TableOperation extends AbstractOperation
             );
         }
 
-        // Reconstruct the previous state by reducing the table's history
-        $original = array_shift($previous);
-        if ($original->table !== $this->table) {
+        if ($original && $original->table !== $this->table) {
             throw new \InvalidArgumentException('Previous operations must apply to the same table.');
-        }
-
-        while ($change = array_shift($previous)) {
-            $original = $original->apply($change);
         }
 
         // Provide the create table operation to reverse a drop
