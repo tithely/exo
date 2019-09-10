@@ -83,4 +83,47 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
         $operation = $base->apply($drop);
         $this->assertEquals($drop, $operation);
     }
+
+    public function testReverseCreate()
+    {
+        $base = new TableOperation('users', TableOperation::CREATE, [
+            new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
+            new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
+        ]);
+
+        $operation = $base->reverse();
+
+        $this->assertEquals('users', $operation->getTable());
+        $this->assertEquals(TableOperation::DROP, $operation->getOperation());
+    }
+
+    public function testReverseAlter()
+    {
+        $base = new TableOperation('users', TableOperation::ALTER, [
+            new ColumnOperation('id', ColumnOperation::DROP, []),
+            new ColumnOperation('email', ColumnOperation::ADD, ['type' => 'string', 'length' => 255, 'first' => true]),
+            new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255])
+        ]);
+
+        $create = new TableOperation('users', TableOperation::CREATE, [
+            new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
+            new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
+        ]);
+
+        $operation = $base->reverse([$create]);
+
+        $this->assertEquals('users', $operation->getTable());
+        $this->assertEquals(TableOperation::ALTER, $operation->getOperation());
+
+        $this->assertEquals('id', $operation->getColumnOperations()[0]->getColumn());
+        $this->assertEquals(ColumnOperation::ADD, $operation->getColumnOperations()[0]->getOperation());
+        $this->assertEquals(['type' => 'uuid'], $operation->getColumnOperations()[0]->getOptions());
+
+        $this->assertEquals('email', $operation->getColumnOperations()[1]->getColumn());
+        $this->assertEquals(ColumnOperation::DROP, $operation->getColumnOperations()[1]->getOperation());
+
+        $this->assertEquals('username', $operation->getColumnOperations()[2]->getColumn());
+        $this->assertEquals(ColumnOperation::MODIFY, $operation->getColumnOperations()[2]->getOperation());
+        $this->assertEquals(['type' => 'string', 'length' => 64], $operation->getColumnOperations()[2]->getOptions());
+    }
 }

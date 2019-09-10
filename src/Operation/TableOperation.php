@@ -40,29 +40,75 @@ class TableOperation extends AbstractOperation
     /**
      * Returns the reverse of the operation.
      *
+     * @param TableOperation[] $previous
      * @return static
      */
-    public function reverse()
+    public function reverse(array $previous = [])
     {
-        switch ($this->getOperation()) {
-            case self::CREATE:
-                $operation = TableOperation::DROP;
-                $columns = [];
-                break;
-            case self::DROP:
-                $operation = TableOperation::CREATE;
-                $columns = [];
-                break;
-            default:
-                $operation = $this->getOperation();
-                $columns = $this->getColumnOperations();
-                break;
+        if ($this->getOperation() === TableOperation::CREATE) {
+            return new TableOperation(
+                $this->table,
+                TableOperation::DROP,
+                []
+            );
+        }
+
+        // Reconstruct the previous state by reducing the table's history
+        $original = array_shift($previous);
+        if ($original->table !== $this->table) {
+            throw new \InvalidArgumentException('Previous operations must apply to the same table.');
+        }
+
+        while ($change = array_shift($previous)) {
+            $original = $original->apply($change);
+        }
+
+        // Provide the create table operation to reverse a drop
+        if ($this->getOperation() === TableOperation::DROP) {
+            return $original;
+        }
+
+        $columnOperations = [];
+        foreach ($this->columnOperations as $columnOperation) {
+            // Find a column operation to reconstruct previous version of the column
+            $originalColumn = null;
+            foreach ($original->getColumnOperations() as $originalOperation) {
+                if ($originalOperation->getColumn() === $columnOperation->getColumn()) {
+                    $originalColumn = $originalOperation;
+                    break;
+                }
+            }
+
+            if ($columnOperation->getOperation() === ColumnOperation::ADD) {
+                $columnOperations[] = new ColumnOperation($columnOperation->getColumn(), ColumnOperation::DROP, []);
+                continue;
+            }
+
+            if ($columnOperation->getOperation() === ColumnOperation::DROP) {
+                if (!$originalColumn) {
+                    throw new \LogicException('Cannot revert a column that does not exist.');
+                }
+
+                $columnOperations[] = $originalColumn;
+            }
+
+            if ($columnOperation->getOperation() === ColumnOperation::MODIFY) {
+                if (!$originalColumn) {
+                    throw new \LogicException('Cannot revert a column that does not exist.');
+                }
+
+                $columnOperations[] = new ColumnOperation(
+                    $columnOperation->getColumn(),
+                    ColumnOperation::MODIFY,
+                    $originalColumn->getOptions()
+                );
+            }
         }
 
         return new TableOperation(
             $this->table,
-            $operation,
-            $columns
+            TableOperation::ALTER,
+            $columnOperations
         );
     }
 
