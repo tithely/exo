@@ -24,17 +24,24 @@ class TableOperation extends AbstractOperation
     private $columnOperations = [];
 
     /**
+     * @var IndexOperation[]
+     */
+    private $indexOperations = [];
+
+    /**
      * TableOperation constructor.
      *
      * @param string            $table
      * @param string            $operation
      * @param ColumnOperation[] $columnOperations
+     * @param IndexOperation[]  $indexOperations
      */
-    public function __construct(string $table, string $operation, array $columnOperations)
+    public function __construct(string $table, string $operation, array $columnOperations, array $indexOperations)
     {
         $this->table = $table;
         $this->operation = $operation;
         $this->columnOperations = $columnOperations;
+        $this->indexOperations = $indexOperations;
     }
 
     /**
@@ -49,6 +56,7 @@ class TableOperation extends AbstractOperation
             return new TableOperation(
                 $this->table,
                 TableOperation::DROP,
+                [],
                 []
             );
         }
@@ -102,7 +110,8 @@ class TableOperation extends AbstractOperation
         return new TableOperation(
             $this->table,
             TableOperation::ALTER,
-            $columnOperations
+            $columnOperations,
+            []
         );
     }
 
@@ -212,7 +221,7 @@ class TableOperation extends AbstractOperation
             }
         }
 
-        return new TableOperation($this->table, $this->operation, array_values($columns));
+        return new TableOperation($this->table, $this->operation, array_values($columns), []);
     }
 
     /**
@@ -243,5 +252,15 @@ class TableOperation extends AbstractOperation
     public function getColumnOperations(): array
     {
         return $this->columnOperations;
+    }
+
+    /**
+     * Returns the index operations.
+     *
+     * @return IndexOperation[]
+     */
+    public function getIndexOperations(): array
+    {
+        return $this->indexOperations;
     }
 }

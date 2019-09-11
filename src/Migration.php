@@ -3,6 +3,7 @@
 namespace Exo;
 
 use Exo\Operation\ColumnOperation;
+use Exo\Operation\IndexOperation;
 use Exo\Operation\TableOperation;
 
 class Migration
@@ -21,6 +22,11 @@ class Migration
      * @var ColumnOperation[]
      */
     private $columnOperations = [];
+
+    /**
+     * @var IndexOperation[]
+     */
+    private $indexOperations = [];
 
     /**
      * Returns a new create table migration.
@@ -129,12 +135,48 @@ class Migration
     }
 
     /**
+     * Pushes a new add index operation.
+     *
+     * @param string $name
+     * @param array  $columns
+     * @param array  $options
+     * @return Migration
+     */
+    public function addIndex(string $name, array $columns, array $options = []): self
+    {
+        if ($this->operation === TableOperation::DROP) {
+            throw new \LogicException('Cannot add indexes in a drop migration.');
+        }
+
+        $this->indexOperations[] = new IndexOperation($name, IndexOperation::ADD_OPERATION, $columns, $options);
+    }
+
+    /**
+     * Pushes a new drop index operation.
+     *
+     * @param string $name
+     * @return $this
+     */
+    public function dropIndex(string $name): self
+    {
+        if ($this->operation === TableOperation::CREATE) {
+            throw new \LogicException('Cannot drop indexes in a create migration.');
+        }
+
+        if ($this->operation === TableOperation::DROP) {
+            throw new \LogicException('Cannot drop indexes in a drop migration.');
+        }
+
+        $this->indexOperations[] = new IndexOperation($name, IndexOperation::DROP_OPERATION, [], []);
+    }
+
+    /**
      * Returns the table operation.
      *
      * @return TableOperation
      */
     public function getOperation()
     {
-        return new TableOperation($this->table, $this->operation, $this->columnOperations);
+        return new TableOperation($this->table, $this->operation, $this->columnOperations, $this->indexOperations);
     }
 }

@@ -41,7 +41,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(TableOperation::DROP, $operation->getOperation());
     }
 
-    public function testPreventModifyDuringCreate()
+    public function testPreventModifyColumnDuringCreate()
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Cannot modify columns in a create migration.');
@@ -50,7 +50,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             ->modifyColumn('id', ['type' => 'string']);
     }
 
-    public function testPreventDropDuringCreate()
+    public function testPreventDropColumnDuringCreate()
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Cannot drop columns in a create migration.');
@@ -59,7 +59,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             ->dropColumn('id');
     }
 
-    public function testPreventAddDuringDrop()
+    public function testPreventAddColumnDuringDrop()
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Cannot add columns in a drop migration.');
@@ -68,7 +68,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             ->addColumn('id', ['type' => 'string']);
     }
 
-    public function testPreventModifyDuringDrop()
+    public function testPreventModifyColumnDuringDrop()
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Cannot modify columns in a drop migration.');
@@ -77,12 +77,39 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             ->modifyColumn('id', ['type' => 'string']);
     }
 
-    public function testPreventDropDuringDrop()
+    public function testPreventDropColumnDuringDrop()
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Cannot drop columns in a drop migration.');
 
         Migration::drop('users')
             ->dropColumn('id');
+    }
+
+    public function testPreventDropIndexDuringCreate()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot drop indexes in a create migration.');
+
+        Migration::create('users')
+            ->dropIndex('email');
+    }
+
+    public function testPreventAddIndexDuringDrop()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot add indexes in a drop migration.');
+
+        Migration::drop('users')
+            ->addIndex('email', ['email']);
+    }
+
+    public function testPreventDropIndexDuringDrop()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot drop indexes in a drop migration.');
+
+        Migration::drop('users')
+            ->dropIndex('email');
     }
 }

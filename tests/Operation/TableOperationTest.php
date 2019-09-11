@@ -9,13 +9,13 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
         $base = new TableOperation('users', TableOperation::CREATE, [
             new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
-        ]);
+        ], []);
 
         $operation = $base->apply(new TableOperation('users', TableOperation::ALTER, [
             new ColumnOperation('id', ColumnOperation::DROP, []),
             new ColumnOperation('email', ColumnOperation::ADD, ['type' => 'string', 'length' => 255, 'first' => true]),
             new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255])
-        ]));
+        ], []));
 
         $this->assertEquals('users', $operation->getTable());
         $this->assertEquals(TableOperation::CREATE, $operation->getOperation());
@@ -35,9 +35,9 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
         $base = new TableOperation('users', TableOperation::CREATE, [
             new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
-        ]);
+        ], []);
 
-        $operation = $base->apply(new TableOperation('users', TableOperation::DROP, []));
+        $operation = $base->apply(new TableOperation('users', TableOperation::DROP, [], []));
 
         $this->assertNull($operation);
     }
@@ -48,12 +48,12 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
             new ColumnOperation('id', ColumnOperation::DROP, []),
             new ColumnOperation('email', ColumnOperation::ADD, ['type' => 'string', 'length' => 255, 'first' => true]),
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 255])
-        ]);
+        ], []);
 
         $operation = $base->apply(new TableOperation('users', TableOperation::ALTER, [
             new ColumnOperation('email', ColumnOperation::DROP, []),
             new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 64])
-        ]));
+        ], []));
 
         $this->assertEquals('users', $operation->getTable());
         $this->assertEquals(TableOperation::ALTER, $operation->getOperation());
@@ -76,9 +76,9 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
             new ColumnOperation('id', ColumnOperation::DROP, []),
             new ColumnOperation('email', ColumnOperation::ADD, ['type' => 'string', 'length' => 255, 'first' => true]),
             new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255])
-        ]);
+        ], []);
 
-        $drop = new TableOperation('users', TableOperation::DROP, []);
+        $drop = new TableOperation('users', TableOperation::DROP, [], []);
 
         $operation = $base->apply($drop);
         $this->assertEquals($drop, $operation);
@@ -89,7 +89,7 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
         $base = new TableOperation('users', TableOperation::CREATE, [
             new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
-        ]);
+        ], []);
 
         $operation = $base->reverse();
 
@@ -103,12 +103,12 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
             new ColumnOperation('id', ColumnOperation::DROP, []),
             new ColumnOperation('email', ColumnOperation::ADD, ['type' => 'string', 'length' => 255, 'first' => true]),
             new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255])
-        ]);
+        ], []);
 
         $create = new TableOperation('users', TableOperation::CREATE, [
             new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
-        ]);
+        ], []);
 
         $operation = $base->reverse($create);
 
@@ -129,12 +129,12 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
 
     public function testReverseDrop()
     {
-        $base = new TableOperation('users', TableOperation::DROP, []);
+        $base = new TableOperation('users', TableOperation::DROP, [], []);
 
         $create = new TableOperation('users', TableOperation::CREATE, [
             new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid']),
             new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64])
-        ]);
+        ], []);
 
         $operation = $base->reverse($create);
 

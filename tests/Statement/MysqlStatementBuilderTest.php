@@ -24,7 +24,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
                     new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64, 'null' => false]),
                     new ColumnOperation('password', ColumnOperation::ADD, ['type' => 'string'])
-                ]),
+                ], []),
                 'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `username` VARCHAR(64) NOT NULL, `password` VARCHAR(255));'
             ],
             [
@@ -32,11 +32,11 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new ColumnOperation('meta', ColumnOperation::ADD, ['type' => 'json', 'after' => 'password']),
                     new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255]),
                     new ColumnOperation('created_at', ColumnOperation::DROP, [])
-                ]),
+                ], []),
                 'ALTER TABLE `users` ADD COLUMN `meta` JSON AFTER `password`, MODIFY COLUMN `username` VARCHAR(255), DROP COLUMN `created_at`;'
             ],
             [
-                new TableOperation('users', TableOperation::DROP, []),
+                new TableOperation('users', TableOperation::DROP, [], []),
                 'DROP TABLE `users`;'
             ]
         ];
