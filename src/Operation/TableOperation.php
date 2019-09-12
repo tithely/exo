@@ -107,11 +107,36 @@ class TableOperation extends AbstractOperation
             }
         }
 
+        $indexOperations = [];
+        foreach ($this->indexOperations as $indexOperation) {
+            // Find an index operation to reconstruct previous version of the index
+            $originalIndex = null;
+            foreach ($original->getIndexOperations() as $originalOperation) {
+                if ($originalOperation->getName() === $indexOperation->getName()) {
+                    $originalIndex = $originalOperation;
+                    break;
+                }
+            }
+
+            if ($indexOperation->getOperation() === IndexOperation::ADD) {
+                $indexOperations[] = new IndexOperation($indexOperation->getName(), IndexOperation::DROP, [], []);
+                continue;
+            }
+
+            if ($indexOperation->getOperation() === IndexOperation::DROP) {
+                if (!$originalIndex) {
+                    throw new \LogicException('Cannot revert a index that does not exist.');
+                }
+
+                $indexOperations[] = $originalIndex;
+            }
+        }
+
         return new TableOperation(
             $this->table,
             TableOperation::ALTER,
             $columnOperations,
-            []
+            $indexOperations
         );
     }
 
@@ -289,6 +314,10 @@ class TableOperation extends AbstractOperation
                             $indexColumns[] = $indexColumn;
                         }
                     }
+                }
+
+                if (empty($indexColumns)) {
+                    continue;
                 }
 
                 $indexes[$name] = new IndexOperation(
