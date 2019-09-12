@@ -148,7 +148,7 @@ class Migration
             throw new \LogicException('Cannot add indexes in a drop migration.');
         }
 
-        $this->indexOperations[] = new IndexOperation($name, IndexOperation::ADD_OPERATION, $columns, $options);
+        $this->indexOperations[] = new IndexOperation($name, IndexOperation::ADD, $columns, $options);
     }
 
     /**
@@ -167,7 +167,7 @@ class Migration
             throw new \LogicException('Cannot drop indexes in a drop migration.');
         }
 
-        $this->indexOperations[] = new IndexOperation($name, IndexOperation::DROP_OPERATION, [], []);
+        $this->indexOperations[] = new IndexOperation($name, IndexOperation::DROP, [], []);
     }
 
     /**

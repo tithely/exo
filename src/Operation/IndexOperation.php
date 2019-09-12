@@ -4,8 +4,8 @@ namespace Exo\Operation;
 
 class IndexOperation extends AbstractOperation
 {
-    const ADD_OPERATION = 'add';
-    const DROP_OPERATION = 'DROP';
+    const ADD = 'add';
+    const DROP = 'DROP';
 
     /**
      * @var string
@@ -41,16 +41,6 @@ class IndexOperation extends AbstractOperation
         $this->operation = $operation;
         $this->columns = $columns;
         $this->options = $options;
-    }
-
-    /**
-     * Returns the reverse of the operation.
-     *
-     * @return static
-     */
-    public function reverse()
-    {
-        return $this;
     }
 
     /**

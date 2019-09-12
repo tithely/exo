@@ -137,6 +137,12 @@ class TableOperation extends AbstractOperation
             $columns[$columnOperation->getColumn()] = $columnOperation;
         }
 
+        // Collect existing indexes
+        $indexes = [];
+        foreach ($this->indexOperations as $indexOperation) {
+            $indexes[$indexOperation->getName()] = $indexOperation;
+        }
+
         if ($this->operation === self::CREATE) {
             if ($operation->operation === self::CREATE) {
                 throw new \InvalidArgumentException('Cannot recreate an existing table.');
@@ -186,6 +192,34 @@ class TableOperation extends AbstractOperation
                         break;
                 }
             }
+
+            foreach ($operation->indexOperations as $indexOperation) {
+                $options = $indexOperation->getOptions();
+
+                // Calculate index position
+                $offset = count($indexes);
+
+                // Remove existing operation for the index
+                foreach ($indexes as $existing => $index) {
+                    if ($index->getName() === $indexOperation->getName()) {
+                        unset($indexes[$existing]);
+                        break;
+                    }
+                }
+
+                // Apply new index operation
+                if ($indexOperation->getOperation() === IndexOperation::ADD) {
+                    $addOperation = new IndexOperation(
+                        $indexOperation->getName(),
+                        IndexOperation::ADD,
+                        $indexOperation->getColumns(),
+                        $options
+                    );
+
+                    array_splice($indexes, $offset, 0, [$addOperation]);
+                    break;
+                }
+            }
         } else {
             // Skip modification of tables that will be dropped
             if ($operation->operation === self::DROP) {
@@ -207,8 +241,12 @@ class TableOperation extends AbstractOperation
                 // Apply new column operation
                 switch ($columnOperation->getOperation()) {
                     case ColumnOperation::ADD:
-                    case ColumnOperation::DROP:
                         $columns[] = $columnOperation;
+                        break;
+                    case ColumnOperation::DROP:
+                        if ($originalOperation !== ColumnOperation::ADD) {
+                            $columns[] = $columnOperation;
+                        }
                         break;
                     case ColumnOperation::MODIFY:
                         $columns[] = new ColumnOperation(
@@ -219,9 +257,50 @@ class TableOperation extends AbstractOperation
                         break;
                 }
             }
+
+            foreach ($operation->indexOperations as $indexOperation) {
+                $originalOperation = null;
+
+                // Remove existing operations for the index
+                foreach ($indexes as $existing => $index) {
+                    if ($index->getName() === $indexOperation->getName()) {
+                        $originalOperation = $index->getOperation();
+                        unset($indexes[$existing]);
+                        break;
+                    }
+                }
+
+                if (
+                    $indexOperation->getOperation() === IndexOperation::DROP &&
+                    $originalOperation === ColumnOperation::ADD
+                ) {
+                    continue;
+                }
+
+                $indexes[$indexOperation->getName()] = $indexOperation;
+            }
+
+            // Remove non-existent columns from indexes
+            foreach ($indexes as $name => $index) {
+                $indexColumns = [];
+                foreach ($index->getColumns() as $indexColumn) {
+                    foreach ($columns as $column) {
+                        if ($column->getColumn() === $indexColumn) {
+                            $indexColumns[] = $indexColumn;
+                        }
+                    }
+                }
+
+                $indexes[$name] = new IndexOperation(
+                    $index->getName(),
+                    $index->getOperation(),
+                    $indexColumns,
+                    $index->getOptions()
+                );
+            }
         }
 
-        return new TableOperation($this->table, $this->operation, array_values($columns), []);
+        return new TableOperation($this->table, $this->operation, array_values($columns), array_values($indexes));
     }
 
     /**

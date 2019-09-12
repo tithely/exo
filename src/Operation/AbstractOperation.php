@@ -10,11 +10,4 @@ abstract class AbstractOperation
      * @return string
      */
     abstract public function getOperation(): string;
-
-    /**
-     * Returns the reverse of the operation.
-     *
-     * @return static
-     */
-    abstract public function reverse();
 }
