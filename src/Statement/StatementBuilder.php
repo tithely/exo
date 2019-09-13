@@ -12,27 +12,7 @@ abstract class StatementBuilder
      * @param TableOperation $operation
      * @return string
      */
-    public function build(TableOperation $operation): string
-    {
-        switch ($operation->getOperation()) {
-            case TableOperation::CREATE:
-                $definitions = [];
-                foreach ($operation->getColumnOperations() as $columnOperation) {
-                    $definitions[] = $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions());
-                }
-
-                return sprintf(
-                    'CREATE TABLE %s (%s);',
-                    $this->buildIdentifier($operation->getTable()),
-                    implode(', ', $definitions)
-                );
-            case TableOperation::DROP:
-                return sprintf(
-                    'DROP TABLE %s;',
-                    $this->buildIdentifier($operation->getTable())
-                );
-        }
-    }
+    abstract public function build(TableOperation $operation): string;
 
     /**
      * Builds an identifier.
@@ -86,4 +66,14 @@ abstract class StatementBuilder
      * @return string
      */
     abstract protected function buildColumn(string $column, array $options): string;
+
+    /**
+     * Builds an index definition.
+     *
+     * @param string   $index
+     * @param string[] $columns
+     * @param array    $options
+     * @return string
+     */
+    abstract protected function buildIndex(string $index, array $columns, array $options): string;
 }

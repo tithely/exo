@@ -3,6 +3,7 @@
 namespace Exo\Statement;
 
 use Exo\Operation\ColumnOperation;
+use Exo\Operation\IndexOperation;
 use Exo\Operation\TableOperation;
 
 class MysqlStatementBuilder extends StatementBuilder
@@ -16,6 +17,21 @@ class MysqlStatementBuilder extends StatementBuilder
     public function build(TableOperation $operation): string
     {
         switch ($operation->getOperation()) {
+            case TableOperation::CREATE:
+                $definitions = [];
+                foreach ($operation->getColumnOperations() as $columnOperation) {
+                    $definitions[] = $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions());
+                }
+
+                foreach ($operation->getIndexOperations() as $indexOperation) {
+                    $definitions[] = 'INDEX ' . $this->buildIndex($indexOperation->getName(), $indexOperation->getColumns(), $indexOperation->getOptions());
+                }
+
+                return sprintf(
+                    'CREATE TABLE %s (%s);',
+                    $this->buildIdentifier($operation->getTable()),
+                    implode(', ', $definitions)
+                );
             case TableOperation::ALTER:
                 $specifications = [];
                 foreach ($operation->getColumnOperations() as $columnOperation) {
@@ -41,10 +57,32 @@ class MysqlStatementBuilder extends StatementBuilder
                     }
                 }
 
+                foreach ($operation->getIndexOperations() as $indexOperation) {
+                    switch ($indexOperation->getOperation()) {
+                        case IndexOperation::ADD:
+                            $specifications[] = sprintf(
+                                'ADD INDEX %s',
+                                $this->buildIndex($indexOperation->getName(), $indexOperation->getColumns(), $indexOperation->getOptions())
+                            );
+                            break;
+                        case IndexOperation::DROP:
+                            $specifications[] = sprintf(
+                                'DROP INDEX %s',
+                                $this->buildIdentifier($indexOperation->getName())
+                            );
+                            break;
+                    }
+                }
+
                 return sprintf(
                     'ALTER TABLE %s %s;',
                     $this->buildIdentifier($operation->getTable()),
                     implode(', ', $specifications)
+                );
+            case TableOperation::DROP:
+                return sprintf(
+                    'DROP TABLE %s;',
+                    $this->buildIdentifier($operation->getTable())
                 );
             default:
                 return parent::build($operation);
@@ -111,6 +149,29 @@ class MysqlStatementBuilder extends StatementBuilder
 
         if ($options['after'] ?? null) {
             $definition .= sprintf(' AFTER %s', $this->buildIdentifier($options['after']));
+        }
+
+        return $definition;
+    }
+
+    /**
+     * Builds an index definition.
+     *
+     * @param string   $index
+     * @param string[] $columns
+     * @param array    $options
+     * @return string
+     */
+    protected function buildIndex(string $index, array $columns, array $options): string
+    {
+        $definition = sprintf(
+            '%s (%s)',
+            $this->buildIdentifier($index),
+            implode(', ', array_map([$this, 'buildIdentifier'], $columns))
+        );
+
+        if ($options['unique'] ?? false) {
+            $definition .= ' UNIQUE';
         }
 
         return $definition;
