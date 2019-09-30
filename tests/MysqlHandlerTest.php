@@ -28,6 +28,14 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(3, $results);
     }
 
+    public function testFullMigrationReduced()
+    {
+        $handler = $this->getHandler();
+        $results = $handler->migrate(null, null, true);
+
+        $this->assertCount(2, $results);
+    }
+
     private function getHandler()
     {
         $history = new History();
