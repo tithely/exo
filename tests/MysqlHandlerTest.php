@@ -47,11 +47,44 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($results[1]->getVersion());
     }
 
+    public function testPartialMigration()
+    {
+        $handler = $this->getHandler();
+        $results = $handler->migrate(null, '2');
+
+        $this->assertCount(2, $results);
+        $this->assertTrue($results[0]->isSuccess());
+        $this->assertTrue($results[1]->isSuccess());
+    }
+
     public function testFailingMigration()
     {
         $handler = $this->getHandler();
         $handler->migrate(null, null, true);
         $results = $handler->migrate('1', '2', false);
+
+        $this->assertCount(1, $results);
+        $this->assertFalse($results[0]->isSuccess());
+        $this->assertNotEmpty($results[0]->getSql());
+        $this->assertNotEmpty($results[0]->getErrorInfo());
+    }
+
+    public function testRollback()
+    {
+        $handler = $this->getHandler();
+        $handler->migrate(null, null, false);
+        $results = $handler->rollback('3', '2', false);
+
+        $this->assertCount(1, $results);
+        $this->assertTrue($results[0]->isSuccess());
+        $this->assertEquals('3', $results[0]->getVersion());
+    }
+
+    public function testFailingRollback()
+    {
+        $handler = $this->getHandler();
+        $handler->migrate(null, '2', false);
+        $results = $handler->rollback('3', '1', false);
 
         $this->assertCount(1, $results);
         $this->assertFalse($results[0]->isSuccess());
