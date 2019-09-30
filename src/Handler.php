@@ -49,18 +49,18 @@ class Handler
 
         // Determine range of versions to play
         $from = reset($versions);
-        $to = $target ?? array_pop($versions);
+        $to = $target ?? $versions[count($versions) - 1];
 
         // Execute operations
         $operations = $this->history->play($from, $to, $reduce);
         $results = [];
 
-        foreach ($operations as $operation) {
+        foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
             $result = $this->db->exec($sql);
 
             $results[] = new HandlerResult(
-                null,
+                $reduce ? null : $versions[$offset],
                 $result !== false,
                 $sql,
                 $result === false ? $this->db->errorInfo() : null
