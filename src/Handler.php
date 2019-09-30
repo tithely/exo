@@ -37,7 +37,6 @@ class Handler
      * @param string|null $target
      * @param bool        $reduce
      * @return HandlerResult[]
-     * @throws \Exception
      */
     public function migrate(?string $current, ?string $target, bool $reduce)
     {
