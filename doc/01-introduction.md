@@ -14,7 +14,7 @@ database tables, columns and indexes. Prior to being transformed into SQL statem
 operations may be reduced into a single operation in order to avoid redundant database queries.
 
 **Migrations** offer a developer-friendly means of defining changes to the schema and act as
-operation factories.
+factories for table operations.
 
 **Histories** are versioned collections of migrations that provide facilities for playing and
 rewinding sets of operations.
