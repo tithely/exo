@@ -12,7 +12,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function setUp(): void
     {
         $this->pdo = new \PDO('mysql:dbname=test;host=127.0.0.1', 'root', '');
-        $this->pdo->exec('DROP TABLE IF EXISTS test');
+        $this->pdo->exec('DROP TABLE IF EXISTS users;');
+        $this->pdo->exec('DROP TABLE IF EXISTS users_sessions;');
     }
 
     public function tearDown(): void
