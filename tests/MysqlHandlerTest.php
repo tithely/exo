@@ -50,7 +50,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testPartialMigration()
     {
         $handler = $this->getHandler();
-        $results = $handler->migrate(null, '2');
+        $results = $handler->migrate(null, '2', false);
 
         $this->assertCount(2, $results);
         $this->assertTrue($results[0]->isSuccess());

@@ -29,9 +29,9 @@ class History
             }
         }
 
-        return array_filter(array_values($reduced), function ($operation) {
+        return array_values(array_filter(array_values($reduced), function ($operation) {
             return !is_null($operation);
-        });
+        }));
     }
 
     /**
