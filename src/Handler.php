@@ -65,6 +65,11 @@ class Handler
                 $sql,
                 $result === false ? $this->db->errorInfo() : null
             );
+
+            // Stop migration if there was a failure
+            if ($result === false) {
+                break;
+            }
         }
 
         return $results;
@@ -105,6 +110,11 @@ class Handler
                 $sql,
                 $result === false ? $this->db->errorInfo() : null
             );
+
+            // Stop rollback if there was a failure
+            if ($result === false) {
+                break;
+            }
         }
 
         return $results;
