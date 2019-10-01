@@ -37,7 +37,6 @@ class Handler
      * @param string|null $target
      * @param bool        $reduce
      * @return HandlerResult[]
-     * @throws \Exception
      */
     public function migrate(?string $current, ?string $target, bool $reduce)
     {
@@ -50,22 +49,27 @@ class Handler
 
         // Determine range of versions to play
         $from = reset($versions);
-        $to = $target ?? array_pop($versions);
+        $to = $target ?? end($versions);
 
         // Execute operations
         $operations = $this->history->play($from, $to, $reduce);
         $results = [];
 
-        foreach ($operations as $operation) {
+        foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
             $result = $this->db->exec($sql);
 
             $results[] = new HandlerResult(
-                null,
+                $reduce ? null : $versions[$offset],
                 $result !== false,
                 $sql,
                 $result === false ? $this->db->errorInfo() : null
             );
+
+            // Stop migration if there was a failure
+            if ($result === false) {
+                break;
+            }
         }
 
         return $results;
@@ -82,25 +86,35 @@ class Handler
     public function rollback(string $current, ?string $target, bool $reduce)
     {
         $versions = $this->history->getVersions();
+        $from = $target ? array_search($target, $versions) : 0;
+        $count = array_search($current, $versions) - $from;
+
         $versions = array_slice(
             $versions,
-            $target ? array_search($target, $versions) : 0,
-            array_search($current, $versions)
+            $from + 1,
+            $count
         );
 
-        $operations = $this->history->rewind($current, $versions[0], $reduce);
+        $operations = $this->history->rewind(end($versions), reset($versions), $reduce);
         $results = [];
 
-        foreach ($operations as $operation) {
+        $versions = array_reverse($versions);
+
+        foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
             $result = $this->db->exec($sql);
 
             $results[] = new HandlerResult(
-                null,
+                $reduce ? null : $versions[$offset],
                 $result !== false,
                 $sql,
                 $result === false ? $this->db->errorInfo() : null
             );
+
+            // Stop rollback if there was a failure
+            if ($result === false) {
+                break;
+            }
         }
 
         return $results;
