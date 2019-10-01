@@ -82,12 +82,12 @@ class Handler
     {
         $versions = $this->history->getVersions();
         $from = $target ? array_search($target, $versions) : 0;
-        $to = array_search($current, $versions);
+        $count = array_search($current, $versions) - $from;
 
         $versions = array_slice(
             $versions,
-            $from,
-            $to - $from
+            $from + 1,
+            $count
         );
 
         $operations = $this->history->rewind(end($versions), reset($versions), $reduce);
