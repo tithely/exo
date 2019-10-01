@@ -90,10 +90,10 @@ class Handler
             $to - $from
         );
 
-        $operations = $this->history->rewind($current, $versions[0], $reduce);
+        $operations = $this->history->rewind(end($versions), reset($versions), $reduce);
         $results = [];
 
-        array_reverse($versions);
+        $versions = array_reverse($versions);
 
         foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
