@@ -2,6 +2,8 @@
 
 A flexible database migration library.
 
+[![Build Status](https://travis-ci.org/tithely/exo.svg?branch=master)](https://travis-ci.org/tithely/exo)
+
 ## Installation
 
 Install the latest version with
