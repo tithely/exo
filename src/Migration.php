@@ -140,7 +140,7 @@ class Migration
      * @param string $name
      * @param array  $columns
      * @param array  $options
-     * @return Migration
+     * @return $this
      */
     public function addIndex(string $name, array $columns, array $options = []): self
     {
@@ -149,6 +149,8 @@ class Migration
         }
 
         $this->indexOperations[] = new IndexOperation($name, IndexOperation::ADD, $columns, $options);
+
+        return $this;
     }
 
     /**
@@ -168,6 +170,8 @@ class Migration
         }
 
         $this->indexOperations[] = new IndexOperation($name, IndexOperation::DROP, [], []);
+
+        return $this;
     }
 
     /**
