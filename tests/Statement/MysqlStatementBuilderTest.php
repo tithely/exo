@@ -24,11 +24,13 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 new TableOperation('users', TableOperation::CREATE, [
                     new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
                     new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64, 'null' => false]),
-                    new ColumnOperation('password', ColumnOperation::ADD, ['type' => 'string'])
+                    new ColumnOperation('password', ColumnOperation::ADD, ['type' => 'string']),
+                    new ColumnOperation('gender', ColumnOperation::ADD, ['type' => 'enum', 'values' => ['male', 'female']])
                 ], [
                     new IndexOperation('username', IndexOperation::ADD, ['username'], ['unique' => true])
                 ]),
-                'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `username` VARCHAR(64) NOT NULL, `password` VARCHAR(255), INDEX `username` (`username`) UNIQUE);'
+                'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `username` VARCHAR(64) NOT NULL, ' .
+                '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\'), INDEX `username` (`username`) UNIQUE);'
             ],
             [
                 new TableOperation('users', TableOperation::ALTER, [
@@ -39,7 +41,8 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new IndexOperation('meta', IndexOperation::ADD, ['meta'], []),
                     new IndexOperation('username', IndexOperation::DROP, [], [])
                 ]),
-                'ALTER TABLE `users` ADD COLUMN `meta` JSON AFTER `password`, MODIFY COLUMN `username` VARCHAR(255), DROP COLUMN `created_at`, ADD INDEX `meta` (`meta`), DROP INDEX `username`;'
+                'ALTER TABLE `users` ADD COLUMN `meta` JSON AFTER `password`, MODIFY COLUMN `username` VARCHAR(255), ' .
+                'DROP COLUMN `created_at`, ADD INDEX `meta` (`meta`), DROP INDEX `username`;'
             ],
             [
                 new TableOperation('users', TableOperation::DROP, [], []),

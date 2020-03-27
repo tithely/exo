@@ -2,8 +2,12 @@
 
 namespace Exo;
 
+use Exo\Tests\Traits\UsesYamlConfig;
+
 class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
 {
+    use UsesYamlConfig;
+
     /**
      * @var \PDO
      */
@@ -11,7 +15,13 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
 
     public function setUp(): void
     {
-        $this->pdo = new \PDO('mysql:dbname=test;host=127.0.0.1', 'root', '');
+        $mysql = self::yaml('handlers.mysql');
+
+        $this->pdo = new \PDO(
+            sprintf('mysql:dbname=%s;host=%s;port=%s', $mysql['name'], $mysql['host'], $mysql['port']),
+            $mysql['user'],
+            $mysql['pass']
+        );
         $this->pdo->exec('DROP TABLE IF EXISTS users;');
         $this->pdo->exec('DROP TABLE IF EXISTS users_sessions;');
     }
