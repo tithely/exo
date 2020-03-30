@@ -115,6 +115,8 @@ class MysqlStatementBuilder extends StatementBuilder
                 return 'DATETIME';
             case 'json':
                 return 'JSON';
+            case 'enum':
+                return sprintf("ENUM('%s')", implode("','", $options['values']));
             default:
                 return parent::buildType($options);
         }

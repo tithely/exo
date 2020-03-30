@@ -53,8 +53,6 @@ abstract class StatementBuilder
                 return 'TIMESTAMP';
             case 'uuid':
                 return 'CHAR(36)';
-            case 'enum':
-                return sprintf("ENUM('%s')", implode("','", $options['values']));
             default:
                 throw new \InvalidArgumentException(sprintf('Unknown column type "%s".', $type));
         }
