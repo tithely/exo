@@ -8,6 +8,7 @@ before_script:
   - curl -sSfL -o ~/.phpenv/versions/hhvm/bin/phpunit https://phar.phpunit.de/phpunit-8.3.4.phar
   - composer install --no-interaction --prefer-source
   - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+  - cp tests/db.yml.example tests/db.yml
 
 script:
   - vendor/bin/phpunit
