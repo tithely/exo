@@ -43,8 +43,12 @@ class Handler
         $versions = $this->history->getVersions();
         $version = null;
 
-        while ($version !== $current) {
+        while ($version !== $current && !empty($versions)) {
             $version = array_shift($versions);
+        }
+
+        if (!is_null($current) && is_null($version)) {
+            throw new \InvalidArgumentException('Current version is invalid.');
         }
 
         // Determine range of versions to play
