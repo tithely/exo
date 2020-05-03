@@ -137,6 +137,10 @@ class MysqlStatementBuilder extends StatementBuilder
             $definition .= ' NOT NULL';
         }
 
+        if ($options['null'] ?? false) {
+            $definition .= ' NULL';
+        }
+
         if ($options['primary'] ?? false) {
             $definition .= ' PRIMARY KEY';
         }
