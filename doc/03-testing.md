@@ -2,7 +2,7 @@
 
 ## Data Source Config
 
-- Copy `test/db.yml.example` to `tests/db.yml`
+- Copy `tests/db.yml.example` to `tests/db.yml`
 - Add the credentials for your data source(s)
 
 ## Create Database
