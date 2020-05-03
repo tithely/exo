@@ -34,6 +34,41 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\'), `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX `username` (`username`) UNIQUE);'
             ],
             [
+                new TableOperation('users', TableOperation::CREATE, [
+                    new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
+                    new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP'])
+                ], []),
+                'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP);'
+            ],
+            [
+                new TableOperation('users', TableOperation::CREATE, [
+                    new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
+                    new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'update' => 'CURRENT_TIMESTAMP'])
+                ], []),
+                'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);'
+            ],
+            [
+                new TableOperation('users', TableOperation::CREATE, [
+                    new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
+                    new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'null' => true])
+                ], []),
+                'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `created_at` TIMESTAMP NULL);'
+            ],
+            [
+                new TableOperation('users', TableOperation::CREATE, [
+                    new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
+                    new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'null' => false])
+                ], []),
+                'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `created_at` TIMESTAMP NOT NULL);'
+            ],
+            [
+                new TableOperation('users', TableOperation::CREATE, [
+                    new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
+                    new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp'])
+                ], []),
+                'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `created_at` TIMESTAMP);'
+            ],
+            [
                 new TableOperation('users', TableOperation::ALTER, [
                     new ColumnOperation('meta', ColumnOperation::ADD, ['type' => 'json', 'after' => 'password']),
                     new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255]),
