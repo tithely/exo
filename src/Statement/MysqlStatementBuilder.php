@@ -158,7 +158,7 @@ class MysqlStatementBuilder extends StatementBuilder
         }
 
         if ($options['default'] ?? false) {
-            $definition .= sprintf(' DEFAULT %s', $options['default']);
+            $definition .= sprintf(' DEFAULT %s', $this->buildDefaultValue($options['default']));
         }
 
         if ($options['update'] ?? false) {
@@ -189,5 +189,19 @@ class MysqlStatementBuilder extends StatementBuilder
         }
 
         return $definition;
+    }
+
+    /**
+     * Builds a default.
+     *
+     * @param string $value
+     * @return string
+     */
+    protected function buildDefaultValue(string $value): string
+    {
+        if (in_array($value, ['CURRENT_TIMESTAMP'])) {
+            return $value;
+        }
+        return sprintf('\'%s\'', $value);
     }
 }
