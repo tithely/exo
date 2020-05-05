@@ -137,6 +137,10 @@ class MysqlStatementBuilder extends StatementBuilder
             $definition .= ' NOT NULL';
         }
 
+        if ($options['null'] ?? false) {
+            $definition .= ' NULL';
+        }
+
         if ($options['primary'] ?? false) {
             $definition .= ' PRIMARY KEY';
         }
@@ -151,6 +155,14 @@ class MysqlStatementBuilder extends StatementBuilder
 
         if ($options['after'] ?? null) {
             $definition .= sprintf(' AFTER %s', $this->buildIdentifier($options['after']));
+        }
+
+        if ($options['default'] ?? false) {
+            $definition .= sprintf(' DEFAULT %s', $options['default']);
+        }
+
+        if ($options['update'] ?? false) {
+            $definition .= sprintf(' ON UPDATE %s', $options['update']);
         }
 
         return $definition;
