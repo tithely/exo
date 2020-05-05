@@ -117,6 +117,14 @@ class MysqlStatementBuilder extends StatementBuilder
                 return 'JSON';
             case 'enum':
                 return sprintf("ENUM('%s')", implode("','", $options['values']));
+            case 'tinytext':
+                return 'TINYTEXT';
+            case 'text':
+                return 'TEXT';
+            case 'mediumtext':
+                return 'MEDIUMTEXT';
+            case 'longtext':
+                return 'LONGTEXT';
             default:
                 return parent::buildType($options);
         }

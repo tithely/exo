@@ -26,12 +26,18 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64, 'null' => false]),
                     new ColumnOperation('password', ColumnOperation::ADD, ['type' => 'string']),
                     new ColumnOperation('gender', ColumnOperation::ADD, ['type' => 'enum', 'values' => ['male', 'female']]),
+                    new ColumnOperation('tinytext', ColumnOperation::ADD, ['type' => 'tinytext']),
+                    new ColumnOperation('summary', ColumnOperation::ADD, ['type' => 'text']),
+                    new ColumnOperation('description', ColumnOperation::ADD, ['type' => 'mediumtext']),
+                    new ColumnOperation('novel', ColumnOperation::ADD, ['type' => 'longtext']),
                     new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'update' => 'CURRENT_TIMESTAMP'])
                 ], [
                     new IndexOperation('username', IndexOperation::ADD, ['username'], ['unique' => true])
                 ]),
                 'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `username` VARCHAR(64) NOT NULL, ' .
-                '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\'), `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX `username` (`username`) UNIQUE);'
+                '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\'), ' .
+                '`tinytext` TINYTEXT, `summary` TEXT, `description` MEDIUMTEXT, `novel` LONGTEXT, ' .
+                '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX `username` (`username`) UNIQUE);'
             ],
             [
                 new TableOperation('users', TableOperation::CREATE, [
