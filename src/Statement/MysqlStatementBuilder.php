@@ -157,7 +157,7 @@ class MysqlStatementBuilder extends StatementBuilder
             $definition .= sprintf(' AFTER %s', $this->buildIdentifier($options['after']));
         }
 
-        if ($options['default'] ?? false) {
+        if (isset($options['default'])) {
             $definition .= sprintf(' DEFAULT %s', $this->buildDefaultValue($options['default']));
         }
 
