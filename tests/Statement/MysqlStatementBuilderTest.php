@@ -26,10 +26,10 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64, 'null' => false]),
                     new ColumnOperation('password', ColumnOperation::ADD, ['type' => 'string']),
                     new ColumnOperation('gender', ColumnOperation::ADD, ['type' => 'enum', 'values' => ['male', 'female']]),
-                    new ColumnOperation('tinytext', ColumnOperation::ADD, ['type' => 'tinytext']),
+                    new ColumnOperation('tinytext', ColumnOperation::ADD, ['type' => 'text', 'length' => 255]),
                     new ColumnOperation('summary', ColumnOperation::ADD, ['type' => 'text']),
-                    new ColumnOperation('description', ColumnOperation::ADD, ['type' => 'mediumtext']),
-                    new ColumnOperation('novel', ColumnOperation::ADD, ['type' => 'longtext']),
+                    new ColumnOperation('description', ColumnOperation::ADD, ['type' => 'text', 'length' => 16777215]),
+                    new ColumnOperation('novel', ColumnOperation::ADD, ['type' => 'text', 'length' => 4294967295]),
                     new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'update' => 'CURRENT_TIMESTAMP'])
                 ], [
                     new IndexOperation('username', IndexOperation::ADD, ['username'], ['unique' => true])
