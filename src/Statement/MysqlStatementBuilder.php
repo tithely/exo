@@ -125,6 +125,9 @@ class MysqlStatementBuilder extends StatementBuilder
                         'TEXT' => 65535,
                         'TINYTEXT' => 255
                     ];
+                    if ($options['length'] > $sizes['LONGTEXT']) {
+                        throw new \InvalidArgumentException('Invalid length provided for \'text\' column type.');
+                    }
                     foreach ($sizes as $name => $length) {
                         if ($options['length'] >= $length) {
                             return $name;

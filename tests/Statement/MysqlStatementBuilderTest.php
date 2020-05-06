@@ -92,4 +92,17 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
             ]
         ];
     }
+
+    public function testInvalidTextLengthThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid length provided for \'text\' column type.');
+
+        $operation = new TableOperation('users', TableOperation::CREATE, [
+            new ColumnOperation('novel', ColumnOperation::ADD, ['type' => 'text', 'length' => 99999999999])
+        ], []);
+
+        $handler = new MysqlStatementBuilder();
+        $handler->build($operation);
+    }
 }
