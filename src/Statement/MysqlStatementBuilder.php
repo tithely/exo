@@ -194,14 +194,17 @@ class MysqlStatementBuilder extends StatementBuilder
     /**
      * Builds a default.
      *
-     * @param string $value
+     * @param mixed $value
      * @return string
      */
-    protected function buildDefaultValue(string $value): string
+    protected function buildDefaultValue($value): string
     {
-        if (in_array($value, ['CURRENT_TIMESTAMP'])) {
-            return $value;
+        if (is_string($value) && $value !== 'CURRENT_TIMESTAMP') {
+            return sprintf('\'%s\'', $value);
+        } elseif (is_bool($value)) {
+            return (bool) $value ? 1 : 0;
+        } else {
+            return sprintf('%s', $value);
         }
-        return sprintf('\'%s\'', $value);
     }
 }

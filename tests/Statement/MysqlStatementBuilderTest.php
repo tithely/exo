@@ -26,12 +26,15 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64, 'null' => false]),
                     new ColumnOperation('password', ColumnOperation::ADD, ['type' => 'string']),
                     new ColumnOperation('gender', ColumnOperation::ADD, ['type' => 'enum', 'values' => ['male', 'female'], 'default' => 'male']),
+                    new ColumnOperation('archived', ColumnOperation::ADD, ['type' => 'bool', 'default' => 1]),
+                    new ColumnOperation('status', ColumnOperation::ADD, ['type' => 'string', 'default' => 'draft']),
                     new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'update' => 'CURRENT_TIMESTAMP'])
                 ], [
                     new IndexOperation('username', IndexOperation::ADD, ['username'], ['unique' => true])
                 ]),
                 'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `username` VARCHAR(64) NOT NULL, ' .
-                '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\') DEFAULT \'male\', `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX `username` (`username`) UNIQUE);'
+                '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\') DEFAULT \'male\', `archived` SMALLINT(1) DEFAULT 1, `status` VARCHAR(255) DEFAULT \'draft\', ' .
+                '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX `username` (`username`) UNIQUE);'
             ],
             [
                 new TableOperation('users', TableOperation::CREATE, [
