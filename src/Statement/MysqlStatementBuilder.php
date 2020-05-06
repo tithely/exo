@@ -123,7 +123,7 @@ class MysqlStatementBuilder extends StatementBuilder
                         'LONGTEXT' => 4294967295,
                         'MEDIUMTEXT' => 16777215,
                         'TEXT' => 65535,
-                        'TINYTEXT' => 255,
+                        'TINYTEXT' => 255
                     ];
                     foreach ($sizes as $name => $length) {
                         if ($options['length'] >= $length) {
