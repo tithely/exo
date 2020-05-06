@@ -175,8 +175,8 @@ class MysqlStatementBuilder extends StatementBuilder
             $definition .= sprintf(' AFTER %s', $this->buildIdentifier($options['after']));
         }
 
-        if ($options['default'] ?? false) {
-            $definition .= sprintf(' DEFAULT %s', $options['default']);
+        if (array_key_exists('default', $options)) {
+            $definition .= sprintf(' DEFAULT %s', $this->buildDefaultValue($options['default']));
         }
 
         if ($options['update'] ?? false) {
@@ -207,5 +207,20 @@ class MysqlStatementBuilder extends StatementBuilder
         }
 
         return $definition;
+    }
+
+    /**
+     * Builds a default.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    protected function buildDefaultValue($value): string
+    {
+        if (is_string($value) && $value !== 'CURRENT_TIMESTAMP') {
+            return sprintf('\'%s\'', $value);
+        } else {
+            return sprintf('%s', $value);
+        }
     }
 }
