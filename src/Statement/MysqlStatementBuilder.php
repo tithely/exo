@@ -201,8 +201,6 @@ class MysqlStatementBuilder extends StatementBuilder
     {
         if (is_string($value) && $value !== 'CURRENT_TIMESTAMP') {
             return sprintf('\'%s\'', $value);
-        } elseif (is_bool($value)) {
-            return (bool) $value ? 1 : 0;
         } else {
             return sprintf('%s', $value);
         }
