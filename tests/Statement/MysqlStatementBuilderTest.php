@@ -25,7 +25,12 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new ColumnOperation('id', ColumnOperation::ADD, ['type' => 'uuid', 'primary' => true]),
                     new ColumnOperation('username', ColumnOperation::ADD, ['type' => 'string', 'length' => 64, 'null' => false]),
                     new ColumnOperation('password', ColumnOperation::ADD, ['type' => 'string']),
+
                     new ColumnOperation('gender', ColumnOperation::ADD, ['type' => 'enum', 'values' => ['male', 'female'], 'default' => 'male']),
+                    new ColumnOperation('tinytext', ColumnOperation::ADD, ['type' => 'text', 'length' => 255]),
+                    new ColumnOperation('summary', ColumnOperation::ADD, ['type' => 'text']),
+                    new ColumnOperation('description', ColumnOperation::ADD, ['type' => 'text', 'length' => 16777215]),
+                    new ColumnOperation('novel', ColumnOperation::ADD, ['type' => 'text', 'length' => 4294967295]),
                     new ColumnOperation('archived', ColumnOperation::ADD, ['type' => 'bool', 'default' => 1]),
                     new ColumnOperation('status', ColumnOperation::ADD, ['type' => 'string', 'default' => 'draft']),
                     new ColumnOperation('created_at', ColumnOperation::ADD, ['type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'update' => 'CURRENT_TIMESTAMP'])
@@ -33,7 +38,9 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new IndexOperation('username', IndexOperation::ADD, ['username'], ['unique' => true])
                 ]),
                 'CREATE TABLE `users` (`id` CHAR(36) PRIMARY KEY, `username` VARCHAR(64) NOT NULL, ' .
-                '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\') DEFAULT \'male\', `archived` SMALLINT(1) DEFAULT 1, `status` VARCHAR(255) DEFAULT \'draft\', ' .
+                '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\') DEFAULT \'male\', ' .
+                '`tinytext` TINYTEXT, `summary` TEXT, `description` MEDIUMTEXT, `novel` LONGTEXT, ' .
+                '`archived` SMALLINT(1) DEFAULT 1, `status` VARCHAR(255) DEFAULT \'draft\', ' .
                 '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX `username` (`username`) UNIQUE);'
             ],
             [
@@ -88,5 +95,18 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 'DROP TABLE `users`;'
             ]
         ];
+    }
+
+    public function testInvalidTextLengthThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid length provided for \'text\' column type.');
+
+        $operation = new TableOperation('users', TableOperation::CREATE, [
+            new ColumnOperation('novel', ColumnOperation::ADD, ['type' => 'text', 'length' => 99999999999])
+        ], []);
+
+        $handler = new MysqlStatementBuilder();
+        $handler->build($operation);
     }
 }

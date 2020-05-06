@@ -117,6 +117,24 @@ class MysqlStatementBuilder extends StatementBuilder
                 return 'JSON';
             case 'enum':
                 return sprintf("ENUM('%s')", implode("','", $options['values']));
+            case 'text':
+                if (array_key_exists('length', $options)) {
+                    $sizes = [
+                        'LONGTEXT' => 4294967295,
+                        'MEDIUMTEXT' => 16777215,
+                        'TEXT' => 65535,
+                        'TINYTEXT' => 255
+                    ];
+                    if ($options['length'] > $sizes['LONGTEXT']) {
+                        throw new \InvalidArgumentException('Invalid length provided for \'text\' column type.');
+                    }
+                    foreach ($sizes as $name => $length) {
+                        if ($options['length'] >= $length) {
+                            return $name;
+                        }
+                    }
+                }
+                return 'TEXT';
             default:
                 return parent::buildType($options);
         }
