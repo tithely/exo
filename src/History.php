@@ -2,7 +2,10 @@
 
 namespace Exo;
 
+use Exo\Operation\AbstractOperation;
 use Exo\Operation\TableOperation;
+use Exo\Operation\UnsupportedOperationException;
+use Exo\Operation\ViewOperation;
 
 class History
 {
@@ -16,16 +19,17 @@ class History
      *
      * @param TableOperation[] $operations
      * @return TableOperation[]
+     * @throws UnsupportedOperationException
      */
     private static function reduce(array $operations)
     {
         $reduced = [];
 
         foreach ($operations as $operation) {
-            if (!isset($reduced[$operation->getTable()])) {
-                $reduced[$operation->getTable()] = $operation;
+            if (!isset($reduced[self::getEntityName($operation)])) {
+                $reduced[self::getEntityName($operation)] = $operation;
             } else {
-                $reduced[$operation->getTable()] = $reduced[$operation->getTable()]->apply($operation);
+                $reduced[self::getEntityName($operation)] = $reduced[self::getEntityName($operation)]->apply($operation);
             }
         }
 
@@ -37,12 +41,12 @@ class History
     /**
      * Adds a migration to the history.
      *
-     * @param string    $version
-     * @param Migration $migration
+     * @param string         $version
+     * @param Migration|ViewMigration $migrationOrView
      */
-    public function add(string $version, Migration $migration)
+    public function add(string $version, $migrationOrView)
     {
-        $this->migrations[$version] = $migration;
+        $this->migrations[$version] = $migrationOrView;
     }
 
     /**
@@ -88,13 +92,14 @@ class History
      *
      * @param string $from
      * @param string $to
-     * @param bool   $reduce
+     * @param bool $reduce
      * @return TableOperation[]
+     * @throws UnsupportedOperationException
      */
     public function rewind(string $from, string $to, bool $reduce = false)
     {
         $operations = [];
-        $tables = [];
+        $entities = [];
         $inRange = false;
 
         foreach ($this->migrations as $version => $migration) {
@@ -113,12 +118,12 @@ class History
                 }
 
                 foreach ($history as $operation) {
-                    $tables[$operation->getTable()] = $operation;
+                    $entities[self::getEntityName($operation)] = $operation;
                 }
 
                 // Reverse the operation
                 $operation = $migration->getOperation();
-                array_unshift($operations, $operation->reverse($tables[$operation->getTable()] ?? null));
+                array_unshift($operations, $operation->reverse($entities[self::getEntityName($operation)] ?? null));
             }
 
             if (strval($version) === $from) {
@@ -131,6 +136,22 @@ class History
         }
 
         return $operations;
+    }
+
+    private static function getEntityName(AbstractOperation $operation) {
+        $operationClass = get_class($operation);
+
+        switch($operationClass) {
+
+            case TableOperation::class:
+                return $operation->getTable();
+                break;
+            case ViewOperation::class:
+                return $operation->getView();
+                break;
+            default:
+                throw new UnsupportedOperationException($operationClass);
+        }
     }
 
     /**

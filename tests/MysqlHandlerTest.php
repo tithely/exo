@@ -24,6 +24,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         );
         $this->pdo->exec('DROP TABLE IF EXISTS users;');
         $this->pdo->exec('DROP TABLE IF EXISTS users_sessions;');
+        $this->pdo->exec('DROP VIEW IF EXISTS user_counts;');
     }
 
     public function tearDown(): void
@@ -36,13 +37,17 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler = $this->getHandler();
         $results = $handler->migrate(null, null, false);
 
-        $this->assertCount(3, $results);
+        $this->assertCount(5, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('1', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
         $this->assertEquals('2', $results[1]->getVersion());
         $this->assertTrue($results[2]->isSuccess());
         $this->assertEquals('3', $results[2]->getVersion());
+        $this->assertTrue($results[3]->isSuccess());
+        $this->assertEquals('4', $results[3]->getVersion());
+        $this->assertTrue($results[4]->isSuccess());
+        $this->assertEquals('5', $results[4]->getVersion());
     }
 
     public function testFullMigrationReduced()
@@ -50,11 +55,13 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler = $this->getHandler();
         $results = $handler->migrate(null, null, true);
 
-        $this->assertCount(2, $results);
+        $this->assertCount(3, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertNull($results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
         $this->assertNull($results[1]->getVersion());
+        $this->assertTrue($results[2]->isSuccess());
+        $this->assertNull($results[2]->getVersion());
     }
 
     public function testPartialMigration()
@@ -121,6 +128,14 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $history->add('3', Migration::alter('users')
             ->addColumn('email', ['type' => 'string', 'unique' => 'true', 'after' => 'id'])
             ->dropColumn('username')
+        );
+
+        $history->add('4', ViewMigration::create('user_counts')
+            ->withBody('select count(*) as user_count from test.users')
+        );
+
+        $history->add('5', ViewMigration::alter('user_counts')
+            ->withBody('select count(distinct id) as user_count from test.users')
         );
 
         return new Handler($this->pdo, $history);

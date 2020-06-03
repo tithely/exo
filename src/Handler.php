@@ -35,8 +35,9 @@ class Handler
      *
      * @param string|null $current
      * @param string|null $target
-     * @param bool        $reduce
+     * @param bool $reduce
      * @return HandlerResult[]
+     * @throws Operation\UnsupportedOperationException
      */
     public function migrate(?string $current, ?string $target, bool $reduce)
     {
@@ -82,10 +83,11 @@ class Handler
     /**
      * Performs a rollback from current to target version.
      *
-     * @param string      $current
+     * @param string $current
      * @param string|null $target
-     * @param bool        $reduce
+     * @param bool $reduce
      * @return HandlerResult[]
+     * @throws Operation\UnsupportedOperationException
      */
     public function rollback(string $current, ?string $target, bool $reduce)
     {

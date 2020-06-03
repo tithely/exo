@@ -2,19 +2,48 @@
 
 namespace Exo\Statement;
 
+use Exo\Operation\AbstractOperation;
 use Exo\Operation\ColumnOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\TableOperation;
+use Exo\Operation\UnsupportedOperationException;
+use Exo\Operation\ViewOperation;
 
 class MysqlStatementBuilder extends StatementBuilder
 {
     /**
      * Builds SQL statements for an operation.
      *
+     * @param AbstractOperation $operation
+     * @return string
+     * @throws UnsupportedOperationException
+     */
+    public function build($operation): string
+    {
+        $operationClass = get_class($operation);
+
+        switch($operationClass) {
+
+            case TableOperation::class:
+                return $this->buildTable($operation);
+                break;
+
+            case ViewOperation::class:
+                return $this->buildView($operation);
+                break;
+
+            default:
+                throw new UnsupportedOperationException($operationClass);
+        }
+    }
+
+    /**
+     * Builds SQL statements for an table operation.
+     *
      * @param TableOperation $operation
      * @return string
      */
-    public function build(TableOperation $operation): string
+    public function buildTable(TableOperation $operation): string
     {
         switch ($operation->getOperation()) {
             case TableOperation::CREATE:
@@ -84,8 +113,30 @@ class MysqlStatementBuilder extends StatementBuilder
                     'DROP TABLE %s;',
                     $this->buildIdentifier($operation->getTable())
                 );
-            default:
-                return parent::build($operation);
+        }
+    }
+
+    /**
+     * Builds SQL statements for a view operation.
+     *
+     * @param ViewOperation $operation
+     * @return string
+     */
+    public function buildView(ViewOperation $operation): string
+    {
+        switch ($operation->getOperation()) {
+            case ViewOperation::CREATE:
+            case ViewOperation::ALTER:
+                return sprintf(
+                    'CREATE OR REPLACE VIEW %s AS (%s);',
+                    $this->buildIdentifier($operation->getView()),
+                    $operation->getBody()
+                );
+            case ViewOperation::DROP:
+                return sprintf(
+                    'DROP VIEW %s;',
+                    $this->buildIdentifier($operation->getView())
+                );
         }
     }
 
