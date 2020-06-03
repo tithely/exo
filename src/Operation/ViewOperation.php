@@ -26,8 +26,8 @@ class ViewOperation extends AbstractOperation
     /**
      * ViewOperation constructor.
      *
-     * @param string $view
-     * @param string $operation
+     * @param string      $view
+     * @param string      $operation
      * @param string|null $body
      */
     public function __construct(string $view, string $operation, string $body = null)

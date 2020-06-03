@@ -92,7 +92,7 @@ class History
      *
      * @param string $from
      * @param string $to
-     * @param bool $reduce
+     * @param bool   $reduce
      * @return TableOperation[]
      * @throws UnsupportedOperationException
      */

@@ -60,8 +60,8 @@ class ViewMigration
     /**
      * Migration constructor.
      *
-     * @param string $name
-     * @param string $operation
+     * @param string      $name
+     * @param string      $operation
      * @param string|null $body
      */
     private function __construct(string $name, string $operation, string $body = null)

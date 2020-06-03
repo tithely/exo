@@ -21,7 +21,7 @@ class Handler
     /**
      * Handler constructor.
      *
-     * @param PDO    $db
+     * @param PDO     $db
      * @param History $history
      */
     public function __construct(PDO $db, History $history)
@@ -35,7 +35,7 @@ class Handler
      *
      * @param string|null $current
      * @param string|null $target
-     * @param bool $reduce
+     * @param bool        $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
@@ -83,9 +83,9 @@ class Handler
     /**
      * Performs a rollback from current to target version.
      *
-     * @param string $current
+     * @param string      $current
      * @param string|null $target
-     * @param bool $reduce
+     * @param bool        $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
