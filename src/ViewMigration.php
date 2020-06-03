@@ -79,7 +79,7 @@ class ViewMigration
      */
     public function withBody(string $body): self
     {
-        if ($this->operation === TableOperation::DROP) {
+        if ($this->operation === ViewMigration::DROP) {
             throw new \LogicException('Cannot set view body in a view drop migration.');
         }
 
