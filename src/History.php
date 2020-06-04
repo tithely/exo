@@ -3,6 +3,7 @@
 namespace Exo;
 
 use Exo\Operation\AbstractOperation;
+use Exo\Operation\FunctionOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\UnsupportedOperationException;
 use Exo\Operation\ViewOperation;
@@ -42,7 +43,7 @@ class History
      * Adds a migration to the history.
      *
      * @param string         $version
-     * @param Migration|ViewMigration $migrationOrView
+     * @param Migration|ViewMigration|FunctionMigration $migrationOrView
      */
     public function add(string $version, $migrationOrView)
     {
@@ -142,12 +143,15 @@ class History
         $operationClass = get_class($operation);
 
         switch($operationClass) {
-
+            // TODO: Refactor all to use getName() across the board?
             case TableOperation::class:
                 return $operation->getTable();
                 break;
             case ViewOperation::class:
                 return $operation->getView();
+                break;
+            case FunctionOperation::class:
+                return $operation->getName();
                 break;
             default:
                 throw new UnsupportedOperationException($operationClass);

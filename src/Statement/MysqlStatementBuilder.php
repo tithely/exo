@@ -4,13 +4,32 @@ namespace Exo\Statement;
 
 use Exo\Operation\AbstractOperation;
 use Exo\Operation\ColumnOperation;
+use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
+use Exo\Operation\ParameterOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\UnsupportedOperationException;
+use Exo\Operation\VariableOperation;
 use Exo\Operation\ViewOperation;
 
 class MysqlStatementBuilder extends StatementBuilder
 {
+    const VIEW_CREATE_OR_REPLACE = 'CREATE OR REPLACE VIEW %s AS (%s);';
+    const VIEW_DROP = 'DROP VIEW %s;';
+    const FUNCTION_CREATE_OR_REPLACE = '
+    DROP FUNCTION IF EXISTS %s;
+    CREATE FUNCTION %s(
+        %s
+    )
+    RETURNS %s
+    %s
+    BEGIN
+        %s
+    
+        %s
+    END;';
+    const FUNCTION_DROP = 'DROP FUNCTION %s;';
+
     /**
      * Builds SQL statements for an operation.
      *
@@ -30,6 +49,10 @@ class MysqlStatementBuilder extends StatementBuilder
 
             case ViewOperation::class:
                 return $this->buildView($operation);
+                break;
+
+            case FunctionOperation::class:
+                return $this->buildFunction($operation);
                 break;
 
             default:
@@ -128,14 +151,65 @@ class MysqlStatementBuilder extends StatementBuilder
             case ViewOperation::CREATE:
             case ViewOperation::ALTER:
                 return sprintf(
-                    'CREATE OR REPLACE VIEW %s AS (%s);',
+                    self::VIEW_CREATE_OR_REPLACE,
                     $this->buildIdentifier($operation->getView()),
                     $operation->getBody()
                 );
             case ViewOperation::DROP:
                 return sprintf(
-                    'DROP VIEW %s;',
+                    self::VIEW_DROP,
                     $this->buildIdentifier($operation->getView())
+                );
+        }
+    }
+
+    /**
+     * Builds SQL statements for a custom function operation.
+     *
+     * @param FunctionOperation $operation
+     * @return string
+     */
+    public function buildFunction(FunctionOperation $operation): string
+    {
+        $parameters = array_map(function(ParameterOperation $parameterOperation) {
+            return sprintf(
+                '%s %s',
+                $parameterOperation->getParameter(),
+                $this->buildType($parameterOperation->getOptions())
+            );
+        }, $operation->getParameterOperations());
+
+        $returnType = $this->buildType($operation->getReturnType()->getOptions());
+
+        $determinism = ($operation->getDeterministic())
+            ? 'DETERMINISTIC'
+            : 'NOT DETERMINISTIC';
+
+        $variables = array_map(function(VariableOperation $variableOperation) {
+            return sprintf(
+                'DECLARE %s %s',
+                $variableOperation->getVariable(),
+                $this->buildType($variableOperation->getOptions())
+            );
+        }, $operation->getVariableOperations());
+
+        switch ($operation->getOperation()) {
+            case FunctionOperation::CREATE:
+            case FunctionOperation::REPLACE:
+                return sprintf(
+                    self::FUNCTION_CREATE_OR_REPLACE,
+                    $this->buildIdentifier($operation->getName()), // NAME (for drop if exists)
+                    $this->buildIdentifier($operation->getName()), // NAME (for create)
+                    implode(',', $parameters), // PARAMETERS
+                    $returnType, // RETURN TYPE
+                    $determinism, // [NOT] DETERMINISTIC
+                    implode(',', $variables), // VARIABLES
+                    $operation->getBody() // BODY
+                );
+            case FunctionOperation::DROP:
+                return sprintf(
+                    self::FUNCTION_DROP,
+                    $this->buildIdentifier($operation->getName())
                 );
         }
     }
