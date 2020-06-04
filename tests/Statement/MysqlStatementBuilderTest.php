@@ -5,13 +5,16 @@ namespace Exo\Statement;
 use Exo\Operation\ColumnOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\TableOperation;
+use Exo\Operation\ViewOperation;
 
 class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider provider
+     * @param TableOperation|ViewOperation $operation
+     * @param string $sql
      */
-    public function testBuild(TableOperation $operation, string $sql)
+    public function testBuild($operation, string $sql)
     {
         $handler = new MysqlStatementBuilder();
         $this->assertEquals($sql, $handler->build($operation));
@@ -93,6 +96,18 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
             [
                 new TableOperation('users', TableOperation::DROP, [], []),
                 'DROP TABLE `users`;'
+            ],
+            [
+                new ViewOperation('user_counts', ViewOperation::CREATE, 'select count(users.id) as user_count from test.users'),
+                'CREATE OR REPLACE VIEW `user_counts` AS (select count(users.id) as user_count from test.users);'
+            ],
+            [
+                new ViewOperation('user_counts', ViewOperation::ALTER, 'select count(*) as user_count from test.users'),
+                'CREATE OR REPLACE VIEW `user_counts` AS (select count(*) as user_count from test.users);'
+            ],
+            [
+                new ViewOperation('user_counts', ViewOperation::DROP),
+                'DROP VIEW `user_counts`;'
             ]
         ];
     }

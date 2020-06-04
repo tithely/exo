@@ -2,6 +2,7 @@
 
 namespace Exo;
 
+use Exo\Operation\AbstractOperation;
 use Exo\Statement\MysqlStatementBuilder;
 use Exo\Statement\StatementBuilder;
 use PDO;
@@ -21,7 +22,7 @@ class Handler
     /**
      * Handler constructor.
      *
-     * @param PDO    $db
+     * @param PDO     $db
      * @param History $history
      */
     public function __construct(PDO $db, History $history)
@@ -37,8 +38,9 @@ class Handler
      * @param string|null $target
      * @param bool        $reduce
      * @return HandlerResult[]
+     * @throws Operation\UnsupportedOperationException
      */
-    public function migrate(?string $current, ?string $target, bool $reduce)
+    public function migrate(?string $current, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
         $version = null;
@@ -57,26 +59,8 @@ class Handler
 
         // Execute operations
         $operations = $this->history->play($from, $to, $reduce);
-        $results = [];
 
-        foreach ($operations as $offset => $operation) {
-            $sql = $this->getBuilder()->build($operation);
-            $result = $this->db->exec($sql);
-
-            $results[] = new HandlerResult(
-                $reduce ? null : $versions[$offset],
-                $result !== false,
-                $sql,
-                $result === false ? $this->db->errorInfo() : null
-            );
-
-            // Stop migration if there was a failure
-            if ($result === false) {
-                break;
-            }
-        }
-
-        return $results;
+        return $this->processOperations($operations, $versions, $reduce);
     }
 
     /**
@@ -86,8 +70,9 @@ class Handler
      * @param string|null $target
      * @param bool        $reduce
      * @return HandlerResult[]
+     * @throws Operation\UnsupportedOperationException
      */
-    public function rollback(string $current, ?string $target, bool $reduce)
+    public function rollback(string $current, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
         $from = $target ? array_search($target, $versions) : 0;
@@ -100,9 +85,21 @@ class Handler
         );
 
         $operations = $this->history->rewind(end($versions), reset($versions), $reduce);
-        $results = [];
 
         $versions = array_reverse($versions);
+
+        return $this->processOperations($operations, $versions, $reduce);
+    }
+
+    /**
+     * @param AbstractOperation[] $operations
+     * @param array $versions
+     * @param bool $reduce
+     * @return HandlerResult[]
+     * @throws Operation\UnsupportedOperationException
+     */
+    private function processOperations(array $operations, array $versions, bool $reduce): array {
+        $results = [];
 
         foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
@@ -115,7 +112,7 @@ class Handler
                 $result === false ? $this->db->errorInfo() : null
             );
 
-            // Stop rollback if there was a failure
+            // Stop processing if there was a failure
             if ($result === false) {
                 break;
             }
