@@ -4,7 +4,7 @@ namespace Exo;
 
 use Exo\Operation\ViewOperation;
 
-class ViewTest extends \PHPUnit\Framework\TestCase
+class ViewMigrationTest extends \PHPUnit\Framework\TestCase
 {
     public function testCreateView()
     {
