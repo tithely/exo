@@ -2,10 +2,12 @@
 
 namespace Exo\Operation;
 
+use InvalidArgumentException;
+
 class FunctionOperation extends AbstractOperation
 {
     const CREATE = 'create';
-    const ALTER = 'alter';
+    const REPLACE = 'replace';
     const DROP = 'drop';
 
     /**
@@ -19,21 +21,56 @@ class FunctionOperation extends AbstractOperation
     private $operation;
 
     /**
-     * @var string|null
+     * @var ReturnTypeOperation
+     */
+    private $returnType;
+
+    /**
+     * @var bool
+     */
+    private $deterministic;
+
+    /**
+     * @var ParameterOperation[]
+     */
+    private $parameterOperations;
+
+    /**
+     * @var VariableOperation[]
+     */
+    private $variableOperations;
+
+    /**
+     * @var string
      */
     private $body;
 
     /**
      * FunctionOperation constructor.
      *
-     * @param string      $name
-     * @param string      $operation
+     * @param string $name
+     * @param string $operation
+     * @param ReturnTypeOperation|null $returnType
+     * @param bool $deterministic
+     * @param array $parameterOperations
+     * @param array $variableOperations
      * @param string|null $body
      */
-    public function __construct(string $name, string $operation, string $body = null)
-    {
+    public function __construct(
+        string $name,
+        string $operation,
+        ReturnTypeOperation $returnType = null,
+        bool $deterministic = false,
+        array $parameterOperations = [],
+        array $variableOperations = [],
+        string $body = null
+    ) {
         $this->name = $name;
         $this->operation = $operation;
+        $this->returnType = $returnType ?? new ReturnTypeOperation('string', ReturnTypeOperation::ADD);
+        $this->deterministic = $deterministic;
+        $this->parameterOperations = $parameterOperations;
+        $this->variableOperations = $variableOperations;
         $this->body = $body;
     }
 
@@ -43,30 +80,20 @@ class FunctionOperation extends AbstractOperation
      * @param FunctionOperation|null $original
      * @return static
      */
-    public function reverse(FunctionOperation $original = null): FunctionOperation
+    public function reverse(FunctionOperation $original = null): ?FunctionOperation
     {
+        if (!is_null($original) && $original->getName() !== $this->getName()) {
+            throw new InvalidArgumentException('Previous operations must apply to the same function.');
+        }
+
         if ($this->getOperation() === FunctionOperation::CREATE) {
             return new FunctionOperation(
-                $this->name,
-                FunctionOperation::DROP,
-                null
+                $this->getName(),
+                TableOperation::DROP
             );
         }
 
-        if ($original->getName() !== $this->getName()) {
-            throw new \InvalidArgumentException('Previous operations must apply to the same function.');
-        }
-
-        // Provide the create function operation to reverse a drop
-        if ($this->getOperation() === FunctionOperation::DROP) {
-            return $original;
-        }
-
-        return new FunctionOperation(
-            $this->name,
-            FunctionOperation::ALTER,
-            $original->getBody()
-        );
+        return $original;
     }
 
     /**
@@ -77,30 +104,22 @@ class FunctionOperation extends AbstractOperation
      */
     public function apply(FunctionOperation $operation)
     {
-        if ($operation->getName() !== $this->getName()) {
-            throw new \InvalidArgumentException('Cannot apply operations for a different function.');
+        if ($operation->name !== $this->name) {
+            throw new InvalidArgumentException('Cannot apply operations for a different name.');
         }
 
         if ($this->operation === self::DROP) {
-            throw new \InvalidArgumentException('Cannot apply further operations to a dropped function.');
+            throw new InvalidArgumentException('Cannot apply further operations to a dropped name.');
         }
 
-        if ($this->operation === self::CREATE) {
-            if ($operation->operation === self::CREATE) {
-                throw new \InvalidArgumentException('Cannot recreate an existing function.');
-            }
-
-            // Skip creation of functions that will be dropped
+        // Skip creation of functions that will be dropped
+        if (in_array($this->operation, [self::CREATE, self::REPLACE])) {
             if ($operation->operation === self::DROP) {
                 return null;
             }
-        } else if ($operation->operation === self::DROP) {
-
-            // Skip modification of functions that will be dropped
-            return $operation;
         }
 
-        return new FunctionOperation($this->name, $this->operation, $operation->body);
+        return $operation;
     }
 
     /**
@@ -121,6 +140,46 @@ class FunctionOperation extends AbstractOperation
     public function getOperation(): string
     {
         return $this->operation;
+    }
+
+    /**
+     * Returns the return type.
+     *
+     * @return ReturnTypeOperation|null
+     */
+    public function getReturnType(): ?ReturnTypeOperation
+    {
+        return $this->returnType;
+    }
+
+    /**
+     * Returns the deterministic flag.
+     *
+     * @return bool
+     */
+    public function getDeterministic(): bool
+    {
+        return $this->deterministic;
+    }
+
+    /**
+     * Returns the parameter operations.
+     *
+     * @return ParameterOperation[]
+     */
+    public function getParameterOperations(): array
+    {
+        return $this->parameterOperations;
+    }
+
+    /**
+     * Returns the parameter operations.
+     *
+     * @return VariableOperation[]
+     */
+    public function getVariableOperations(): array
+    {
+        return $this->variableOperations;
     }
 
     /**
