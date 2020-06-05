@@ -2,11 +2,7 @@
 
 namespace Exo;
 
-use Exo\Operation\AbstractOperation;
-use Exo\Operation\FunctionOperation;
 use Exo\Operation\TableOperation;
-use Exo\Operation\UnsupportedOperationException;
-use Exo\Operation\ViewOperation;
 
 class History
 {
@@ -20,9 +16,8 @@ class History
      *
      * @param TableOperation[] $operations
      * @return TableOperation[]
-     * @throws UnsupportedOperationException
      */
-    private static function reduce(array $operations)
+    private static function reduce(array $operations): array
     {
         $reduced = [];
 
@@ -42,8 +37,8 @@ class History
     /**
      * Adds a migration to the history.
      *
-     * @param string         $version
-     * @param Migration|ViewMigration|FunctionMigration $migrationOrView
+     * @param string             $version
+     * @param MigrationInterface $migrationOrView
      */
     public function add(string $version, $migrationOrView)
     {
@@ -57,7 +52,7 @@ class History
      *
      * @param string $from
      * @param string $to
-     * @param bool   $reduce
+     * @param bool $reduce
      * @return TableOperation[]
      */
     public function play(string $from, string $to, bool $reduce = false)
@@ -95,7 +90,6 @@ class History
      * @param string $to
      * @param bool   $reduce
      * @return TableOperation[]
-     * @throws UnsupportedOperationException
      */
     public function rewind(string $from, string $to, bool $reduce = false)
     {

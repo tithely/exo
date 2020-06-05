@@ -6,6 +6,7 @@ use Exo\Operation\AbstractOperation;
 use Exo\Operation\ColumnOperation;
 use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
+use Exo\Operation\OperationInterface;
 use Exo\Operation\ParameterOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\UnsupportedOperationException;
