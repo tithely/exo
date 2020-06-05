@@ -17,10 +17,10 @@ class FinderTest extends \PHPUnit\Framework\TestCase
             '20200602_create_user_counts_view',
             '20200604_create_user_level_function'
         ], $history->getVersions());
-        $this->assertEquals('users', $operations[0]->getTable());
-        $this->assertEquals('users', $operations[1]->getTable());
-        $this->assertEquals('posts', $operations[2]->getTable());
-        $this->assertEquals('user_counts', $operations[3]->getView());
+        $this->assertEquals('users', $operations[0]->getName());
+        $this->assertEquals('users', $operations[1]->getName());
+        $this->assertEquals('posts', $operations[2]->getName());
+        $this->assertEquals('user_counts', $operations[3]->getName());
         $this->assertEquals('user_level', $operations[4]->getName());
     }
 }

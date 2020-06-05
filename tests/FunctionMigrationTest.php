@@ -49,12 +49,12 @@ class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(['type' => 'string', 'length' => 256], $operation->getReturnType()->getOptions());
 
         $this->assertCount(1, $operation->getParameterOperations());
-        $this->assertEquals('someParameters', $operation->getParameterOperations()[0]->getParameter());
+        $this->assertEquals('someParameters', $operation->getParameterOperations()[0]->getName());
         $this->assertEquals(ParameterOperation::ADD, $operation->getParameterOperations()[0]->getOperation());
         $this->assertEquals(['type' => 'integer'], $operation->getParameterOperations()[0]->getOptions());
 
         $this->assertCount(1, $operation->getVariableOperations());
-        $this->assertEquals('someVariable', $operation->getVariableOperations()[0]->getVariable());
+        $this->assertEquals('someVariable', $operation->getVariableOperations()[0]->getName());
         $this->assertEquals(VariableOperation::ADD, $operation->getVariableOperations()[0]->getOperation());
         $this->assertEquals(['type' => 'string', 'length' => 64], $operation->getVariableOperations()[0]->getOptions());
 

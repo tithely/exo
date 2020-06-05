@@ -51,21 +51,21 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertCount(3, $operation->getParameterOperations());
 
-        $this->assertEquals('arg1', $operation->getParameterOperations()[0]->getParameter());
+        $this->assertEquals('arg1', $operation->getParameterOperations()[0]->getName());
         $this->assertEquals(ParameterOperation::ADD, $operation->getParameterOperations()[0]->getOperation());
         $this->assertEquals([], $operation->getParameterOperations()[0]->getOptions());
 
-        $this->assertEquals('arg2', $operation->getParameterOperations()[1]->getParameter());
+        $this->assertEquals('arg2', $operation->getParameterOperations()[1]->getName());
         $this->assertEquals(ParameterOperation::ADD, $operation->getParameterOperations()[1]->getOperation());
         $this->assertEquals(['type' => 'integer'], $operation->getParameterOperations()[1]->getOptions());
 
-        $this->assertEquals('arg3', $operation->getParameterOperations()[2]->getParameter());
+        $this->assertEquals('arg3', $operation->getParameterOperations()[2]->getName());
         $this->assertEquals(ParameterOperation::ADD, $operation->getParameterOperations()[2]->getOperation());
         $this->assertEquals(['type' => 'boolean'], $operation->getParameterOperations()[2]->getOptions());
 
         $this->assertCount(1, $operation->getVariableOperations());
 
-        $this->assertEquals('customerLevel', $operation->getVariableOperations()[0]->getVariable());
+        $this->assertEquals('customerLevel', $operation->getVariableOperations()[0]->getName());
         $this->assertEquals(VariableOperation::ADD, $operation->getVariableOperations()[0]->getOperation());
         $this->assertEquals(['type' => 'string', 'length' => 20], $operation->getVariableOperations()[0]->getOptions());
 
@@ -181,17 +181,17 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
 
         $this->assertCount(2, $operation->getParameterOperations());
 
-        $this->assertEquals('id', $operation->getParameterOperations()[0]->getParameter());
+        $this->assertEquals('id', $operation->getParameterOperations()[0]->getName());
         $this->assertEquals(ParameterOperation::ADD, $operation->getParameterOperations()[0]->getOperation());
         $this->assertEquals(['type' => 'uuid'], $operation->getParameterOperations()[0]->getOptions());
 
-        $this->assertEquals('username', $operation->getParameterOperations()[1]->getParameter());
+        $this->assertEquals('username', $operation->getParameterOperations()[1]->getName());
         $this->assertEquals(ParameterOperation::ADD, $operation->getParameterOperations()[1]->getOperation());
         $this->assertEquals(['type' => 'string', 'length' => 64], $operation->getParameterOperations()[1]->getOptions());
 
         $this->assertCount(1, $operation->getVariableOperations());
 
-        $this->assertEquals('username', $operation->getVariableOperations()[0]->getVariable());
+        $this->assertEquals('username', $operation->getVariableOperations()[0]->getName());
         $this->assertEquals(VariableOperation::ADD, $operation->getVariableOperations()[0]->getOperation());
         $this->assertEquals(['type' => 'integer'], $operation->getVariableOperations()[0]->getOptions());
     }

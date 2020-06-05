@@ -14,7 +14,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             ->addColumn('password', ['type' => 'string', 'length' => 128])
             ->getOperation();
 
-        $this->assertEquals('users', $operation->getTable());
+        $this->assertEquals('users', $operation->getName());
         $this->assertEquals(TableOperation::CREATE, $operation->getOperation());
         $this->assertCount(3, $operation->getColumnOperations());
     }
@@ -27,7 +27,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
             ->dropColumn('username')
             ->getOperation();
 
-        $this->assertEquals('users', $operation->getTable());
+        $this->assertEquals('users', $operation->getName());
         $this->assertEquals(TableOperation::ALTER, $operation->getOperation());
         $this->assertCount(3, $operation->getColumnOperations());
     }
@@ -37,7 +37,7 @@ class MigrationTest extends \PHPUnit\Framework\TestCase
         $operation = Migration::drop('users')
             ->getOperation();
 
-        $this->assertEquals('users', $operation->getTable());
+        $this->assertEquals('users', $operation->getName());
         $this->assertEquals(TableOperation::DROP, $operation->getOperation());
     }
 

@@ -10,7 +10,7 @@ class ViewOperationTest extends \PHPUnit\Framework\TestCase
 
         $operation = $base->apply(new ViewOperation('user_view', ViewOperation::ALTER, 'SELECT first_name, last_name FROM USERS'));
 
-        $this->assertEquals('user_view', $operation->getView());
+        $this->assertEquals('user_view', $operation->getName());
         $this->assertEquals(ViewOperation::CREATE, $operation->getOperation());
         $this->assertEquals('SELECT first_name, last_name FROM USERS', $operation->getBody());
     }
@@ -30,7 +30,7 @@ class ViewOperationTest extends \PHPUnit\Framework\TestCase
 
         $operation = $base->apply(new ViewOperation('user_view', ViewOperation::ALTER, 'SELECT first_name, last_name FROM USERS'));
 
-        $this->assertEquals('user_view', $operation->getView());
+        $this->assertEquals('user_view', $operation->getName());
         $this->assertEquals(ViewOperation::ALTER, $operation->getOperation());
         $this->assertEquals('SELECT first_name, last_name FROM USERS', $operation->getBody());
     }
@@ -51,7 +51,7 @@ class ViewOperationTest extends \PHPUnit\Framework\TestCase
 
         $operation = $base->reverse();
 
-        $this->assertEquals('user_view', $operation->getView());
+        $this->assertEquals('user_view', $operation->getName());
         $this->assertEquals(ViewOperation::DROP, $operation->getOperation());
     }
 
@@ -63,7 +63,7 @@ class ViewOperationTest extends \PHPUnit\Framework\TestCase
 
         $operation = $base->reverse($create);
 
-        $this->assertEquals('user_view', $operation->getView());
+        $this->assertEquals('user_view', $operation->getName());
         $this->assertEquals(ViewOperation::ALTER, $operation->getOperation());
         $this->assertEquals('SELECT first_name FROM USERS', $operation->getBody());
     }
