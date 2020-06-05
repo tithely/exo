@@ -27,10 +27,10 @@ class History
         $reduced = [];
 
         foreach ($operations as $operation) {
-            if (!isset($reduced[self::getEntityName($operation)])) {
-                $reduced[self::getEntityName($operation)] = $operation;
+            if (!isset($reduced[$operation->getName()])) {
+                $reduced[$operation->getName()] = $operation;
             } else {
-                $reduced[self::getEntityName($operation)] = $reduced[self::getEntityName($operation)]->apply($operation);
+                $reduced[$operation->getName()] = $reduced[$operation->getName()]->apply($operation);
             }
         }
 
@@ -119,12 +119,12 @@ class History
                 }
 
                 foreach ($history as $operation) {
-                    $entities[self::getEntityName($operation)] = $operation;
+                    $entities[$operation->getName()] = $operation;
                 }
 
                 // Reverse the operation
                 $operation = $migration->getOperation();
-                array_unshift($operations, $operation->reverse($entities[self::getEntityName($operation)] ?? null));
+                array_unshift($operations, $operation->reverse($entities[$operation->getName()] ?? null));
             }
 
             if (strval($version) === $from) {
@@ -137,25 +137,6 @@ class History
         }
 
         return $operations;
-    }
-
-    private static function getEntityName(AbstractOperation $operation) {
-        $operationClass = get_class($operation);
-
-        switch($operationClass) {
-            // TODO: Refactor all to use getName() across the board?
-            case TableOperation::class:
-                return $operation->getTable();
-                break;
-            case ViewOperation::class:
-                return $operation->getView();
-                break;
-            case FunctionOperation::class:
-                return $operation->getName();
-                break;
-            default:
-                throw new UnsupportedOperationException($operationClass);
-        }
     }
 
     /**
