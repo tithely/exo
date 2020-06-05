@@ -2,14 +2,9 @@
 
 namespace Exo\Operation;
 
-class VariableOperation implements OperationInterface
+class VariableOperation extends AbstractOperation
 {
     const ADD = 'add';
-
-    /**
-     * @var string
-     */
-    private $variable;
 
     /**
      * @var string
@@ -24,25 +19,15 @@ class VariableOperation implements OperationInterface
     /**
      * ColumnOperation constructor.
      *
-     * @param string $variable
+     * @param string $name
      * @param string $operation
      * @param array  $options
      */
-    public function __construct(string $variable, string $operation, array $options = [])
+    public function __construct(string $name, string $operation, array $options = [])
     {
-        $this->variable = $variable;
+        $this->name = $name;
         $this->operation = $operation;
         $this->options = $options;
-    }
-
-    /**
-     * Returns the column name.
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->variable;
     }
 
     /**

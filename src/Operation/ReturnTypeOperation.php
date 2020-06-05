@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class ReturnTypeOperation implements OperationInterface
+class ReturnTypeOperation extends AbstractOperation
 {
     const ADD = 'add';
 
@@ -30,19 +30,10 @@ class ReturnTypeOperation implements OperationInterface
      */
     public function __construct(string $type, string $operation, array $options = [])
     {
+        $this->name = '';
         $this->type = $type;
         $this->operation = $operation;
         $this->options = $options;
-    }
-
-    /**
-     * Returns the operation name.
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return 'return-type';
     }
 
     /**

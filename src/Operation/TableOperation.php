@@ -2,16 +2,11 @@
 
 namespace Exo\Operation;
 
-class TableOperation implements OperationInterface
+class TableOperation extends AbstractOperation
 {
     const CREATE = 'create';
     const ALTER = 'alter';
     const DROP = 'drop';
-
-    /**
-     * @var string
-     */
-    private $table;
 
     /**
      * @var string
@@ -31,14 +26,14 @@ class TableOperation implements OperationInterface
     /**
      * TableOperation constructor.
      *
-     * @param string            $table
+     * @param string            $name
      * @param string            $operation
      * @param ColumnOperation[] $columnOperations
      * @param IndexOperation[]  $indexOperations
      */
-    public function __construct(string $table, string $operation, array $columnOperations, array $indexOperations)
+    public function __construct(string $name, string $operation, array $columnOperations, array $indexOperations)
     {
-        $this->table = $table;
+        $this->name = $name;
         $this->operation = $operation;
         $this->columnOperations = $columnOperations;
         $this->indexOperations = $indexOperations;
@@ -54,14 +49,14 @@ class TableOperation implements OperationInterface
     {
         if ($this->getOperation() === TableOperation::CREATE) {
             return new TableOperation(
-                $this->table,
+                $this->getName(),
                 TableOperation::DROP,
                 [],
                 []
             );
         }
 
-        if ($original && $original->table !== $this->table) {
+        if ($original && $original->getName() !== $this->getName()) {
             throw new \InvalidArgumentException('Previous operations must apply to the same table.');
         }
 
@@ -133,7 +128,7 @@ class TableOperation implements OperationInterface
         }
 
         return new TableOperation(
-            $this->table,
+            $this->getName(),
             TableOperation::ALTER,
             $columnOperations,
             $indexOperations
@@ -148,37 +143,37 @@ class TableOperation implements OperationInterface
      */
     public function apply(TableOperation $operation)
     {
-        if ($operation->table !== $this->table) {
+        if ($operation->getName() !== $this->getName()) {
             throw new \InvalidArgumentException('Cannot apply operations for a different table.');
         }
 
-        if ($this->operation === self::DROP) {
+        if ($this->getOperation() === self::DROP) {
             throw new \InvalidArgumentException('Cannot apply further operations to a dropped table.');
         }
 
         // Collect existing columns
         $columns = [];
-        foreach ($this->columnOperations as $columnOperation) {
+        foreach ($this->getColumnOperations() as $columnOperation) {
             $columns[$columnOperation->getName()] = $columnOperation;
         }
 
         // Collect existing indexes
         $indexes = [];
-        foreach ($this->indexOperations as $indexOperation) {
+        foreach ($this->getIndexOperations() as $indexOperation) {
             $indexes[$indexOperation->getName()] = $indexOperation;
         }
 
-        if ($this->operation === self::CREATE) {
-            if ($operation->operation === self::CREATE) {
+        if ($this->getOperation() === self::CREATE) {
+            if ($operation->getOperation() === self::CREATE) {
                 throw new \InvalidArgumentException('Cannot recreate an existing table.');
             }
 
             // Skip creation of tables that will be dropped
-            if ($operation->operation === self::DROP) {
+            if ($operation->getOperation() === self::DROP) {
                 return null;
             }
 
-            foreach ($operation->columnOperations as $columnOperation) {
+            foreach ($operation->getColumnOperations() as $columnOperation) {
                 $options = $columnOperation->getOptions();
 
                 // Calculate column position
@@ -218,7 +213,7 @@ class TableOperation implements OperationInterface
                 }
             }
 
-            foreach ($operation->indexOperations as $indexOperation) {
+            foreach ($operation->getIndexOperations() as $indexOperation) {
                 $options = $indexOperation->getOptions();
 
                 // Calculate index position
@@ -251,7 +246,7 @@ class TableOperation implements OperationInterface
                 return $operation;
             }
 
-            foreach ($operation->columnOperations as $columnOperation) {
+            foreach ($operation->getColumnOperations() as $columnOperation) {
                 $originalOperation = $columnOperation->getOperation();
 
                 // Remove existing operation for the column
@@ -283,7 +278,7 @@ class TableOperation implements OperationInterface
                 }
             }
 
-            foreach ($operation->indexOperations as $indexOperation) {
+            foreach ($operation->getIndexOperations() as $indexOperation) {
                 $originalOperation = null;
 
                 // Remove existing operations for the index
@@ -329,17 +324,12 @@ class TableOperation implements OperationInterface
             }
         }
 
-        return new TableOperation($this->table, $this->operation, array_values($columns), array_values($indexes));
-    }
-
-    /**
-     * Returns the table name.
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->table;
+        return new TableOperation(
+            $this->getName(),
+            $this->getOperation(),
+            array_values($columns),
+            array_values($indexes)
+        );
     }
 
     /**

@@ -4,16 +4,11 @@ namespace Exo\Operation;
 
 use InvalidArgumentException;
 
-class FunctionOperation implements OperationInterface
+class FunctionOperation extends AbstractOperation
 {
     const CREATE = 'create';
     const REPLACE = 'replace';
     const DROP = 'drop';
-
-    /**
-     * @var string
-     */
-    private $name;
 
     /**
      * @var string
@@ -104,32 +99,22 @@ class FunctionOperation implements OperationInterface
      */
     public function apply(FunctionOperation $operation)
     {
-        if ($operation->name !== $this->name) {
+        if ($operation->getName() !== $this->getName()) {
             throw new InvalidArgumentException('Cannot apply operations for a different name.');
         }
 
-        if ($this->operation === self::DROP) {
+        if ($this->getOperation() === self::DROP) {
             throw new InvalidArgumentException('Cannot apply further operations to a dropped name.');
         }
 
         // Skip creation of functions that will be dropped
-        if (in_array($this->operation, [self::CREATE, self::REPLACE])) {
+        if (in_array($this->getOperation(), [self::CREATE, self::REPLACE])) {
             if ($operation->operation === self::DROP) {
                 return null;
             }
         }
 
         return $operation;
-    }
-
-    /**
-     * Returns the function name.
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     /**

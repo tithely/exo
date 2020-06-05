@@ -2,15 +2,10 @@
 
 namespace Exo\Operation;
 
-class IndexOperation implements OperationInterface
+class IndexOperation extends AbstractOperation
 {
     const ADD = 'add';
     const DROP = 'DROP';
-
-    /**
-     * @var string
-     */
-    private $name;
 
     /**
      * @var string[]
@@ -41,15 +36,6 @@ class IndexOperation implements OperationInterface
         $this->operation = $operation;
         $this->columns = $columns;
         $this->options = $options;
-    }
-
-    /**
-     * Returns the index name.
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     /**

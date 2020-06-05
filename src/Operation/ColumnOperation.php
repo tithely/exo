@@ -2,16 +2,11 @@
 
 namespace Exo\Operation;
 
-class ColumnOperation implements OperationInterface
+class ColumnOperation extends AbstractOperation
 {
     const ADD = 'add';
     const MODIFY = 'modify';
     const DROP = 'drop';
-
-    /**
-     * @var string
-     */
-    private $column;
 
     /**
      * @var string
@@ -26,25 +21,15 @@ class ColumnOperation implements OperationInterface
     /**
      * ColumnOperation constructor.
      *
-     * @param string $column
+     * @param string $name
      * @param string $operation
      * @param array  $options
      */
-    public function __construct(string $column, string $operation, array $options)
+    public function __construct(string $name, string $operation, array $options)
     {
-        $this->column = $column;
+        $this->name = $name;
         $this->operation = $operation;
         $this->options = $options;
-    }
-
-    /**
-     * Returns the column name.
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->column;
     }
 
     /**

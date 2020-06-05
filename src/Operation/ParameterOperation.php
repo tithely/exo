@@ -2,14 +2,9 @@
 
 namespace Exo\Operation;
 
-class ParameterOperation implements OperationInterface
+class ParameterOperation extends AbstractOperation
 {
     const ADD = 'add';
-
-    /**
-     * @var string
-     */
-    private $parameter;
 
     /**
      * @var string
@@ -24,25 +19,15 @@ class ParameterOperation implements OperationInterface
     /**
      * ColumnOperation constructor.
      *
-     * @param string $parameter
+     * @param string $name
      * @param string $operation
      * @param array  $options
      */
-    public function __construct(string $parameter, string $operation, array $options = [])
+    public function __construct(string $name, string $operation, array $options = [])
     {
-        $this->parameter = $parameter;
+        $this->name = $name;
         $this->operation = $operation;
         $this->options = $options;
-    }
-
-    /**
-     * Returns the column name.
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->parameter;
     }
 
     /**
