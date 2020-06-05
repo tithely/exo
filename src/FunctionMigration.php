@@ -8,7 +8,7 @@ use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\VariableOperation;
 use LogicException;
 
-class FunctionMigration
+final class FunctionMigration
 {
     /**
      * @var string
@@ -49,37 +49,37 @@ class FunctionMigration
      * Returns a new create view migration.
      *
      * @param string $name
-     * @return static
+     * @return FunctionMigration
      */
-    public static function create(string $name)
+    public static function create(string $name): FunctionMigration
     {
-        return new self($name, FunctionOperation::CREATE);
+        return new FunctionMigration($name, FunctionOperation::CREATE);
     }
 
     /**
      * Returns a new create view migration.
      *
      * @param string $name
-     * @return static
+     * @return FunctionMigration
      */
-    public static function replace(string $name)
+    public static function replace(string $name): FunctionMigration
     {
-        return new self($name, FunctionOperation::REPLACE);
+        return new FunctionMigration($name, FunctionOperation::REPLACE);
     }
 
     /**
      * Returns a new drop view migration.
      *
      * @param string $name
-     * @return static
+     * @return FunctionMigration
      */
-    public static function drop(string $name)
+    public static function drop(string $name): FunctionMigration
     {
-        return new self($name, FunctionOperation::DROP);
+        return new FunctionMigration($name, FunctionOperation::DROP);
     }
 
     /**
-     * Migration constructor.
+     * FunctionMigration constructor.
      *
      * @param string $name
      * @param string $operation
@@ -113,7 +113,7 @@ class FunctionMigration
      * @param bool $deterministic
      * @return $this
      */
-    public function isDeterministic(bool $deterministic): self
+    public function isDeterministic(bool $deterministic): FunctionMigration
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set deterministic property in a drop migration.');
@@ -198,7 +198,7 @@ class FunctionMigration
      * @param string $body
      * @return FunctionMigration
      */
-    public function withBody(string $body): self
+    public function withBody(string $body): FunctionMigration
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set view body in a view drop migration.');
@@ -235,7 +235,7 @@ class FunctionMigration
      *
      * @throws LogicException
      */
-    private function validate() {
+    private function validate(): void {
         if ($this->operation !== FunctionOperation::DROP) {
             if (is_null($this->returnType)) {
                 throw new LogicException('Function Migration must include a return type.');

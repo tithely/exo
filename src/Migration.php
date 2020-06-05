@@ -6,7 +6,7 @@ use Exo\Operation\ColumnOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\TableOperation;
 
-class Migration
+final class Migration
 {
     /**
      * @var string
@@ -80,7 +80,7 @@ class Migration
      * @param array  $options
      * @return Migration
      */
-    public function addColumn(string $column, array $options = []): self
+    public function addColumn(string $column, array $options = []): Migration
     {
         if ($this->operation === TableOperation::DROP) {
             throw new \LogicException('Cannot add columns in a drop migration.');
@@ -98,7 +98,7 @@ class Migration
      * @param array  $options
      * @return Migration
      */
-    public function modifyColumn(string $column, array $options): self
+    public function modifyColumn(string $column, array $options): Migration
     {
         if ($this->operation === TableOperation::CREATE) {
             throw new \LogicException('Cannot modify columns in a create migration.');
@@ -179,7 +179,7 @@ class Migration
      *
      * @return TableOperation
      */
-    public function getOperation()
+    public function getOperation(): TableOperation
     {
         return new TableOperation($this->table, $this->operation, $this->columnOperations, $this->indexOperations);
     }
