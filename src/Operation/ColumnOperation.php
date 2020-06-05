@@ -42,7 +42,7 @@ class ColumnOperation extends AbstractOperation
      *
      * @return string
      */
-    public function getColumn(): string
+    public function getName(): string
     {
         return $this->column;
     }

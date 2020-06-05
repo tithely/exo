@@ -77,7 +77,7 @@ class ViewOperation extends AbstractOperation
      */
     public function apply(ViewOperation $operation)
     {
-        if ($operation->view !== $this->getView()) {
+        if ($operation->view !== $this->getName()) {
             throw new \InvalidArgumentException('Cannot apply operations for a different view.');
         }
 
@@ -108,7 +108,7 @@ class ViewOperation extends AbstractOperation
      *
      * @return string
      */
-    public function getView(): string
+    public function getName(): string
     {
         return $this->view;
     }

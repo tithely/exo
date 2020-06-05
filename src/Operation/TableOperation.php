@@ -75,14 +75,14 @@ class TableOperation extends AbstractOperation
             // Find a column operation to reconstruct previous version of the column
             $originalColumn = null;
             foreach ($original->getColumnOperations() as $originalOperation) {
-                if ($originalOperation->getColumn() === $columnOperation->getColumn()) {
+                if ($originalOperation->getName() === $columnOperation->getName()) {
                     $originalColumn = $originalOperation;
                     break;
                 }
             }
 
             if ($columnOperation->getOperation() === ColumnOperation::ADD) {
-                $columnOperations[] = new ColumnOperation($columnOperation->getColumn(), ColumnOperation::DROP, []);
+                $columnOperations[] = new ColumnOperation($columnOperation->getName(), ColumnOperation::DROP, []);
                 continue;
             }
 
@@ -100,7 +100,7 @@ class TableOperation extends AbstractOperation
                 }
 
                 $columnOperations[] = new ColumnOperation(
-                    $columnOperation->getColumn(),
+                    $columnOperation->getName(),
                     ColumnOperation::MODIFY,
                     $originalColumn->getOptions()
                 );
@@ -159,7 +159,7 @@ class TableOperation extends AbstractOperation
         // Collect existing columns
         $columns = [];
         foreach ($this->columnOperations as $columnOperation) {
-            $columns[$columnOperation->getColumn()] = $columnOperation;
+            $columns[$columnOperation->getName()] = $columnOperation;
         }
 
         // Collect existing indexes
@@ -194,7 +194,7 @@ class TableOperation extends AbstractOperation
 
                 // Remove existing operation for the column
                 foreach ($columns as $existing => $column) {
-                    if ($column->getColumn() === $columnOperation->getColumn()) {
+                    if ($column->getName() === $columnOperation->getName()) {
                         unset($columns[$existing]);
                         break;
                     }
@@ -208,7 +208,7 @@ class TableOperation extends AbstractOperation
                     case ColumnOperation::ADD:
                     case ColumnOperation::MODIFY:
                         $addOperation = new ColumnOperation(
-                            $columnOperation->getColumn(),
+                            $columnOperation->getName(),
                             ColumnOperation::ADD,
                             $options
                         );
@@ -256,7 +256,7 @@ class TableOperation extends AbstractOperation
 
                 // Remove existing operation for the column
                 foreach ($columns as $existing => $column) {
-                    if ($column->getColumn() === $columnOperation->getColumn()) {
+                    if ($column->getName() === $columnOperation->getName()) {
                         unset($columns[$existing]);
                         $originalOperation = $column->getOperation();
                         break;
@@ -275,7 +275,7 @@ class TableOperation extends AbstractOperation
                         break;
                     case ColumnOperation::MODIFY:
                         $columns[] = new ColumnOperation(
-                            $columnOperation->getColumn(),
+                            $columnOperation->getName(),
                             $originalOperation,
                             $columnOperation->getOptions()
                         );
@@ -310,7 +310,7 @@ class TableOperation extends AbstractOperation
                 $indexColumns = [];
                 foreach ($index->getColumns() as $indexColumn) {
                     foreach ($columns as $column) {
-                        if ($column->getColumn() === $indexColumn) {
+                        if ($column->getName() === $indexColumn) {
                             $indexColumns[] = $indexColumn;
                         }
                     }
@@ -337,7 +337,7 @@ class TableOperation extends AbstractOperation
      *
      * @return string
      */
-    public function getTable(): string
+    public function getName(): string
     {
         return $this->table;
     }

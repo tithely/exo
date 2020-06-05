@@ -40,7 +40,7 @@ class ParameterOperation extends AbstractOperation
      *
      * @return string
      */
-    public function getParameter(): string
+    public function getName(): string
     {
         return $this->parameter;
     }

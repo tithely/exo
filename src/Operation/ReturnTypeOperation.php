@@ -36,6 +36,16 @@ class ReturnTypeOperation extends AbstractOperation
     }
 
     /**
+     * Returns the operation name.
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return 'return-type';
+    }
+
+    /**
      * Returns the column name.
      *
      * @return string

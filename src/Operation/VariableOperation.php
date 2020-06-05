@@ -40,7 +40,7 @@ class VariableOperation extends AbstractOperation
      *
      * @return string
      */
-    public function getVariable(): string
+    public function getName(): string
     {
         return $this->variable;
     }

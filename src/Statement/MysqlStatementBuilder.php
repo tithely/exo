@@ -72,7 +72,7 @@ class MysqlStatementBuilder extends StatementBuilder
             case TableOperation::CREATE:
                 $definitions = [];
                 foreach ($operation->getColumnOperations() as $columnOperation) {
-                    $definitions[] = $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions());
+                    $definitions[] = $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions());
                 }
 
                 foreach ($operation->getIndexOperations() as $indexOperation) {
@@ -81,7 +81,7 @@ class MysqlStatementBuilder extends StatementBuilder
 
                 return sprintf(
                     'CREATE TABLE %s (%s);',
-                    $this->buildIdentifier($operation->getTable()),
+                    $this->buildIdentifier($operation->getName()),
                     implode(', ', $definitions)
                 );
             case TableOperation::ALTER:
@@ -91,19 +91,19 @@ class MysqlStatementBuilder extends StatementBuilder
                         case ColumnOperation::ADD:
                             $specifications[] = sprintf(
                                 'ADD COLUMN %s',
-                                $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions())
+                                $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions())
                             );
                             break;
                         case ColumnOperation::MODIFY:
                             $specifications[] = sprintf(
                                 'MODIFY COLUMN %s',
-                                $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions())
+                                $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions())
                             );
                             break;
                         case ColumnOperation::DROP:
                             $specifications[] = sprintf(
                                 'DROP COLUMN %s',
-                                $this->buildIdentifier($columnOperation->getColumn())
+                                $this->buildIdentifier($columnOperation->getName())
                             );
                             break;
                     }
@@ -128,13 +128,13 @@ class MysqlStatementBuilder extends StatementBuilder
 
                 return sprintf(
                     'ALTER TABLE %s %s;',
-                    $this->buildIdentifier($operation->getTable()),
+                    $this->buildIdentifier($operation->getName()),
                     implode(', ', $specifications)
                 );
             case TableOperation::DROP:
                 return sprintf(
                     'DROP TABLE %s;',
-                    $this->buildIdentifier($operation->getTable())
+                    $this->buildIdentifier($operation->getName())
                 );
         }
     }
@@ -152,13 +152,13 @@ class MysqlStatementBuilder extends StatementBuilder
             case ViewOperation::ALTER:
                 return sprintf(
                     self::VIEW_CREATE_OR_REPLACE,
-                    $this->buildIdentifier($operation->getView()),
+                    $this->buildIdentifier($operation->getName()),
                     $operation->getBody()
                 );
             case ViewOperation::DROP:
                 return sprintf(
                     self::VIEW_DROP,
-                    $this->buildIdentifier($operation->getView())
+                    $this->buildIdentifier($operation->getName())
                 );
         }
     }
@@ -174,7 +174,7 @@ class MysqlStatementBuilder extends StatementBuilder
         $parameters = array_map(function(ParameterOperation $parameterOperation) {
             return sprintf(
                 '%s %s',
-                $parameterOperation->getParameter(),
+                $parameterOperation->getName(),
                 $this->buildType($parameterOperation->getOptions())
             );
         }, $operation->getParameterOperations());
@@ -188,7 +188,7 @@ class MysqlStatementBuilder extends StatementBuilder
         $variables = array_map(function(VariableOperation $variableOperation) {
             return sprintf(
                 'DECLARE %s %s',
-                $variableOperation->getVariable(),
+                $variableOperation->getName(),
                 $this->buildType($variableOperation->getOptions())
             );
         }, $operation->getVariableOperations());
