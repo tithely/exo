@@ -33,7 +33,7 @@ class MysqlStatementBuilder extends StatementBuilder
     /**
      * Builds SQL statements for an operation.
      *
-     * @param AbstractOperation $operation
+     * @param OperationInterface $operation
      * @return string
      * @throws UnsupportedOperationException
      */
@@ -44,14 +44,17 @@ class MysqlStatementBuilder extends StatementBuilder
         switch($operationClass) {
 
             case TableOperation::class:
+                /* @var TableOperation $operation */
                 return $this->buildTable($operation);
                 break;
 
             case ViewOperation::class:
+                /* @var ViewOperation $operation */
                 return $this->buildView($operation);
                 break;
 
             case FunctionOperation::class:
+                /* @var FunctionOperation $operation */
                 return $this->buildFunction($operation);
                 break;
 

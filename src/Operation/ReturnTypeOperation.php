@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class ReturnTypeOperation extends AbstractOperation
+class ReturnTypeOperation implements OperationInterface
 {
     const ADD = 'add';
 

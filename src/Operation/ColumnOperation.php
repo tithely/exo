@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class ColumnOperation extends AbstractOperation
+class ColumnOperation implements OperationInterface
 {
     const ADD = 'add';
     const MODIFY = 'modify';

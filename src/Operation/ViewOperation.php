@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class ViewOperation extends AbstractOperation
+class ViewOperation implements OperationInterface
 {
     const CREATE = 'create';
     const ALTER = 'alter';

@@ -4,7 +4,7 @@ namespace Exo\Operation;
 
 use InvalidArgumentException;
 
-class FunctionOperation extends AbstractOperation
+class FunctionOperation implements OperationInterface
 {
     const CREATE = 'create';
     const REPLACE = 'replace';

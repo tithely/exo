@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class ParameterOperation extends AbstractOperation
+class ParameterOperation implements OperationInterface
 {
     const ADD = 'add';
 

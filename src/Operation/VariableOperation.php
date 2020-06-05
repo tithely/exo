@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class VariableOperation extends AbstractOperation
+class VariableOperation implements OperationInterface
 {
     const ADD = 'add';
 

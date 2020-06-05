@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class IndexOperation extends AbstractOperation
+class IndexOperation implements OperationInterface
 {
     const ADD = 'add';
     const DROP = 'DROP';

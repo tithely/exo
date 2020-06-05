@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class TableOperation extends AbstractOperation
+class TableOperation implements OperationInterface
 {
     const CREATE = 'create';
     const ALTER = 'alter';
