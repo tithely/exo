@@ -10,7 +10,7 @@ use Exo\Operation\ViewOperation;
 class History
 {
     /**
-     * @var array
+     * @var Migration[]|ViewMigration[]
      */
     private $migrations = [];
 
@@ -39,6 +39,27 @@ class History
     }
 
     /**
+     * Returns the entity name for an operation.
+     *
+     * @param AbstractOperation $operation
+     * @return string
+     * @throws UnsupportedOperationException
+     */
+    private static function getEntityName(AbstractOperation $operation)
+    {
+        $operationClass = get_class($operation);
+
+        switch ($operationClass) {
+            case TableOperation::class:
+                return $operation->getTable();
+            case ViewOperation::class:
+                return $operation->getView();
+            default:
+                throw new UnsupportedOperationException($operationClass);
+        }
+    }
+
+    /**
      * Adds a migration to the history.
      *
      * @param string                  $version
@@ -47,6 +68,26 @@ class History
     public function add(string $version, $migrationOrView)
     {
         $this->migrations[$version] = $migrationOrView;
+    }
+
+    /**
+     * Clones the history, optionally including only the
+     * specified versions.
+     *
+     * @param array|null $versions
+     * @return History
+     */
+    public function clone(array $versions = null)
+    {
+        $history = new History();
+
+        foreach ($this->migrations as $version => $migration) {
+            if (is_null($versions) || in_array($version, $versions)) {
+                $history->add($version, $migration);
+            }
+        }
+
+        return $history;
     }
 
     /**
@@ -137,27 +178,6 @@ class History
         }
 
         return $operations;
-    }
-
-    /**
-     * Returns the entity name for an operation.
-     *
-     * @param AbstractOperation $operation
-     * @return string
-     * @throws UnsupportedOperationException
-     */
-    private static function getEntityName(AbstractOperation $operation)
-    {
-        $operationClass = get_class($operation);
-
-        switch ($operationClass) {
-            case TableOperation::class:
-                return $operation->getTable();
-            case ViewOperation::class:
-                return $operation->getView();
-            default:
-                throw new UnsupportedOperationException($operationClass);
-        }
     }
 
     /**
