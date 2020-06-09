@@ -74,6 +74,22 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($results[1]->isSuccess());
     }
 
+    public function testMissedMigration()
+    {
+        $handler = $this->getHandler();
+        $handler->migrate(null, '1', false);
+        $handler->migrate('2', '3', false);
+
+        $results = $handler->migrate(['1', '3'], null, false);
+        $this->assertCount(3, $results);
+        $this->assertEquals('2', $results[0]->getVersion());
+        $this->assertTrue($results[0]->isSuccess());
+        $this->assertEquals('4', $results[1]->getVersion());
+        $this->assertTrue($results[1]->isSuccess());
+        $this->assertEquals('5', $results[2]->getVersion());
+        $this->assertTrue($results[2]->isSuccess());
+    }
+
     public function testFailingMigration()
     {
         $handler = $this->getHandler();

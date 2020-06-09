@@ -51,12 +51,21 @@ class Handler
         $versions = $this->history->getVersions();
         $version = null;
 
-        while ($version !== $current && !empty($versions)) {
-            $version = array_shift($versions);
-        }
+        if (is_array($current)) {
+            // Determine versions excluding all executed
+            $versions = array_values(array_diff($versions, $current));
+            $history = $this->history->clone($versions);
+        } else {
+            // Determine versions since last executed
+            while ($version !== $current && !empty($versions)) {
+                $version = array_shift($versions);
+            }
 
-        if (!is_null($current) && is_null($version)) {
-            throw new \InvalidArgumentException('Current version is invalid.');
+            if (!is_null($current) && is_null($version)) {
+                throw new \InvalidArgumentException('Current version is invalid.');
+            }
+
+            $history = $this->history;
         }
 
         // Determine range of versions to play
@@ -64,7 +73,7 @@ class Handler
         $to = $target ?? end($versions);
 
         // Execute operations
-        $operations = $this->history->play($from, $to, $reduce);
+        $operations = $history->play($from, $to, $reduce);
 
         return $this->processOperations($operations, $versions, $reduce);
     }
