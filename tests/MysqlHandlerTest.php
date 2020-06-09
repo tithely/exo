@@ -131,11 +131,11 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         );
 
         $history->add('4', ViewMigration::create('user_counts')
-            ->withBody('select count(*) as user_count from test.users')
+            ->withBody('select count(*) as user_count from users')
         );
 
         $history->add('5', ViewMigration::alter('user_counts')
-            ->withBody('select count(distinct id) as user_count from test.users')
+            ->withBody('select count(distinct id) as user_count from users')
         );
 
         return new Handler($this->pdo, $history);
