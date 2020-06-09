@@ -34,13 +34,19 @@ class Handler
     /**
      * Migrates from current to target version.
      *
-     * @param string|null $current
-     * @param string|null $target
-     * @param bool        $reduce
+     * If $current is a string, all history since the specified
+     * version will be executed. If $current is an array, any
+     * versions not present will be executed. If $target is a
+     * string, history up to and including the specified version
+     * will be executed.
+     *
+     * @param string[]|string|null $current
+     * @param string|null          $target
+     * @param bool                 $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    public function migrate(?string $current, ?string $target, bool $reduce): array
+    public function migrate($current, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
         $version = null;
@@ -66,13 +72,16 @@ class Handler
     /**
      * Performs a rollback from current to target version.
      *
-     * @param string      $current
-     * @param string|null $target
-     * @param bool        $reduce
+     * If $current is an array, any versions not present will
+     * not be considered by the rollback.
+     *
+     * @param string[]|string $current
+     * @param string|null     $target
+     * @param bool            $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    public function rollback(string $current, ?string $target, bool $reduce): array
+    public function rollback($current, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
         $from = $target ? array_search($target, $versions) : 0;
@@ -93,12 +102,13 @@ class Handler
 
     /**
      * @param AbstractOperation[] $operations
-     * @param array $versions
-     * @param bool $reduce
+     * @param array               $versions
+     * @param bool                $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    private function processOperations(array $operations, array $versions, bool $reduce): array {
+    private function processOperations(array $operations, array $versions, bool $reduce): array
+    {
         $results = [];
 
         foreach ($operations as $offset => $operation) {

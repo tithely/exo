@@ -41,7 +41,7 @@ class History
     /**
      * Adds a migration to the history.
      *
-     * @param string         $version
+     * @param string                  $version
      * @param Migration|ViewMigration $migrationOrView
      */
     public function add(string $version, $migrationOrView)
@@ -58,6 +58,7 @@ class History
      * @param string $to
      * @param bool   $reduce
      * @return TableOperation[]
+     * @throws UnsupportedOperationException
      */
     public function play(string $from, string $to, bool $reduce = false)
     {
@@ -138,17 +139,22 @@ class History
         return $operations;
     }
 
-    private static function getEntityName(AbstractOperation $operation) {
+    /**
+     * Returns the entity name for an operation.
+     *
+     * @param AbstractOperation $operation
+     * @return string
+     * @throws UnsupportedOperationException
+     */
+    private static function getEntityName(AbstractOperation $operation)
+    {
         $operationClass = get_class($operation);
 
-        switch($operationClass) {
-
+        switch ($operationClass) {
             case TableOperation::class:
                 return $operation->getTable();
-                break;
             case ViewOperation::class:
                 return $operation->getView();
-                break;
             default:
                 throw new UnsupportedOperationException($operationClass);
         }
