@@ -100,7 +100,7 @@ class Handler
             $history = $this->history->clone($versions);
 
             $from = $target ? array_search($target, $versions) : 0;
-            $count = count($versions) - $from - 1;
+            $count = null;
         } else {
             // Determine range from current and target versions
             $history = $this->history;
