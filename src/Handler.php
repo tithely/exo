@@ -93,8 +93,21 @@ class Handler
     public function rollback($current, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
-        $from = $target ? array_search($target, $versions) : 0;
-        $count = array_search($current, $versions) - $from;
+
+        if (is_array($current)) {
+            // Determine range from executed and target versions
+            $versions = $current;
+            $history = $this->history->clone($versions);
+
+            $from = $target ? array_search($target, $versions) : 0;
+            $count = count($versions) - $from - 1;
+        } else {
+            // Determine range from current and target versions
+            $history = $this->history;
+
+            $from = $target ? array_search($target, $versions) : 0;
+            $count = array_search($current, $versions) - $from;
+        }
 
         $versions = array_slice(
             $versions,
@@ -102,8 +115,7 @@ class Handler
             $count
         );
 
-        $operations = $this->history->rewind(end($versions), reset($versions), $reduce);
-
+        $operations = $history->rewind(end($versions), reset($versions), $reduce);
         $versions = array_reverse($versions);
 
         return $this->processOperations($operations, $versions, $reduce);
