@@ -15,10 +15,22 @@ use Exo\Operation\ViewOperation;
 
 class MysqlStatementBuilder extends StatementBuilder
 {
-    const VIEW_CREATE_OR_REPLACE = 'CREATE OR REPLACE VIEW %s AS (%s);';
+    const VIEW_CREATE = 'CREATE VIEW %s AS (%s);';
+    const VIEW_ALTER = 'ALTER VIEW %s AS (%s);';
     const VIEW_DROP = 'DROP VIEW %s;';
-    const FUNCTION_CREATE_OR_REPLACE = '
-    DROP FUNCTION IF EXISTS %s;
+    const FUNCTION_CREATE = '
+    CREATE FUNCTION %s(
+        %s
+    )
+    RETURNS %s
+    %s
+    BEGIN
+        %s
+    
+        %s
+    END;';
+    const FUNCTION_DROP_AND_REPLACE = '
+    DROP FUNCTION %s;
     CREATE FUNCTION %s(
         %s
     )
@@ -153,9 +165,14 @@ class MysqlStatementBuilder extends StatementBuilder
     {
         switch ($operation->getOperation()) {
             case ViewOperation::CREATE:
+                return sprintf(
+                    self::VIEW_CREATE,
+                    $this->buildIdentifier($operation->getName()),
+                    $operation->getBody()
+                );
             case ViewOperation::ALTER:
                 return sprintf(
-                    self::VIEW_CREATE_OR_REPLACE,
+                    self::VIEW_ALTER,
                     $this->buildIdentifier($operation->getName()),
                     $operation->getBody()
                 );
@@ -199,10 +216,19 @@ class MysqlStatementBuilder extends StatementBuilder
 
         switch ($operation->getOperation()) {
             case FunctionOperation::CREATE:
+                return sprintf(
+                    self::FUNCTION_CREATE,
+                    $this->buildIdentifier($operation->getName()), // NAME (for create)
+                    implode(',', $parameters), // PARAMETERS
+                    $returnType, // RETURN TYPE
+                    $determinism, // [NOT] DETERMINISTIC
+                    implode(',', $variables), // VARIABLES
+                    $operation->getBody() // BODY
+                );
             case FunctionOperation::REPLACE:
                 return sprintf(
-                    self::FUNCTION_CREATE_OR_REPLACE,
-                    $this->buildIdentifier($operation->getName()), // NAME (for drop if exists)
+                    self::FUNCTION_DROP_AND_REPLACE,
+                    $this->buildIdentifier($operation->getName()), // NAME (for drop)
                     $this->buildIdentifier($operation->getName()), // NAME (for create)
                     implode(',', $parameters), // PARAMETERS
                     $returnType, // RETURN TYPE
