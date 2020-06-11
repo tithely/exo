@@ -34,7 +34,7 @@ class MysqlStatementBuilder extends StatementBuilder
     /**
      * Builds SQL statements for an operation.
      *
-     * @param OperationInterface $operation
+     * @param AbstractOperation $operation
      * @return string
      * @throws UnsupportedOperationException
      */
