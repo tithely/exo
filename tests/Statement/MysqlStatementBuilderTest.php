@@ -135,7 +135,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'inputValue1 VARCHAR(32),inputValue2 VARCHAR(32)',
                     'VARCHAR(20)',
                     'DETERMINISTIC',
-                    'DECLARE internalVarName1 INTEGER;DECLARE internalVarName2 INTEGER',
+                    'DECLARE internalVarName1 INTEGER;DECLARE internalVarName2 INTEGER;',
                     'RETURN \'foo\';'
                 )
             ],
@@ -156,7 +156,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'anotherInputValue VARCHAR(32)',
                     'VARCHAR(20)',
                     'DETERMINISTIC',
-                    'DECLARE anotherVarName INTEGER',
+                    'DECLARE anotherVarName INTEGER;',
                     'RETURN \'foo\';'
                 )
             ],
