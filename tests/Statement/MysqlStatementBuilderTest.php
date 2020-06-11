@@ -103,11 +103,11 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 new ViewOperation('user_counts', ViewOperation::CREATE, 'select count(users.id) as user_count from test.users'),
-                'CREATE OR REPLACE VIEW `user_counts` AS (select count(users.id) as user_count from test.users);'
+                'CREATE VIEW `user_counts` AS (select count(users.id) as user_count from test.users);'
             ],
             [
                 new ViewOperation('user_counts', ViewOperation::ALTER, 'select count(*) as user_count from test.users'),
-                'CREATE OR REPLACE VIEW `user_counts` AS (select count(*) as user_count from test.users);'
+                'ALTER VIEW `user_counts` AS (select count(*) as user_count from test.users);'
             ],
             [
                 new ViewOperation('user_counts', ViewOperation::DROP),
@@ -124,8 +124,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'RETURN \'foo\';'
                 ),
                 sprintf(
-                    MysqlStatementBuilder::FUNCTION_CREATE_OR_REPLACE,
-                    '`user_defined_function`',
+                    MysqlStatementBuilder::FUNCTION_CREATE,
                     '`user_defined_function`',
                     'inputValue VARCHAR(32)',
                     'VARCHAR(20)',
@@ -145,7 +144,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'RETURN \'foo\';'
                 ),
                 sprintf(
-                    MysqlStatementBuilder::FUNCTION_CREATE_OR_REPLACE,
+                    MysqlStatementBuilder::FUNCTION_DROP_AND_REPLACE,
                     '`user_defined_function`',
                     '`user_defined_function`',
                     'anotherInputValue VARCHAR(32)',
