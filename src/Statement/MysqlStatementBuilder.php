@@ -229,7 +229,7 @@ class MysqlStatementBuilder extends StatementBuilder
                     implode(',', $parameters), // PARAMETERS
                     $returnType, // RETURN TYPE
                     $determinism, // [NOT] DETERMINISTIC
-                    implode(',', $variables), // VARIABLES
+                    implode(';', $variables), // VARIABLES
                     $operation->getBody() // BODY
                 );
             case FunctionOperation::REPLACE:
@@ -240,7 +240,7 @@ class MysqlStatementBuilder extends StatementBuilder
                     implode(',', $parameters), // PARAMETERS
                     $returnType, // RETURN TYPE
                     $determinism, // [NOT] DETERMINISTIC
-                    implode(',', $variables), // VARIABLES
+                    implode(';', $variables), // VARIABLES
                     $operation->getBody() // BODY
                 );
             case FunctionOperation::DROP:

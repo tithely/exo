@@ -119,17 +119,23 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     FunctionOperation::CREATE,
                     new ReturnTypeOperation('string', ReturnTypeOperation::ADD, ['length' => 20]),
                     true,
-                    [new ParameterOperation('inputValue', ParameterOperation::ADD, ['length' => 32])],
-                    [new VariableOperation('internalVarName', VariableOperation::ADD, ['type' => 'integer'])],
+                    [
+                        new ParameterOperation('inputValue1', ParameterOperation::ADD, ['length' => 32]),
+                        new ParameterOperation('inputValue2', ParameterOperation::ADD, ['length' => 32])
+                    ],
+                    [
+                        new VariableOperation('internalVarName1', VariableOperation::ADD, ['type' => 'integer']),
+                        new VariableOperation('internalVarName2', VariableOperation::ADD, ['type' => 'integer'])
+                    ],
                     'RETURN \'foo\';'
                 ),
                 sprintf(
                     MysqlStatementBuilder::FUNCTION_CREATE,
                     '`user_defined_function`',
-                    'inputValue VARCHAR(32)',
+                    'inputValue1 VARCHAR(32),inputValue2 VARCHAR(32)',
                     'VARCHAR(20)',
                     'DETERMINISTIC',
-                    'DECLARE internalVarName INTEGER',
+                    'DECLARE internalVarName1 INTEGER;DECLARE internalVarName2 INTEGER',
                     'RETURN \'foo\';'
                 )
             ],
