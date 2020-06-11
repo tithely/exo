@@ -26,6 +26,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->pdo->exec('DROP TABLE IF EXISTS users_sessions;');
         $this->pdo->exec('DROP VIEW IF EXISTS user_counts;');
         $this->pdo->exec('DROP FUNCTION IF EXISTS user_level;');
+        $this->pdo->exec('DROP FUNCTION IF EXISTS user_count_function;');
     }
 
     public function tearDown(): void
@@ -85,13 +86,15 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler->migrate('2', '3', false);
 
         $results = $handler->migrate(['1', '3'], null, false);
-        $this->assertCount(3, $results);
+        $this->assertCount(4, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('2', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
         $this->assertEquals('4', $results[1]->getVersion());
         $this->assertTrue($results[2]->isSuccess());
         $this->assertEquals('5', $results[2]->getVersion());
+        $this->assertTrue($results[3]->isSuccess());
+        $this->assertEquals('6', $results[3]->getVersion());
     }
 
     public function testFailingMigration()
@@ -121,16 +124,18 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     {
         $handler = $this->getHandler();
         $handler->migrate(null, '1', false);
-        $handler->migrate('2', '5', false);
+        $handler->migrate('2', '6', false);
 
-        $results = $handler->rollback(['1', '3', '4', '5'], '1', false);
-        $this->assertCount(3, $results);
+        $results = $handler->rollback(['1', '3', '4', '5', '6'], '1', false);
+        $this->assertCount(4, $results);
         $this->assertTrue($results[0]->isSuccess());
-        $this->assertEquals('5', $results[0]->getVersion());
+        $this->assertEquals('6', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
-        $this->assertEquals('4', $results[1]->getVersion());
+        $this->assertEquals('5', $results[1]->getVersion());
         $this->assertTrue($results[2]->isSuccess());
-        $this->assertEquals('3', $results[2]->getVersion());
+        $this->assertEquals('4', $results[2]->getVersion());
+        $this->assertTrue($results[3]->isSuccess());
+        $this->assertEquals('3', $results[3]->getVersion());
     }
 
     public function testFailingRollback()
