@@ -6,12 +6,12 @@ use Exo\Operation\AbstractOperation;
 use Exo\Operation\ColumnOperation;
 use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
-use Exo\Operation\OperationInterface;
 use Exo\Operation\ParameterOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\UnsupportedOperationException;
 use Exo\Operation\VariableOperation;
 use Exo\Operation\ViewOperation;
+use InvalidArgumentException;
 
 class MysqlStatementBuilder extends StatementBuilder
 {
@@ -81,6 +81,7 @@ class MysqlStatementBuilder extends StatementBuilder
      *
      * @param TableOperation $operation
      * @return string
+     * @throws UnsupportedOperationException
      */
     public function buildTable(TableOperation $operation): string
     {
@@ -152,6 +153,8 @@ class MysqlStatementBuilder extends StatementBuilder
                     'DROP TABLE %s;',
                     $this->buildIdentifier($operation->getName())
                 );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
         }
     }
 
@@ -160,6 +163,7 @@ class MysqlStatementBuilder extends StatementBuilder
      *
      * @param ViewOperation $operation
      * @return string
+     * @throws UnsupportedOperationException
      */
     public function buildView(ViewOperation $operation): string
     {
@@ -181,6 +185,8 @@ class MysqlStatementBuilder extends StatementBuilder
                     self::VIEW_DROP,
                     $this->buildIdentifier($operation->getName())
                 );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
         }
     }
 
@@ -189,6 +195,7 @@ class MysqlStatementBuilder extends StatementBuilder
      *
      * @param FunctionOperation $operation
      * @return string
+     * @throws UnsupportedOperationException
      */
     public function buildFunction(FunctionOperation $operation): string
     {
@@ -241,6 +248,8 @@ class MysqlStatementBuilder extends StatementBuilder
                     self::FUNCTION_DROP,
                     $this->buildIdentifier($operation->getName())
                 );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
         }
     }
 
@@ -281,7 +290,7 @@ class MysqlStatementBuilder extends StatementBuilder
                         'TINYTEXT' => 255
                     ];
                     if ($options['length'] > $sizes['LONGTEXT']) {
-                        throw new \InvalidArgumentException('Invalid length provided for \'text\' column type.');
+                        throw new InvalidArgumentException('Invalid length provided for \'text\' column type.');
                     }
                     foreach ($sizes as $name => $length) {
                         if ($options['length'] >= $length) {
