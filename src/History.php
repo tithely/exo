@@ -7,7 +7,7 @@ use Exo\Operation\TableOperation;
 class History
 {
     /**
-     * @var array
+     * @var MigrationInterface[]
      */
     private $migrations = [];
 
@@ -43,6 +43,26 @@ class History
     public function add(string $version, $migrationOrView)
     {
         $this->migrations[$version] = $migrationOrView;
+    }
+
+    /**
+     * Clones the history, optionally including only the
+     * specified versions.
+     *
+     * @param array|null $versions
+     * @return History
+     */
+    public function clone(array $versions = null)
+    {
+        $history = new History();
+
+        foreach ($this->migrations as $version => $migration) {
+            if (is_null($versions) || in_array($version, $versions)) {
+                $history->add($version, $migration);
+            }
+        }
+
+        return $history;
     }
 
     /**

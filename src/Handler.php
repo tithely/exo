@@ -34,23 +34,38 @@ class Handler
     /**
      * Migrates from current to target version.
      *
-     * @param string|null $current
-     * @param string|null $target
-     * @param bool        $reduce
+     * If $current is a string, all history since the specified
+     * version will be executed. If $current is an array, any
+     * versions not present will be executed. If $target is a
+     * string, history up to and including the specified version
+     * will be executed.
+     *
+     * @param string[]|string|null $current
+     * @param string|null          $target
+     * @param bool                 $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    public function migrate(?string $current, ?string $target, bool $reduce): array
+    public function migrate($current, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
         $version = null;
 
-        while ($version !== $current && !empty($versions)) {
-            $version = array_shift($versions);
-        }
+        if (is_array($current)) {
+            // Determine versions excluding all executed
+            $versions = array_values(array_diff($versions, $current));
+            $history = $this->history->clone($versions);
+        } else {
+            // Determine versions since last executed
+            while ($version !== $current && !empty($versions)) {
+                $version = array_shift($versions);
+            }
 
-        if (!is_null($current) && is_null($version)) {
-            throw new \InvalidArgumentException('Current version is invalid.');
+            if (!is_null($current) && is_null($version)) {
+                throw new \InvalidArgumentException('Current version is invalid.');
+            }
+
+            $history = $this->history;
         }
 
         // Determine range of versions to play
@@ -58,7 +73,7 @@ class Handler
         $to = $target ?? end($versions);
 
         // Execute operations
-        $operations = $this->history->play($from, $to, $reduce);
+        $operations = $history->play($from, $to, $reduce);
 
         return $this->processOperations($operations, $versions, $reduce);
     }
@@ -66,17 +81,33 @@ class Handler
     /**
      * Performs a rollback from current to target version.
      *
-     * @param string      $current
-     * @param string|null $target
-     * @param bool        $reduce
+     * If $current is an array, any versions not present will
+     * not be considered by the rollback.
+     *
+     * @param string[]|string $current
+     * @param string|null     $target
+     * @param bool            $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    public function rollback(string $current, ?string $target, bool $reduce): array
+    public function rollback($current, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
-        $from = $target ? array_search($target, $versions) : 0;
-        $count = array_search($current, $versions) - $from;
+
+        if (is_array($current)) {
+            // Determine range from executed and target versions
+            $versions = $current;
+            $history = $this->history->clone($versions);
+
+            $from = $target ? array_search($target, $versions) : 0;
+            $count = null;
+        } else {
+            // Determine range from current and target versions
+            $history = $this->history;
+
+            $from = $target ? array_search($target, $versions) : 0;
+            $count = array_search($current, $versions) - $from;
+        }
 
         $versions = array_slice(
             $versions,
@@ -84,8 +115,7 @@ class Handler
             $count
         );
 
-        $operations = $this->history->rewind(end($versions), reset($versions), $reduce);
-
+        $operations = $history->rewind(end($versions), reset($versions), $reduce);
         $versions = array_reverse($versions);
 
         return $this->processOperations($operations, $versions, $reduce);
@@ -93,12 +123,13 @@ class Handler
 
     /**
      * @param AbstractOperation[] $operations
-     * @param array $versions
-     * @param bool $reduce
+     * @param array               $versions
+     * @param bool                $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    private function processOperations(array $operations, array $versions, bool $reduce): array {
+    private function processOperations(array $operations, array $versions, bool $reduce): array
+    {
         $results = [];
 
         foreach ($operations as $offset => $operation) {

@@ -78,6 +78,22 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($results[1]->isSuccess());
     }
 
+    public function testMigrationWithMissed()
+    {
+        $handler = $this->getHandler();
+        $handler->migrate(null, '1', false);
+        $handler->migrate('2', '3', false);
+
+        $results = $handler->migrate(['1', '3'], null, false);
+        $this->assertCount(3, $results);
+        $this->assertTrue($results[0]->isSuccess());
+        $this->assertEquals('2', $results[0]->getVersion());
+        $this->assertTrue($results[1]->isSuccess());
+        $this->assertEquals('4', $results[1]->getVersion());
+        $this->assertTrue($results[2]->isSuccess());
+        $this->assertEquals('5', $results[2]->getVersion());
+    }
+
     public function testFailingMigration()
     {
         $handler = $this->getHandler();
@@ -99,6 +115,22 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('3', $results[0]->getVersion());
+    }
+
+    public function testRollbackWithMissed()
+    {
+        $handler = $this->getHandler();
+        $handler->migrate(null, '1', false);
+        $handler->migrate('2', '5', false);
+
+        $results = $handler->rollback(['1', '3', '4', '5'], '1', false);
+        $this->assertCount(3, $results);
+        $this->assertTrue($results[0]->isSuccess());
+        $this->assertEquals('5', $results[0]->getVersion());
+        $this->assertTrue($results[1]->isSuccess());
+        $this->assertEquals('4', $results[1]->getVersion());
+        $this->assertTrue($results[2]->isSuccess());
+        $this->assertEquals('3', $results[2]->getVersion());
     }
 
     public function testFailingRollback()
@@ -135,11 +167,11 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         );
 
         $history->add('4', ViewMigration::create('user_counts')
-            ->withBody('select count(*) as user_count from test.users')
+            ->withBody('select count(*) as user_count from users')
         );
 
         $history->add('5', ViewMigration::alter('user_counts')
-            ->withBody('select count(distinct id) as user_count from test.users')
+            ->withBody('select count(distinct id) as user_count from users')
         );
 
         $history->add('6', FunctionMigration::create('user_count_function')
