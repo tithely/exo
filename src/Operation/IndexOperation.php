@@ -8,11 +8,6 @@ class IndexOperation extends AbstractOperation
     const DROP = 'DROP';
 
     /**
-     * @var string
-     */
-    private $name;
-
-    /**
      * @var string[]
      */
     private $columns = [];
@@ -41,15 +36,6 @@ class IndexOperation extends AbstractOperation
         $this->operation = $operation;
         $this->columns = $columns;
         $this->options = $options;
-    }
-
-    /**
-     * Returns the index name.
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     /**

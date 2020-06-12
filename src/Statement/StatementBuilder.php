@@ -3,6 +3,7 @@
 namespace Exo\Statement;
 
 use Exo\Operation\AbstractOperation;
+use Exo\Operation\FunctionOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\ViewOperation;
 
@@ -17,7 +18,7 @@ abstract class StatementBuilder
     abstract public function build($operation): string;
 
     /**
-     * Builds SQL statements for an operation.
+     * Builds SQL statements for a table operation.
      *
      * @param TableOperation $operation
      * @return string
@@ -25,12 +26,20 @@ abstract class StatementBuilder
     abstract public function buildTable(TableOperation $operation): string;
 
     /**
-     * Builds SQL statements for an operation.
+     * Builds SQL statements for a view operation.
      *
      * @param ViewOperation $operation
      * @return string
      */
     abstract public function buildView(ViewOperation $operation): string;
+
+    /**
+     * Builds SQL statements for a function operation.
+     *
+     * @param FunctionOperation $operation
+     * @return string
+     */
+    abstract public function buildFunction(FunctionOperation $operation): string;
 
     /**
      * Builds an identifier.

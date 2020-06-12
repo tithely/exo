@@ -11,11 +11,6 @@ class TableOperation extends AbstractOperation
     /**
      * @var string
      */
-    private $table;
-
-    /**
-     * @var string
-     */
     private $operation;
 
     /**
@@ -31,14 +26,14 @@ class TableOperation extends AbstractOperation
     /**
      * TableOperation constructor.
      *
-     * @param string            $table
+     * @param string            $name
      * @param string            $operation
      * @param ColumnOperation[] $columnOperations
      * @param IndexOperation[]  $indexOperations
      */
-    public function __construct(string $table, string $operation, array $columnOperations, array $indexOperations)
+    public function __construct(string $name, string $operation, array $columnOperations, array $indexOperations)
     {
-        $this->table = $table;
+        $this->name = $name;
         $this->operation = $operation;
         $this->columnOperations = $columnOperations;
         $this->indexOperations = $indexOperations;
@@ -54,14 +49,14 @@ class TableOperation extends AbstractOperation
     {
         if ($this->getOperation() === TableOperation::CREATE) {
             return new TableOperation(
-                $this->table,
+                $this->getName(),
                 TableOperation::DROP,
                 [],
                 []
             );
         }
 
-        if ($original && $original->table !== $this->table) {
+        if ($original && $original->getName() !== $this->getName()) {
             throw new \InvalidArgumentException('Previous operations must apply to the same table.');
         }
 
@@ -75,14 +70,14 @@ class TableOperation extends AbstractOperation
             // Find a column operation to reconstruct previous version of the column
             $originalColumn = null;
             foreach ($original->getColumnOperations() as $originalOperation) {
-                if ($originalOperation->getColumn() === $columnOperation->getColumn()) {
+                if ($originalOperation->getName() === $columnOperation->getName()) {
                     $originalColumn = $originalOperation;
                     break;
                 }
             }
 
             if ($columnOperation->getOperation() === ColumnOperation::ADD) {
-                $columnOperations[] = new ColumnOperation($columnOperation->getColumn(), ColumnOperation::DROP, []);
+                $columnOperations[] = new ColumnOperation($columnOperation->getName(), ColumnOperation::DROP, []);
                 continue;
             }
 
@@ -100,7 +95,7 @@ class TableOperation extends AbstractOperation
                 }
 
                 $columnOperations[] = new ColumnOperation(
-                    $columnOperation->getColumn(),
+                    $columnOperation->getName(),
                     ColumnOperation::MODIFY,
                     $originalColumn->getOptions()
                 );
@@ -133,7 +128,7 @@ class TableOperation extends AbstractOperation
         }
 
         return new TableOperation(
-            $this->table,
+            $this->getName(),
             TableOperation::ALTER,
             $columnOperations,
             $indexOperations
@@ -148,37 +143,37 @@ class TableOperation extends AbstractOperation
      */
     public function apply(TableOperation $operation)
     {
-        if ($operation->table !== $this->table) {
+        if ($operation->getName() !== $this->getName()) {
             throw new \InvalidArgumentException('Cannot apply operations for a different table.');
         }
 
-        if ($this->operation === self::DROP) {
+        if ($this->getOperation() === self::DROP) {
             throw new \InvalidArgumentException('Cannot apply further operations to a dropped table.');
         }
 
         // Collect existing columns
         $columns = [];
-        foreach ($this->columnOperations as $columnOperation) {
-            $columns[$columnOperation->getColumn()] = $columnOperation;
+        foreach ($this->getColumnOperations() as $columnOperation) {
+            $columns[$columnOperation->getName()] = $columnOperation;
         }
 
         // Collect existing indexes
         $indexes = [];
-        foreach ($this->indexOperations as $indexOperation) {
+        foreach ($this->getIndexOperations() as $indexOperation) {
             $indexes[$indexOperation->getName()] = $indexOperation;
         }
 
-        if ($this->operation === self::CREATE) {
-            if ($operation->operation === self::CREATE) {
+        if ($this->getOperation() === self::CREATE) {
+            if ($operation->getOperation() === self::CREATE) {
                 throw new \InvalidArgumentException('Cannot recreate an existing table.');
             }
 
             // Skip creation of tables that will be dropped
-            if ($operation->operation === self::DROP) {
+            if ($operation->getOperation() === self::DROP) {
                 return null;
             }
 
-            foreach ($operation->columnOperations as $columnOperation) {
+            foreach ($operation->getColumnOperations() as $columnOperation) {
                 $options = $columnOperation->getOptions();
 
                 // Calculate column position
@@ -194,7 +189,7 @@ class TableOperation extends AbstractOperation
 
                 // Remove existing operation for the column
                 foreach ($columns as $existing => $column) {
-                    if ($column->getColumn() === $columnOperation->getColumn()) {
+                    if ($column->getName() === $columnOperation->getName()) {
                         unset($columns[$existing]);
                         break;
                     }
@@ -208,7 +203,7 @@ class TableOperation extends AbstractOperation
                     case ColumnOperation::ADD:
                     case ColumnOperation::MODIFY:
                         $addOperation = new ColumnOperation(
-                            $columnOperation->getColumn(),
+                            $columnOperation->getName(),
                             ColumnOperation::ADD,
                             $options
                         );
@@ -218,7 +213,7 @@ class TableOperation extends AbstractOperation
                 }
             }
 
-            foreach ($operation->indexOperations as $indexOperation) {
+            foreach ($operation->getIndexOperations() as $indexOperation) {
                 $options = $indexOperation->getOptions();
 
                 // Calculate index position
@@ -251,12 +246,12 @@ class TableOperation extends AbstractOperation
                 return $operation;
             }
 
-            foreach ($operation->columnOperations as $columnOperation) {
+            foreach ($operation->getColumnOperations() as $columnOperation) {
                 $originalOperation = $columnOperation->getOperation();
 
                 // Remove existing operation for the column
                 foreach ($columns as $existing => $column) {
-                    if ($column->getColumn() === $columnOperation->getColumn()) {
+                    if ($column->getName() === $columnOperation->getName()) {
                         unset($columns[$existing]);
                         $originalOperation = $column->getOperation();
                         break;
@@ -275,7 +270,7 @@ class TableOperation extends AbstractOperation
                         break;
                     case ColumnOperation::MODIFY:
                         $columns[] = new ColumnOperation(
-                            $columnOperation->getColumn(),
+                            $columnOperation->getName(),
                             $originalOperation,
                             $columnOperation->getOptions()
                         );
@@ -283,7 +278,7 @@ class TableOperation extends AbstractOperation
                 }
             }
 
-            foreach ($operation->indexOperations as $indexOperation) {
+            foreach ($operation->getIndexOperations() as $indexOperation) {
                 $originalOperation = null;
 
                 // Remove existing operations for the index
@@ -310,7 +305,7 @@ class TableOperation extends AbstractOperation
                 $indexColumns = [];
                 foreach ($index->getColumns() as $indexColumn) {
                     foreach ($columns as $column) {
-                        if ($column->getColumn() === $indexColumn) {
+                        if ($column->getName() === $indexColumn) {
                             $indexColumns[] = $indexColumn;
                         }
                     }
@@ -329,17 +324,12 @@ class TableOperation extends AbstractOperation
             }
         }
 
-        return new TableOperation($this->table, $this->operation, array_values($columns), array_values($indexes));
-    }
-
-    /**
-     * Returns the table name.
-     *
-     * @return string
-     */
-    public function getTable(): string
-    {
-        return $this->table;
+        return new TableOperation(
+            $this->getName(),
+            $this->getOperation(),
+            array_values($columns),
+            array_values($indexes)
+        );
     }
 
     /**

@@ -3,8 +3,12 @@
 namespace Exo\Statement;
 
 use Exo\Operation\ColumnOperation;
+use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
+use Exo\Operation\ParameterOperation;
+use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\TableOperation;
+use Exo\Operation\VariableOperation;
 use Exo\Operation\ViewOperation;
 
 class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
@@ -99,15 +103,69 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 new ViewOperation('user_counts', ViewOperation::CREATE, 'select count(users.id) as user_count from test.users'),
-                'CREATE OR REPLACE VIEW `user_counts` AS (select count(users.id) as user_count from test.users);'
+                'CREATE VIEW `user_counts` AS (select count(users.id) as user_count from test.users);'
             ],
             [
                 new ViewOperation('user_counts', ViewOperation::ALTER, 'select count(*) as user_count from test.users'),
-                'CREATE OR REPLACE VIEW `user_counts` AS (select count(*) as user_count from test.users);'
+                'ALTER VIEW `user_counts` AS (select count(*) as user_count from test.users);'
             ],
             [
                 new ViewOperation('user_counts', ViewOperation::DROP),
                 'DROP VIEW `user_counts`;'
+            ],
+            [
+                new FunctionOperation(
+                    'user_defined_function',
+                    FunctionOperation::CREATE,
+                    new ReturnTypeOperation('string', ReturnTypeOperation::ADD, ['length' => 20]),
+                    true,
+                    [
+                        new ParameterOperation('inputValue1', ParameterOperation::ADD, ['length' => 32]),
+                        new ParameterOperation('inputValue2', ParameterOperation::ADD, ['length' => 32])
+                    ],
+                    [
+                        new VariableOperation('internalVarName1', VariableOperation::ADD, ['type' => 'integer']),
+                        new VariableOperation('internalVarName2', VariableOperation::ADD, ['type' => 'integer'])
+                    ],
+                    'RETURN \'foo\';'
+                ),
+                sprintf(
+                    MysqlStatementBuilder::FUNCTION_CREATE,
+                    '`user_defined_function`',
+                    'inputValue1 VARCHAR(32),inputValue2 VARCHAR(32)',
+                    'VARCHAR(20)',
+                    'DETERMINISTIC',
+                    'DECLARE internalVarName1 INTEGER;DECLARE internalVarName2 INTEGER;',
+                    'RETURN \'foo\';'
+                )
+            ],
+            [
+                new FunctionOperation(
+                    'user_defined_function',
+                    FunctionOperation::REPLACE,
+                    new ReturnTypeOperation('string', ReturnTypeOperation::ADD, ['length' => 20]),
+                    true,
+                    [new ParameterOperation('anotherInputValue', ParameterOperation::ADD, ['length' => 32])],
+                    [new VariableOperation('anotherVarName', VariableOperation::ADD, ['type' => 'integer'])],
+                    'RETURN \'foo\';'
+                ),
+                sprintf(
+                    MysqlStatementBuilder::FUNCTION_DROP_AND_REPLACE,
+                    '`user_defined_function`',
+                    '`user_defined_function`',
+                    'anotherInputValue VARCHAR(32)',
+                    'VARCHAR(20)',
+                    'DETERMINISTIC',
+                    'DECLARE anotherVarName INTEGER;',
+                    'RETURN \'foo\';'
+                )
+            ],
+            [
+                new FunctionOperation(
+                    'user_defined_function',
+                    FunctionOperation::DROP
+                ),
+                'DROP FUNCTION `user_defined_function`;'
             ]
         ];
     }

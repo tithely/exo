@@ -11,11 +11,6 @@ class ViewOperation extends AbstractOperation
     /**
      * @var string
      */
-    private $view;
-
-    /**
-     * @var string
-     */
     private $operation;
 
     /**
@@ -26,13 +21,13 @@ class ViewOperation extends AbstractOperation
     /**
      * ViewOperation constructor.
      *
-     * @param string      $view
+     * @param string      $name
      * @param string      $operation
      * @param string|null $body
      */
-    public function __construct(string $view, string $operation, string $body = null)
+    public function __construct(string $name, string $operation, string $body = null)
     {
-        $this->view = $view;
+        $this->name = $name;
         $this->operation = $operation;
         $this->body = $body;
     }
@@ -47,13 +42,13 @@ class ViewOperation extends AbstractOperation
     {
         if ($this->getOperation() === ViewOperation::CREATE) {
             return new ViewOperation(
-                $this->view,
+                $this->getName(),
                 ViewOperation::DROP,
                 null
             );
         }
 
-        if ($original && $original->view !== $this->view) {
+        if ($original && $original->getName() !== $this->name) {
             throw new \InvalidArgumentException('Previous operations must apply to the same view.');
         }
 
@@ -63,7 +58,7 @@ class ViewOperation extends AbstractOperation
         }
 
         return new ViewOperation(
-            $this->view,
+            $this->getName(),
             ViewOperation::ALTER,
             $original->getBody()
         );
@@ -77,40 +72,34 @@ class ViewOperation extends AbstractOperation
      */
     public function apply(ViewOperation $operation)
     {
-        if ($operation->view !== $this->getView()) {
+        if ($operation->getName() !== $this->getName()) {
             throw new \InvalidArgumentException('Cannot apply operations for a different view.');
         }
 
-        if ($this->operation === self::DROP) {
+        if ($this->getOperation() === self::DROP) {
             throw new \InvalidArgumentException('Cannot apply further operations to a dropped view.');
         }
 
-        if ($this->operation === self::CREATE) {
+        if ($this->getOperation() === self::CREATE) {
             if ($operation->operation === self::CREATE) {
                 throw new \InvalidArgumentException('Cannot recreate an existing view.');
             }
 
             // Skip creation of views that will be dropped
-            if ($operation->operation === self::DROP) {
+            if ($operation->getOperation() === self::DROP) {
                 return null;
             }
-        } else if ($operation->operation === self::DROP) {
+        } else if ($operation->getOperation() === self::DROP) {
 
             // Skip modification of views that will be dropped
             return $operation;
         }
 
-        return new ViewOperation($this->view, $this->operation, $operation->body);
-    }
-
-    /**
-     * Returns the view name.
-     *
-     * @return string
-     */
-    public function getView(): string
-    {
-        return $this->view;
+        return new ViewOperation(
+            $this->getName(),
+            $this->getOperation(),
+            $operation->getBody()
+        );
     }
 
     /**

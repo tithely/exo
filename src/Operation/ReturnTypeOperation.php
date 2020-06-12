@@ -2,11 +2,14 @@
 
 namespace Exo\Operation;
 
-class ColumnOperation extends AbstractOperation
+class ReturnTypeOperation extends AbstractOperation
 {
     const ADD = 'add';
-    const MODIFY = 'modify';
-    const DROP = 'drop';
+
+    /**
+     * @var string
+     */
+    private $type;
 
     /**
      * @var string
@@ -16,20 +19,31 @@ class ColumnOperation extends AbstractOperation
     /**
      * @var array
      */
-    private $options = [];
+    private $options;
 
     /**
      * ColumnOperation constructor.
      *
-     * @param string $name
+     * @param string $type
      * @param string $operation
      * @param array  $options
      */
-    public function __construct(string $name, string $operation, array $options)
+    public function __construct(string $type, string $operation, array $options = [])
     {
-        $this->name = $name;
+        $this->name = '';
+        $this->type = $type;
         $this->operation = $operation;
         $this->options = $options;
+    }
+
+    /**
+     * Returns the column name.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
     }
 
     /**

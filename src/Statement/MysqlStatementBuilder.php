@@ -4,13 +4,45 @@ namespace Exo\Statement;
 
 use Exo\Operation\AbstractOperation;
 use Exo\Operation\ColumnOperation;
+use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
+use Exo\Operation\ParameterOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\UnsupportedOperationException;
+use Exo\Operation\VariableOperation;
 use Exo\Operation\ViewOperation;
+use InvalidArgumentException;
 
 class MysqlStatementBuilder extends StatementBuilder
 {
+    const VIEW_CREATE = 'CREATE VIEW %s AS (%s);';
+    const VIEW_ALTER = 'ALTER VIEW %s AS (%s);';
+    const VIEW_DROP = 'DROP VIEW %s;';
+    const FUNCTION_CREATE = '
+    CREATE FUNCTION %s(
+        %s
+    )
+    RETURNS %s
+    %s
+    BEGIN
+        %s
+    
+        %s
+    END;';
+    const FUNCTION_DROP_AND_REPLACE = '
+    DROP FUNCTION %s;
+    CREATE FUNCTION %s(
+        %s
+    )
+    RETURNS %s
+    %s
+    BEGIN
+        %s
+    
+        %s
+    END;';
+    const FUNCTION_DROP = 'DROP FUNCTION %s;';
+
     /**
      * Builds SQL statements for an operation.
      *
@@ -25,11 +57,18 @@ class MysqlStatementBuilder extends StatementBuilder
         switch($operationClass) {
 
             case TableOperation::class:
+                /* @var TableOperation $operation */
                 return $this->buildTable($operation);
                 break;
 
             case ViewOperation::class:
+                /* @var ViewOperation $operation */
                 return $this->buildView($operation);
+                break;
+
+            case FunctionOperation::class:
+                /* @var FunctionOperation $operation */
+                return $this->buildFunction($operation);
                 break;
 
             default:
@@ -42,6 +81,7 @@ class MysqlStatementBuilder extends StatementBuilder
      *
      * @param TableOperation $operation
      * @return string
+     * @throws UnsupportedOperationException
      */
     public function buildTable(TableOperation $operation): string
     {
@@ -49,7 +89,7 @@ class MysqlStatementBuilder extends StatementBuilder
             case TableOperation::CREATE:
                 $definitions = [];
                 foreach ($operation->getColumnOperations() as $columnOperation) {
-                    $definitions[] = $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions());
+                    $definitions[] = $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions());
                 }
 
                 foreach ($operation->getIndexOperations() as $indexOperation) {
@@ -58,7 +98,7 @@ class MysqlStatementBuilder extends StatementBuilder
 
                 return sprintf(
                     'CREATE TABLE %s (%s);',
-                    $this->buildIdentifier($operation->getTable()),
+                    $this->buildIdentifier($operation->getName()),
                     implode(', ', $definitions)
                 );
             case TableOperation::ALTER:
@@ -68,19 +108,19 @@ class MysqlStatementBuilder extends StatementBuilder
                         case ColumnOperation::ADD:
                             $specifications[] = sprintf(
                                 'ADD COLUMN %s',
-                                $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions())
+                                $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions())
                             );
                             break;
                         case ColumnOperation::MODIFY:
                             $specifications[] = sprintf(
                                 'MODIFY COLUMN %s',
-                                $this->buildColumn($columnOperation->getColumn(), $columnOperation->getOptions())
+                                $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions())
                             );
                             break;
                         case ColumnOperation::DROP:
                             $specifications[] = sprintf(
                                 'DROP COLUMN %s',
-                                $this->buildIdentifier($columnOperation->getColumn())
+                                $this->buildIdentifier($columnOperation->getName())
                             );
                             break;
                     }
@@ -105,14 +145,16 @@ class MysqlStatementBuilder extends StatementBuilder
 
                 return sprintf(
                     'ALTER TABLE %s %s;',
-                    $this->buildIdentifier($operation->getTable()),
+                    $this->buildIdentifier($operation->getName()),
                     implode(', ', $specifications)
                 );
             case TableOperation::DROP:
                 return sprintf(
                     'DROP TABLE %s;',
-                    $this->buildIdentifier($operation->getTable())
+                    $this->buildIdentifier($operation->getName())
                 );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
         }
     }
 
@@ -121,22 +163,93 @@ class MysqlStatementBuilder extends StatementBuilder
      *
      * @param ViewOperation $operation
      * @return string
+     * @throws UnsupportedOperationException
      */
     public function buildView(ViewOperation $operation): string
     {
         switch ($operation->getOperation()) {
             case ViewOperation::CREATE:
+                return sprintf(
+                    self::VIEW_CREATE,
+                    $this->buildIdentifier($operation->getName()),
+                    $operation->getBody()
+                );
             case ViewOperation::ALTER:
                 return sprintf(
-                    'CREATE OR REPLACE VIEW %s AS (%s);',
-                    $this->buildIdentifier($operation->getView()),
+                    self::VIEW_ALTER,
+                    $this->buildIdentifier($operation->getName()),
                     $operation->getBody()
                 );
             case ViewOperation::DROP:
                 return sprintf(
-                    'DROP VIEW %s;',
-                    $this->buildIdentifier($operation->getView())
+                    self::VIEW_DROP,
+                    $this->buildIdentifier($operation->getName())
                 );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
+        }
+    }
+
+    /**
+     * Builds SQL statements for a custom function operation.
+     *
+     * @param FunctionOperation $operation
+     * @return string
+     * @throws UnsupportedOperationException
+     */
+    public function buildFunction(FunctionOperation $operation): string
+    {
+        $parameters = array_map(function(ParameterOperation $parameterOperation) {
+            return sprintf(
+                '%s %s',
+                $parameterOperation->getName(),
+                $this->buildType($parameterOperation->getOptions())
+            );
+        }, $operation->getParameterOperations());
+
+        $returnType = $this->buildType($operation->getReturnType()->getOptions());
+
+        $determinism = ($operation->getDeterministic())
+            ? 'DETERMINISTIC'
+            : 'NOT DETERMINISTIC';
+
+        $variables = array_map(function(VariableOperation $variableOperation) {
+            return sprintf(
+                'DECLARE %s %s;',
+                $variableOperation->getName(),
+                $this->buildType($variableOperation->getOptions())
+            );
+        }, $operation->getVariableOperations());
+
+        switch ($operation->getOperation()) {
+            case FunctionOperation::CREATE:
+                return sprintf(
+                    self::FUNCTION_CREATE,
+                    $this->buildIdentifier($operation->getName()), // NAME (for create)
+                    implode(',', $parameters), // PARAMETERS
+                    $returnType, // RETURN TYPE
+                    $determinism, // [NOT] DETERMINISTIC
+                    implode('', $variables), // VARIABLES
+                    $operation->getBody() // BODY
+                );
+            case FunctionOperation::REPLACE:
+                return sprintf(
+                    self::FUNCTION_DROP_AND_REPLACE,
+                    $this->buildIdentifier($operation->getName()), // NAME (for drop)
+                    $this->buildIdentifier($operation->getName()), // NAME (for create)
+                    implode(',', $parameters), // PARAMETERS
+                    $returnType, // RETURN TYPE
+                    $determinism, // [NOT] DETERMINISTIC
+                    implode('', $variables), // VARIABLES
+                    $operation->getBody() // BODY
+                );
+            case FunctionOperation::DROP:
+                return sprintf(
+                    self::FUNCTION_DROP,
+                    $this->buildIdentifier($operation->getName())
+                );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
         }
     }
 
@@ -177,7 +290,7 @@ class MysqlStatementBuilder extends StatementBuilder
                         'TINYTEXT' => 255
                     ];
                     if ($options['length'] > $sizes['LONGTEXT']) {
-                        throw new \InvalidArgumentException('Invalid length provided for \'text\' column type.');
+                        throw new InvalidArgumentException('Invalid length provided for \'text\' column type.');
                     }
                     foreach ($sizes as $name => $length) {
                         if ($options['length'] >= $length) {

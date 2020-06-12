@@ -7,7 +7,7 @@ use Exo\Operation\IndexOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\ViewOperation;
 
-class ViewMigration
+final class ViewMigration
 {
     /**
      * @var string
@@ -77,7 +77,7 @@ class ViewMigration
      * @param string $body
      * @return ViewMigration
      */
-    public function withBody(string $body): self
+    public function withBody(string $body): ViewMigration
     {
         if ($this->operation === ViewOperation::DROP) {
             throw new \LogicException('Cannot set view body in a view drop migration.');
@@ -91,7 +91,7 @@ class ViewMigration
      *
      * @return ViewOperation
      */
-    public function getOperation()
+    public function getOperation(): ViewOperation
     {
         return new ViewOperation($this->name, $this->operation, $this->body);
     }

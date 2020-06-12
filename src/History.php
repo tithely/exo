@@ -2,15 +2,12 @@
 
 namespace Exo;
 
-use Exo\Operation\AbstractOperation;
 use Exo\Operation\TableOperation;
-use Exo\Operation\UnsupportedOperationException;
-use Exo\Operation\ViewOperation;
 
 class History
 {
     /**
-     * @var Migration[]|ViewMigration[]
+     * @var MigrationInterface[]
      */
     private $migrations = [];
 
@@ -19,17 +16,16 @@ class History
      *
      * @param TableOperation[] $operations
      * @return TableOperation[]
-     * @throws UnsupportedOperationException
      */
-    private static function reduce(array $operations)
+    private static function reduce(array $operations): array
     {
         $reduced = [];
 
         foreach ($operations as $operation) {
-            if (!isset($reduced[self::getEntityName($operation)])) {
-                $reduced[self::getEntityName($operation)] = $operation;
+            if (!isset($reduced[$operation->getName()])) {
+                $reduced[$operation->getName()] = $operation;
             } else {
-                $reduced[self::getEntityName($operation)] = $reduced[self::getEntityName($operation)]->apply($operation);
+                $reduced[$operation->getName()] = $reduced[$operation->getName()]->apply($operation);
             }
         }
 
@@ -39,31 +35,10 @@ class History
     }
 
     /**
-     * Returns the entity name for an operation.
-     *
-     * @param AbstractOperation $operation
-     * @return string
-     * @throws UnsupportedOperationException
-     */
-    private static function getEntityName(AbstractOperation $operation)
-    {
-        $operationClass = get_class($operation);
-
-        switch ($operationClass) {
-            case TableOperation::class:
-                return $operation->getTable();
-            case ViewOperation::class:
-                return $operation->getView();
-            default:
-                throw new UnsupportedOperationException($operationClass);
-        }
-    }
-
-    /**
      * Adds a migration to the history.
      *
-     * @param string                  $version
-     * @param Migration|ViewMigration $migrationOrView
+     * @param string             $version
+     * @param MigrationInterface $migrationOrView
      */
     public function add(string $version, $migrationOrView)
     {
@@ -97,9 +72,8 @@ class History
      *
      * @param string $from
      * @param string $to
-     * @param bool   $reduce
+     * @param bool $reduce
      * @return TableOperation[]
-     * @throws UnsupportedOperationException
      */
     public function play(string $from, string $to, bool $reduce = false)
     {
@@ -136,7 +110,6 @@ class History
      * @param string $to
      * @param bool   $reduce
      * @return TableOperation[]
-     * @throws UnsupportedOperationException
      */
     public function rewind(string $from, string $to, bool $reduce = false)
     {
@@ -160,12 +133,12 @@ class History
                 }
 
                 foreach ($history as $operation) {
-                    $entities[self::getEntityName($operation)] = $operation;
+                    $entities[$operation->getName()] = $operation;
                 }
 
                 // Reverse the operation
                 $operation = $migration->getOperation();
-                array_unshift($operations, $operation->reverse($entities[self::getEntityName($operation)] ?? null));
+                array_unshift($operations, $operation->reverse($entities[$operation->getName()] ?? null));
             }
 
             if (strval($version) === $from) {

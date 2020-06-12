@@ -2,11 +2,9 @@
 
 namespace Exo\Operation;
 
-class ColumnOperation extends AbstractOperation
+class ParameterOperation extends AbstractOperation
 {
     const ADD = 'add';
-    const MODIFY = 'modify';
-    const DROP = 'drop';
 
     /**
      * @var string
@@ -16,7 +14,7 @@ class ColumnOperation extends AbstractOperation
     /**
      * @var array
      */
-    private $options = [];
+    private $options;
 
     /**
      * ColumnOperation constructor.
@@ -25,7 +23,7 @@ class ColumnOperation extends AbstractOperation
      * @param string $operation
      * @param array  $options
      */
-    public function __construct(string $name, string $operation, array $options)
+    public function __construct(string $name, string $operation, array $options = [])
     {
         $this->name = $name;
         $this->operation = $operation;

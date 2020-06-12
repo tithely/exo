@@ -4,7 +4,7 @@ namespace Exo;
 
 use Exo\Operation\ViewOperation;
 
-class ViewTest extends \PHPUnit\Framework\TestCase
+class ViewMigrationTest extends \PHPUnit\Framework\TestCase
 {
     public function testCreateView()
     {
@@ -12,7 +12,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
             ->withBody('SELECT COUNT(username) as usernames FROM USERS')
             ->getOperation();
 
-        $this->assertEquals('user_counts', $operation->getView());
+        $this->assertEquals('user_counts', $operation->getName());
         $this->assertEquals(ViewOperation::CREATE, $operation->getOperation());
         $this->assertEquals('SELECT COUNT(username) as usernames FROM USERS', $operation->getBody());
     }
@@ -23,7 +23,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
             ->withBody('SELECT COUNT(username) as usernames, COUNT(DISTINCT username) as distinct_usernames FROM USERS')
             ->getOperation();
 
-        $this->assertEquals('user_counts', $operation->getView());
+        $this->assertEquals('user_counts', $operation->getName());
         $this->assertEquals(ViewOperation::ALTER, $operation->getOperation());
         $this->assertEquals('SELECT COUNT(username) as usernames, COUNT(DISTINCT username) as distinct_usernames FROM USERS', $operation->getBody());
     }
@@ -33,7 +33,7 @@ class ViewTest extends \PHPUnit\Framework\TestCase
         $operation = ViewMigration::drop('user_counts')
             ->getOperation();
 
-        $this->assertEquals('user_counts', $operation->getView());
+        $this->assertEquals('user_counts', $operation->getName());
         $this->assertEquals(ViewOperation::DROP, $operation->getOperation());
         $this->assertNull($operation->getBody());
     }

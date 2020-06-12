@@ -25,6 +25,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->pdo->exec('DROP TABLE IF EXISTS users;');
         $this->pdo->exec('DROP TABLE IF EXISTS users_sessions;');
         $this->pdo->exec('DROP VIEW IF EXISTS user_counts;');
+        $this->pdo->exec('DROP FUNCTION IF EXISTS user_level;');
+        $this->pdo->exec('DROP FUNCTION IF EXISTS user_count_function;');
     }
 
     public function tearDown(): void
@@ -37,7 +39,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler = $this->getHandler();
         $results = $handler->migrate(null, null, false);
 
-        $this->assertCount(5, $results);
+        $this->assertCount(6, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('1', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
@@ -48,6 +50,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('4', $results[3]->getVersion());
         $this->assertTrue($results[4]->isSuccess());
         $this->assertEquals('5', $results[4]->getVersion());
+        $this->assertTrue($results[5]->isSuccess());
+        $this->assertEquals('6', $results[5]->getVersion());
     }
 
     public function testFullMigrationReduced()
@@ -55,13 +59,14 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler = $this->getHandler();
         $results = $handler->migrate(null, null, true);
 
-        $this->assertCount(3, $results);
+        $this->assertCount(4, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertNull($results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
         $this->assertNull($results[1]->getVersion());
         $this->assertTrue($results[2]->isSuccess());
         $this->assertNull($results[2]->getVersion());
+        $this->assertNull($results[3]->getVersion());
     }
 
     public function testPartialMigration()
@@ -81,13 +86,15 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler->migrate('2', '3', false);
 
         $results = $handler->migrate(['1', '3'], null, false);
-        $this->assertCount(3, $results);
+        $this->assertCount(4, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('2', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
         $this->assertEquals('4', $results[1]->getVersion());
         $this->assertTrue($results[2]->isSuccess());
         $this->assertEquals('5', $results[2]->getVersion());
+        $this->assertTrue($results[3]->isSuccess());
+        $this->assertEquals('6', $results[3]->getVersion());
     }
 
     public function testFailingMigration()
@@ -117,16 +124,18 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     {
         $handler = $this->getHandler();
         $handler->migrate(null, '1', false);
-        $handler->migrate('2', '5', false);
+        $handler->migrate('2', '6', false);
 
-        $results = $handler->rollback(['1', '3', '4', '5'], '1', false);
-        $this->assertCount(3, $results);
+        $results = $handler->rollback(['1', '3', '4', '5', '6'], '1', false);
+        $this->assertCount(4, $results);
         $this->assertTrue($results[0]->isSuccess());
-        $this->assertEquals('5', $results[0]->getVersion());
+        $this->assertEquals('6', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
-        $this->assertEquals('4', $results[1]->getVersion());
+        $this->assertEquals('5', $results[1]->getVersion());
         $this->assertTrue($results[2]->isSuccess());
-        $this->assertEquals('3', $results[2]->getVersion());
+        $this->assertEquals('4', $results[2]->getVersion());
+        $this->assertTrue($results[3]->isSuccess());
+        $this->assertEquals('3', $results[3]->getVersion());
     }
 
     public function testFailingRollback()
@@ -168,6 +177,11 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
 
         $history->add('5', ViewMigration::alter('user_counts')
             ->withBody('select count(distinct id) as user_count from users')
+        );
+
+        $history->add('6', FunctionMigration::create('user_count_function')
+            ->withReturnType('integer')
+            ->withBody('RETURN \'example value\';')
         );
 
         return new Handler($this->pdo, $history);
