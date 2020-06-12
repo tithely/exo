@@ -65,6 +65,17 @@ class HistoryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(TableOperation::DROP, $operations[1]->getOperation());
     }
 
+    public function testClone()
+    {
+        $history = $this->getHistory();
+
+        $cloned = $history->clone();
+        $this->assertEquals(['1', '2', '3'], $cloned->getVersions());
+
+        $cloned = $history->clone(['1', '3']);
+        $this->assertEquals(['1', '3'], $cloned->getVersions());
+    }
+
     private function getHistory()
     {
         $history = new History();
