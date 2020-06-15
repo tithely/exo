@@ -61,23 +61,19 @@ class Handler
     /**
      * Performs a rollback to target version.
      *
-     * @param string[]    $executed
-     * @param string|null $target
-     * @param bool        $reduce
+     * @param string[] $executed
+     * @param string   $target
+     * @param bool     $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    public function rollback(array $executed, ?string $target, bool $reduce): array
+    public function rollback(array $executed, string $target, bool $reduce): array
     {
         $history = $this->history->clone($executed);
-        $from = 0;
+        $from = array_search($target, $executed);
 
-        if ($target) {
-            $from = array_search($target, $executed);
-
-            if ($from === false) {
-                throw new \InvalidArgumentException(sprintf('Unknown target version "%s".', $target));
-            }
+        if ($from === false) {
+            throw new \InvalidArgumentException(sprintf('Unknown target version "%s".', $target));
         }
 
         $versions = array_slice(
