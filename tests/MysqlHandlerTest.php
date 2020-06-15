@@ -138,6 +138,15 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('3', $results[3]->getVersion());
     }
 
+    public function testRollbackWithoutTarget()
+    {
+        $handler = $this->getHandler();
+        $handler->migrate([], '3', false);
+        $results = $handler->rollback(['1', '2', '3'], null, false);
+
+        $this->assertCount(3, $results);
+    }
+
     public function testFailingRollback()
     {
         $handler = $this->getHandler();
