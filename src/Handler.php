@@ -32,41 +32,21 @@ class Handler
     }
 
     /**
-     * Migrates from current to target version.
+     * Executes pending migrations up to target version.
      *
-     * If $current is a string, all history since the specified
-     * version will be executed. If $current is an array, any
-     * versions not present will be executed. If $target is a
-     * string, history up to and including the specified version
-     * will be executed.
-     *
-     * @param string[]|string|null $current
-     * @param string|null          $target
-     * @param bool                 $reduce
+     * @param string[]    $executed
+     * @param string|null $target
+     * @param bool        $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    public function migrate($current, ?string $target, bool $reduce): array
+    public function migrate(array $executed, ?string $target, bool $reduce): array
     {
         $versions = $this->history->getVersions();
-        $version = null;
 
-        if (is_array($current)) {
-            // Determine versions excluding all executed
-            $versions = array_values(array_diff($versions, $current));
-            $history = $this->history->clone($versions);
-        } else {
-            // Determine versions since last executed
-            while ($version !== $current && !empty($versions)) {
-                $version = array_shift($versions);
-            }
-
-            if (!is_null($current) && is_null($version)) {
-                throw new \InvalidArgumentException('Current version is invalid.');
-            }
-
-            $history = $this->history;
-        }
+        // Determine versions excluding all executed
+        $versions = array_values(array_diff($versions, $executed));
+        $history = $this->history->clone($versions);
 
         // Determine range of versions to play
         $from = reset($versions);
@@ -79,40 +59,30 @@ class Handler
     }
 
     /**
-     * Performs a rollback from current to target version.
+     * Performs a rollback to target version.
      *
-     * If $current is an array, any versions not present will
-     * not be considered by the rollback.
-     *
-     * @param string[]|string $current
-     * @param string|null     $target
-     * @param bool            $reduce
+     * @param string[]    $executed
+     * @param string|null $target
+     * @param bool        $reduce
      * @return HandlerResult[]
      * @throws Operation\UnsupportedOperationException
      */
-    public function rollback($current, ?string $target, bool $reduce): array
+    public function rollback(array $executed, ?string $target, bool $reduce): array
     {
-        $versions = $this->history->getVersions();
+        $history = $this->history->clone($executed);
+        $from = 0;
 
-        if (is_array($current)) {
-            // Determine range from executed and target versions
-            $versions = $current;
-            $history = $this->history->clone($versions);
+        if ($target) {
+            $from = array_search($target, $executed);
 
-            $from = $target ? array_search($target, $versions) : 0;
-            $count = null;
-        } else {
-            // Determine range from current and target versions
-            $history = $this->history;
-
-            $from = $target ? array_search($target, $versions) : 0;
-            $count = array_search($current, $versions) - $from;
+            if ($from === false) {
+                throw new \InvalidArgumentException(sprintf('Unknown target version "%s".', $target));
+            }
         }
 
         $versions = array_slice(
-            $versions,
-            $from + 1,
-            $count
+            $executed,
+            $from + 1
         );
 
         $operations = $history->rewind(end($versions), reset($versions), $reduce);
