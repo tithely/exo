@@ -37,7 +37,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testFullMigration()
     {
         $handler = $this->getHandler();
-        $results = $handler->migrate(null, null, false);
+        $results = $handler->migrate([], null, false);
 
         $this->assertCount(6, $results);
         $this->assertTrue($results[0]->isSuccess());
@@ -57,7 +57,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testFullMigrationReduced()
     {
         $handler = $this->getHandler();
-        $results = $handler->migrate(null, null, true);
+        $results = $handler->migrate([], null, true);
 
         $this->assertCount(4, $results);
         $this->assertTrue($results[0]->isSuccess());
@@ -72,7 +72,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testPartialMigration()
     {
         $handler = $this->getHandler();
-        $results = $handler->migrate(null, '2', false);
+        $results = $handler->migrate([], '2', false);
 
         $this->assertCount(2, $results);
         $this->assertTrue($results[0]->isSuccess());
@@ -82,8 +82,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testMigrationWithMissed()
     {
         $handler = $this->getHandler();
-        $handler->migrate(null, '1', false);
-        $handler->migrate('2', '3', false);
+        $handler->migrate([], '1', false);
+        $handler->migrate(['1', '2'], '3', false);
 
         $results = $handler->migrate(['1', '3'], null, false);
         $this->assertCount(4, $results);
@@ -100,8 +100,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testFailingMigration()
     {
         $handler = $this->getHandler();
-        $handler->migrate(null, null, true);
-        $results = $handler->migrate('1', '2', false);
+        $handler->migrate([], null, true);
+        $results = $handler->migrate(['1'], '2', false);
 
         $this->assertCount(1, $results);
         $this->assertFalse($results[0]->isSuccess());
@@ -112,8 +112,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testRollback()
     {
         $handler = $this->getHandler();
-        $handler->migrate(null, null, false);
-        $results = $handler->rollback('3', '2', false);
+        $handler->migrate([], null, false);
+        $results = $handler->rollback(['1', '2', '3'], '2', false);
 
         $this->assertCount(1, $results);
         $this->assertTrue($results[0]->isSuccess());
@@ -123,8 +123,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
     public function testRollbackWithMissed()
     {
         $handler = $this->getHandler();
-        $handler->migrate(null, '1', false);
-        $handler->migrate('2', '6', false);
+        $handler->migrate([], '1', false);
+        $handler->migrate(['1', '2'], '6', false);
 
         $results = $handler->rollback(['1', '3', '4', '5', '6'], '1', false);
         $this->assertCount(4, $results);
@@ -138,11 +138,20 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('3', $results[3]->getVersion());
     }
 
+    public function testRollbackWithoutTarget()
+    {
+        $handler = $this->getHandler();
+        $handler->migrate([], '3', false);
+        $results = $handler->rollback(['1', '2', '3'], null, false);
+
+        $this->assertCount(3, $results);
+    }
+
     public function testFailingRollback()
     {
         $handler = $this->getHandler();
-        $handler->migrate(null, '2', false);
-        $results = $handler->rollback('3', '1', false);
+        $handler->migrate([], '2', false);
+        $results = $handler->rollback(['1', '2', '3'], '1', false);
 
         $this->assertCount(1, $results);
         $this->assertFalse($results[0]->isSuccess());
