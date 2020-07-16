@@ -335,12 +335,12 @@ class MysqlStatementBuilder extends StatementBuilder
             $definition .= ' FIRST';
         }
 
-        if ($options['after'] ?? null) {
-            $definition .= sprintf(' AFTER %s', $this->buildIdentifier($options['after']));
-        }
-
         if (array_key_exists('default', $options)) {
             $definition .= sprintf(' DEFAULT %s', $this->buildDefaultValue($options['default']));
+        }
+
+        if ($options['after'] ?? null) {
+            $definition .= sprintf(' AFTER %s', $this->buildIdentifier($options['after']));
         }
 
         if ($options['update'] ?? false) {
