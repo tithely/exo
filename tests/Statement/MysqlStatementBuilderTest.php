@@ -87,14 +87,14 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 new TableOperation('users', TableOperation::ALTER, [
-                    new ColumnOperation('meta', ColumnOperation::ADD, ['type' => 'json', 'after' => 'password']),
+                    new ColumnOperation('meta', ColumnOperation::ADD, ['type' => 'json', 'default' => '["meta"]', 'after' => 'password']),
                     new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255]),
                     new ColumnOperation('created_at', ColumnOperation::DROP, [])
                 ], [
                     new IndexOperation('meta', IndexOperation::ADD, ['meta'], []),
                     new IndexOperation('username', IndexOperation::DROP, [], [])
                 ]),
-                'ALTER TABLE `users` ADD COLUMN `meta` JSON AFTER `password`, MODIFY COLUMN `username` VARCHAR(255), ' .
+                'ALTER TABLE `users` ADD COLUMN `meta` JSON DEFAULT \'["meta"]\' AFTER `password`, MODIFY COLUMN `username` VARCHAR(255), ' .
                 'DROP COLUMN `created_at`, ADD INDEX `meta` (`meta`), DROP INDEX `username`;'
             ],
             [
