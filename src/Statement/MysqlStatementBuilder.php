@@ -93,7 +93,12 @@ class MysqlStatementBuilder extends StatementBuilder
                 }
 
                 foreach ($operation->getIndexOperations() as $indexOperation) {
-                    $definitions[] = 'INDEX ' . $this->buildIndex($indexOperation->getName(), $indexOperation->getColumns(), $indexOperation->getOptions());
+                    $definition = '';
+                    if ($indexOperation->getOptions()['unique'] ?? false) {
+                        $definition .= 'UNIQUE ';
+                    }
+                    $definition .= 'INDEX ' . $this->buildIndex($indexOperation->getName(), $indexOperation->getColumns(), $indexOperation->getOptions());
+                    $definitions[] = $definition;
                 }
 
                 return sprintf(
@@ -129,10 +134,15 @@ class MysqlStatementBuilder extends StatementBuilder
                 foreach ($operation->getIndexOperations() as $indexOperation) {
                     switch ($indexOperation->getOperation()) {
                         case IndexOperation::ADD:
-                            $specifications[] = sprintf(
-                                'ADD INDEX %s',
+                            $specification = 'ADD ';
+                            if ($indexOperation->getOptions()['unique'] ?? false) {
+                                $specification .= 'UNIQUE ';
+                            }
+                            $specification .= sprintf(
+                                'INDEX %s',
                                 $this->buildIndex($indexOperation->getName(), $indexOperation->getColumns(), $indexOperation->getOptions())
                             );
+                            $specifications[] = $specification;
                             break;
                         case IndexOperation::DROP:
                             $specifications[] = sprintf(
@@ -365,10 +375,6 @@ class MysqlStatementBuilder extends StatementBuilder
             $this->buildIdentifier($index),
             implode(', ', array_map([$this, 'buildIdentifier'], $columns))
         );
-
-        if ($options['unique'] ?? false) {
-            $definition .= ' UNIQUE';
-        }
 
         return $definition;
     }

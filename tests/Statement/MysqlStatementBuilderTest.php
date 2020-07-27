@@ -48,7 +48,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 '`password` VARCHAR(255), `gender` ENUM(\'male\',\'female\') DEFAULT \'male\', ' .
                 '`tinytext` TINYTEXT, `summary` TEXT, `description` MEDIUMTEXT, `novel` LONGTEXT, ' .
                 '`archived` SMALLINT(1) DEFAULT 1, `status` VARCHAR(255) DEFAULT \'draft\', ' .
-                '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX `username` (`username`) UNIQUE);'
+                '`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, UNIQUE INDEX `username` (`username`));'
             ],
             [
                 new TableOperation('users', TableOperation::CREATE, [
@@ -91,11 +91,11 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255]),
                     new ColumnOperation('created_at', ColumnOperation::DROP, [])
                 ], [
-                    new IndexOperation('meta', IndexOperation::ADD, ['meta'], []),
+                    new IndexOperation('meta', IndexOperation::ADD, ['meta'], ['unique' => true]),
                     new IndexOperation('username', IndexOperation::DROP, [], [])
                 ]),
                 'ALTER TABLE `users` ADD COLUMN `meta` JSON DEFAULT \'["meta"]\' AFTER `password`, MODIFY COLUMN `username` VARCHAR(255), ' .
-                'DROP COLUMN `created_at`, ADD INDEX `meta` (`meta`), DROP INDEX `username`;'
+                'DROP COLUMN `created_at`, ADD UNIQUE INDEX `meta` (`meta`), DROP INDEX `username`;'
             ],
             [
                 new TableOperation('users', TableOperation::DROP, [], []),
