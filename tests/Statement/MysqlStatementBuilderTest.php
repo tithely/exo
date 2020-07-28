@@ -88,13 +88,16 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
             [
                 new TableOperation('users', TableOperation::ALTER, [
                     new ColumnOperation('meta', ColumnOperation::ADD, ['type' => 'json', 'default' => '["meta"]', 'after' => 'password']),
+                    new ColumnOperation('date', ColumnOperation::ADD, ['type' => 'timestamp', 'update' => 'CURRENT_TIMESTAMP', 'after' => 'meta']),
                     new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'string', 'length' => 255]),
                     new ColumnOperation('created_at', ColumnOperation::DROP, [])
                 ], [
                     new IndexOperation('meta', IndexOperation::ADD, ['meta'], ['unique' => true]),
                     new IndexOperation('username', IndexOperation::DROP, [], [])
                 ]),
-                'ALTER TABLE `users` ADD COLUMN `meta` JSON DEFAULT \'["meta"]\' AFTER `password`, MODIFY COLUMN `username` VARCHAR(255), ' .
+                'ALTER TABLE `users` ADD COLUMN `meta` JSON DEFAULT \'["meta"]\' AFTER `password`, ' .
+                'ADD COLUMN `date` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `meta`, ' .
+                'MODIFY COLUMN `username` VARCHAR(255), ' .
                 'DROP COLUMN `created_at`, ADD UNIQUE INDEX `meta` (`meta`), DROP INDEX `username`;'
             ],
             [
