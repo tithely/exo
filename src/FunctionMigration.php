@@ -36,6 +36,11 @@ final class FunctionMigration
     private $deterministic;
 
     /**
+     * @var bool
+     */
+    private $readsSqlData;
+
+    /**
      * @var ParameterOperation[]
      */
     private $parameterOperations;
@@ -85,6 +90,7 @@ final class FunctionMigration
      * @param string $operation
      * @param ReturnTypeOperation $returnType
      * @param bool $deterministic
+     * @param bool $readsSqlData
      * @param array $parameterOperations
      * @param array $variableOperations
      * @param string|null $body
@@ -94,6 +100,7 @@ final class FunctionMigration
         string $operation,
         ReturnTypeOperation $returnType = null,
         bool $deterministic = false,
+        bool $readsSqlData = false,
         array $parameterOperations = [],
         array $variableOperations = [],
         string $body = null
@@ -102,13 +109,14 @@ final class FunctionMigration
         $this->operation = $operation;
         $this->returnType = $returnType;
         $this->deterministic = $deterministic;
+        $this->readsSqlData = $readsSqlData;
         $this->parameterOperations = $parameterOperations;
         $this->variableOperations = $variableOperations;
         $this->body = $body;
     }
 
     /**
-     * Pushes a new add parameter operation.
+     * Sets determinism for the function.
      *
      * @param bool $deterministic
      * @return $this
@@ -120,6 +128,23 @@ final class FunctionMigration
         }
 
         $this->deterministic = $deterministic;
+
+        return $this;
+    }
+
+    /**
+     * Sets the reads sql data property of the function.
+     *
+     * @param bool $readsSqlData
+     * @return $this
+     */
+    public function readsSqlData(bool $readsSqlData): FunctionMigration
+    {
+        if ($this->operation === FunctionOperation::DROP) {
+            throw new LogicException('Cannot set readsSqlData property in a drop migration.');
+        }
+
+        $this->readsSqlData = $readsSqlData;
 
         return $this;
     }
@@ -224,6 +249,7 @@ final class FunctionMigration
             $this->operation,
             $this->returnType,
             $this->deterministic,
+            $this->readsSqlData,
             $this->parameterOperations,
             $this->variableOperations,
             $this->body

@@ -26,6 +26,11 @@ class FunctionOperation extends AbstractOperation
     private $deterministic;
 
     /**
+     * @var bool
+     */
+    private $readsSqlData;
+
+    /**
      * @var ParameterOperation[]
      */
     private $parameterOperations;
@@ -47,6 +52,7 @@ class FunctionOperation extends AbstractOperation
      * @param string $operation
      * @param ReturnTypeOperation|null $returnType
      * @param bool $deterministic
+     * @param bool $readsSqlData
      * @param array $parameterOperations
      * @param array $variableOperations
      * @param string|null $body
@@ -56,6 +62,7 @@ class FunctionOperation extends AbstractOperation
         string $operation,
         ReturnTypeOperation $returnType = null,
         bool $deterministic = false,
+        bool $readsSqlData = false,
         array $parameterOperations = [],
         array $variableOperations = [],
         string $body = null
@@ -64,6 +71,7 @@ class FunctionOperation extends AbstractOperation
         $this->operation = $operation;
         $this->returnType = $returnType ?? new ReturnTypeOperation('string', ReturnTypeOperation::ADD);
         $this->deterministic = $deterministic;
+        $this->readsSqlData = $readsSqlData;
         $this->parameterOperations = $parameterOperations;
         $this->variableOperations = $variableOperations;
         $this->body = $body;
@@ -145,6 +153,16 @@ class FunctionOperation extends AbstractOperation
     public function getDeterministic(): bool
     {
         return $this->deterministic;
+    }
+
+    /**
+     * Returns the readsSqlData flag.
+     *
+     * @return bool
+     */
+    public function getReadsSqlData(): bool
+    {
+        return $this->readsSqlData;
     }
 
     /**
