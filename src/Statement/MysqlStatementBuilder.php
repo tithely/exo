@@ -24,6 +24,7 @@ class MysqlStatementBuilder extends StatementBuilder
     )
     RETURNS %s
     %s
+    %s
     BEGIN
         %s
     
@@ -35,6 +36,7 @@ class MysqlStatementBuilder extends StatementBuilder
         %s
     )
     RETURNS %s
+    %s
     %s
     BEGIN
         %s
@@ -223,6 +225,10 @@ class MysqlStatementBuilder extends StatementBuilder
             ? 'DETERMINISTIC'
             : 'NOT DETERMINISTIC';
 
+        $readsSqlData = ($operation->getReadsSqlData())
+            ? 'READS SQL DATA'
+            : '';
+
         $variables = array_map(function(VariableOperation $variableOperation) {
             return sprintf(
                 'DECLARE %s %s;',
@@ -238,7 +244,8 @@ class MysqlStatementBuilder extends StatementBuilder
                     $this->buildIdentifier($operation->getName()), // NAME (for create)
                     implode(',', $parameters), // PARAMETERS
                     $returnType, // RETURN TYPE
-                    $determinism, // [NOT] DETERMINISTIC
+                    $determinism, // 'DETERMINISTIC' | 'NOT DETERMINISTIC'
+                    $readsSqlData, // 'READS SQL DATA' | ''
                     implode('', $variables), // VARIABLES
                     $operation->getBody() // BODY
                 );
@@ -249,7 +256,8 @@ class MysqlStatementBuilder extends StatementBuilder
                     $this->buildIdentifier($operation->getName()), // NAME (for create)
                     implode(',', $parameters), // PARAMETERS
                     $returnType, // RETURN TYPE
-                    $determinism, // [NOT] DETERMINISTIC
+                    $determinism, // 'DETERMINISTIC' | 'NOT DETERMINISTIC'
+                    $readsSqlData, // 'READS SQL DATA' | ''
                     implode('', $variables), // VARIABLES
                     $operation->getBody() // BODY
                 );

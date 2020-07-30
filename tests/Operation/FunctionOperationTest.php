@@ -32,6 +32,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
         $operation = new FunctionOperation('customer_level', FunctionOperation::CREATE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
+            false,
             [
                 new ParameterOperation('arg1', ParameterOperation::ADD),
                 new ParameterOperation('arg2', ParameterOperation::ADD, ['type' => 'integer']),
@@ -48,6 +49,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals([], $operation->getReturnType()->getOptions());
 
         $this->assertTrue($operation->getDeterministic());
+        $this->assertFalse($operation->getReadsSqlData());
 
         $this->assertCount(3, $operation->getParameterOperations());
 
@@ -77,6 +79,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
         $base = new FunctionOperation('customer_level', FunctionOperation::CREATE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
+            false,
             [
                 new ParameterOperation('arg1', ParameterOperation::ADD),
                 new ParameterOperation('arg2', ParameterOperation::ADD, ['type' => 'integer']),
@@ -89,6 +92,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
         $new = new FunctionOperation('customer_level', FunctionOperation::REPLACE,
             new ReturnTypeOperation('integer', ReturnTypeOperation::ADD),
             false,
+            true,
             [],
             [],
             self::BODY_TWO
@@ -103,6 +107,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals([], $operation->getReturnType()->getOptions());
 
         $this->assertFalse($operation->getDeterministic());
+        $this->assertTrue($operation->getReadsSqlData());
 
         $this->assertCount(0, $operation->getParameterOperations());
 
@@ -116,6 +121,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
         $base = new FunctionOperation('any_name', FunctionOperation::REPLACE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
+            false,
             [],
             [],
             self::BODY_ONE
@@ -147,6 +153,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
             FunctionOperation::REPLACE,
             new ReturnTypeOperation('integer', ReturnTypeOperation::ADD),
             false,
+            true,
             [
                 new ParameterOperation('id', ParameterOperation::ADD, []),
                 new ParameterOperation('email', ParameterOperation::ADD, ['type' => 'string', 'length' => 255]),
@@ -164,6 +171,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
             FunctionOperation::REPLACE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
+            false,
             [
                 new ParameterOperation('id', ParameterOperation::ADD, ['type' => 'uuid']),
                 new ParameterOperation('username', ParameterOperation::ADD, ['type' => 'string', 'length' => 64])
@@ -205,6 +213,7 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
             FunctionOperation::REPLACE,
             new ReturnTypeOperation('integer', ReturnTypeOperation::ADD),
             false,
+            true,
             [
                 new ParameterOperation('id', ParameterOperation::ADD, []),
                 new ParameterOperation('email', ParameterOperation::ADD, ['type' => 'string', 'length' => 255, 'first' => true]),

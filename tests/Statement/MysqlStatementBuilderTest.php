@@ -122,6 +122,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     FunctionOperation::CREATE,
                     new ReturnTypeOperation('string', ReturnTypeOperation::ADD, ['length' => 20]),
                     true,
+                    false,
                     [
                         new ParameterOperation('inputValue1', ParameterOperation::ADD, ['length' => 32]),
                         new ParameterOperation('inputValue2', ParameterOperation::ADD, ['length' => 32])
@@ -138,6 +139,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'inputValue1 VARCHAR(32),inputValue2 VARCHAR(32)',
                     'VARCHAR(20)',
                     'DETERMINISTIC',
+                    '',
                     'DECLARE internalVarName1 INTEGER;DECLARE internalVarName2 INTEGER;',
                     'RETURN \'foo\';'
                 )
@@ -147,6 +149,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'user_defined_function',
                     FunctionOperation::REPLACE,
                     new ReturnTypeOperation('string', ReturnTypeOperation::ADD, ['length' => 20]),
+                    false,
                     true,
                     [new ParameterOperation('anotherInputValue', ParameterOperation::ADD, ['length' => 32])],
                     [new VariableOperation('anotherVarName', VariableOperation::ADD, ['type' => 'integer'])],
@@ -158,7 +161,8 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     '`user_defined_function`',
                     'anotherInputValue VARCHAR(32)',
                     'VARCHAR(20)',
-                    'DETERMINISTIC',
+                    'NOT DETERMINISTIC',
+                    'READS SQL DATA',
                     'DECLARE anotherVarName INTEGER;',
                     'RETURN \'foo\';'
                 )
