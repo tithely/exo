@@ -133,7 +133,7 @@ final class FunctionMigration
     }
 
     /**
-     * Sets determinism for the function.
+     * Sets the reads sql data property of the function.
      *
      * @param bool $readsSqlData
      * @return $this
