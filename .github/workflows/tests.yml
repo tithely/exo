@@ -14,7 +14,8 @@ jobs:
     strategy:
       matrix:
         php-versions: [ '7.3', '7.4' ]
-    name: PHP ${{ matrix.php-versions }}
+        mysql-versions: [ '5.7', '8.0' ]
+    name: PHP ${{ matrix.php-versions }} with MySQL ${{ matrix.mysql-versions }}
 
     services:
       mysql:
@@ -57,6 +58,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y default-mysql-client
+          echo 'ALTER USER \'root\'@\'localhost\' IDENTIFIED WITH mysql_native_password BY \'rootpassword\''
           echo 'CREATE DATABASE IF NOT EXISTS test' | mysql -h 127.0.0.1 -u root -prootpassword
           cp tests/db.yml.example tests/db.yml
 
