@@ -104,10 +104,11 @@ class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
             ->addVariable('someVariable', ['type' => 'string', 'length' => 64])
             ->withBody($templateBody)
             ->withExpectedContext($expectedContext);
+
         $this->assertEquals($templateBody, $migration->getBody());
+        $this->assertEquals($expectedContext, $migration->getExpectedContext());
 
         $operation = $migration->getOperation($actualContext);
-        $this->assertEquals($expectedContext, $migration->getExpectedContext());
         $this->assertEquals($parsedBody, $operation->getBody());
     }
 
@@ -116,10 +117,10 @@ class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
         $templateBody = "
         IF credit > {{context_value_1}} THEN
         SET customerLevel = '{{context_value_2}}';
-        ELSEIF credit < {{context_value_3}} THEN
-        SET customerLevel = '{{context_value_4}}';
+        ELSE
+        SET customerLevel = 'default';
         END IF;
-        -- return the customer level for {{context_value_5}}
+        -- return the customer level for ACME
         RETURN (customerLevel);";
 
         $migration = FunctionMigration::create('my_function')
