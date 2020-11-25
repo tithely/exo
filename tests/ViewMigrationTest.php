@@ -36,14 +36,10 @@ class ViewMigrationTest extends \PHPUnit\Framework\TestCase
             ->withExpectedContext($expectedContext);
 
         $this->assertEquals($templateBody, $migration->getBody());
+        $this->assertEquals($expectedContext, $migration->getExpectedContext());
 
         $operation = $migration
             ->getOperation($actualContext);
-
-        $this->assertEquals(
-            $expectedContext,
-            $migration->getExpectedContext()
-        );
 
         $this->assertEquals(
             $actualContext,
@@ -70,24 +66,18 @@ class ViewMigrationTest extends \PHPUnit\Framework\TestCase
         ];
 
         $actualContext = [
-            'catalog_database_name' => 'catalog_db',
-            'tenant_database_name' => 'tenant_123'
+            'catalog_database_name' => 'catalog_db'
         ];
-
-        $parsedBody = "
-            SELECT COUNT(username) as usernames FROM catalog_db.USERS
-            UNION
-            SELECT COUNT(username) as usernames FROM tenant_123.USERS
-        ";
 
         $migration = ViewMigration::create('user_counts')
             ->withBody($templateBody)
             ->withExpectedContext($expectedContext);
         $this->assertEquals($templateBody, $migration->getBody());
 
-        $operation = $migration->getOperation($actualContext);
-        $this->assertEquals($expectedContext, $migration->getExpectedContext());
-        $this->assertEquals($parsedBody, $operation->getBody());
+        $this->expectException(InvalidMigrationContextException::class);
+        $this->expectExceptionMessage('The current migration requires a context value which was not passed in (tenant_database_name).');
+
+        $migration->getOperation($actualContext);
     }
 
     public function testAlterView()
