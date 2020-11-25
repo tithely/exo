@@ -27,7 +27,7 @@ abstract class AbstractContextEnabledMigration implements MigrationInterface
      * @param string $body
      * @return AbstractContextEnabledMigration
      */
-    abstract public function withBody(string $body): AbstractContextEnabledMigration;
+    abstract public function withBody(string $body): MigrationInterface;
 
     /**
      * Returns the table operation.

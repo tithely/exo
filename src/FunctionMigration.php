@@ -218,7 +218,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param string $body
      * @return FunctionMigration
      */
-    public function withBody(string $body): FunctionMigration
+    public function withBody(string $body): MigrationInterface
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set view body in a view drop migration.');
