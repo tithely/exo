@@ -58,7 +58,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y default-mysql-client
-          echo 'ALTER USER \'root\'@\'localhost\' IDENTIFIED WITH mysql_native_password BY \'rootpassword\''
+          echo 'ALTER USER `root`@`localhost` IDENTIFIED WITH mysql_native_password BY `rootpassword`' | mysql -h 127.0.0.1 -u root -prootpassword
           echo 'CREATE DATABASE IF NOT EXISTS test' | mysql -h 127.0.0.1 -u root -prootpassword
           cp tests/db.yml.example tests/db.yml
 
