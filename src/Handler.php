@@ -63,7 +63,7 @@ class Handler
         $to = $target ?? end($versions);
 
         // Execute operations
-        $operations = $history->play($from, $to, $reduce);
+        $operations = $history->play($from, $to, $reduce, $this->context);
 
         return $this->processOperations($operations, $versions, $reduce);
     }
@@ -95,7 +95,7 @@ class Handler
             $from + 1
         );
 
-        $operations = $history->rewind(end($versions), reset($versions), $reduce);
+        $operations = $history->rewind(end($versions), reset($versions), $reduce, $this->context);
         $versions = array_reverse($versions);
 
         return $this->processOperations($operations, $versions, $reduce);
