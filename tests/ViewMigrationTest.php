@@ -17,6 +17,79 @@ class ViewMigrationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('SELECT COUNT(username) as usernames FROM USERS', $operation->getBody());
     }
 
+    public function testCreateViewWithContextHappy()
+    {
+        $templateBody = "SELECT COUNT(username) as usernames FROM {{tenant_database_name}}.USERS";
+
+        $expectedContext = [
+            'catalog_database_name',
+            'tenant_database_name'
+        ];
+
+        $actualContext = [
+            'catalog_database_name' => 'catalog_db',
+            'tenant_database_name' => 'tenant_123'
+        ];
+
+        $migration = ViewMigration::create('user_counts')
+            ->withBody($templateBody)
+            ->withExpectedContext($expectedContext);
+
+        $this->assertEquals($templateBody, $migration->getBody());
+
+        $operation = $migration
+            ->getOperation($actualContext);
+
+        $this->assertEquals(
+            $expectedContext,
+            $migration->getExpectedContext()
+        );
+
+        $this->assertEquals(
+            $actualContext,
+            $migration->getContext()
+        );
+
+        $this->assertEquals(
+            'SELECT COUNT(username) as usernames FROM tenant_123.USERS',
+            $operation->getBody()
+        );
+    }
+
+    public function testCreateViewWithContextSad()
+    {
+        $templateBody = "
+            SELECT COUNT(username) as usernames FROM {{catalog_database_name}}.USERS
+            UNION
+            SELECT COUNT(username) as usernames FROM {{tenant_database_name}}.USERS
+        ";
+
+        $expectedContext = [
+            'catalog_database_name',
+            'tenant_database_name'
+        ];
+
+        $actualContext = [
+            'catalog_database_name' => 'catalog_db',
+            'tenant_database_name' => 'tenant_123'
+        ];
+
+        $parsedBody = "
+            SELECT COUNT(username) as usernames FROM catalog_db.USERS
+            UNION
+            SELECT COUNT(username) as usernames FROM tenant_123.USERS
+        ";
+
+        $migration = ViewMigration::create('user_counts')
+            ->withBody($templateBody)
+            ->withExpectedContext($expectedContext);
+        $this->assertEquals($templateBody, $migration->getBody());
+
+        $operation = $migration->getOperation($actualContext);
+        $this->assertEquals($expectedContext, $migration->getExpectedContext());
+        $this->assertEquals($parsedBody, $operation->getBody());
+    }
+
     public function testAlterView()
     {
         $operation = ViewMigration::alter('user_counts')

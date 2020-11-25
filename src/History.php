@@ -73,9 +73,10 @@ class History
      * @param string $from
      * @param string $to
      * @param bool $reduce
+     * @param array $context
      * @return TableOperation[]
      */
-    public function play(string $from, string $to, bool $reduce = false)
+    public function play(string $from, string $to, bool $reduce = false, array $context = [])
     {
         $operations = [];
         $inRange = false;
@@ -86,7 +87,11 @@ class History
             }
 
             if ($inRange) {
-                $operations[] = $migration->getOperation();
+                if ($migration instanceof AbstractContextEnabledMigration) {
+                    $operations[] = $migration->getOperation($context);
+                } else {
+                    $operations[] = $migration->getOperation();
+                }
             }
 
             if (strval($version) === $to) {
@@ -108,10 +113,11 @@ class History
      *
      * @param string $from
      * @param string $to
-     * @param bool   $reduce
+     * @param bool $reduce
+     * @param array $context
      * @return TableOperation[]
      */
-    public function rewind(string $from, string $to, bool $reduce = false)
+    public function rewind(string $from, string $to, bool $reduce = false, array $context = [])
     {
         $operations = [];
         $entities = [];
@@ -137,7 +143,12 @@ class History
                 }
 
                 // Reverse the operation
-                $operation = $migration->getOperation();
+                if ($migration instanceof AbstractContextEnabledMigration) {
+                    $operation = $migration->getOperation($context);
+                } else {
+                    $operation = $migration->getOperation();
+                }
+
                 array_unshift($operations, $operation->reverse($entities[$operation->getName()] ?? null));
             }
 

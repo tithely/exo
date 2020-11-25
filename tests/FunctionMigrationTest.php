@@ -61,6 +61,86 @@ class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(self::BODY_ONE, $operation->getBody());
     }
 
+    public function testCreateFunctionWithContextHappy()
+    {
+        $expectedContext = [
+            'context_value_1',
+            'context_value_2',
+            'context_value_3',
+            'context_value_4',
+            'context_value_5',
+        ];
+
+        $templateBody = "
+        IF credit > {{context_value_1}} THEN
+        SET customerLevel = '{{context_value_2}}';
+        ELSEIF credit < {{context_value_3}} THEN
+        SET customerLevel = '{{context_value_4}}';
+        END IF;
+        -- return the customer level for {{context_value_5}}
+        RETURN (customerLevel);";
+
+        $actualContext = [
+            'context_value_1' => 1000,
+            'context_value_2' => 'Silver',
+            'context_value_3' => 5000,
+            'context_value_4' => 'Platinum',
+            'context_value_5' => 'ACME'
+        ];
+
+        $parsedBody = "
+        IF credit > 1000 THEN
+        SET customerLevel = 'Silver';
+        ELSEIF credit < 5000 THEN
+        SET customerLevel = 'Platinum';
+        END IF;
+        -- return the customer level for ACME
+        RETURN (customerLevel);";
+
+        $migration = FunctionMigration::create('my_function')
+            ->isDeterministic(true)
+            ->withReturnType('string', ['type' => 'string', 'length' => 256])
+            ->addParameter('someParameters', ['type' => 'integer'])
+            ->addVariable('someVariable', ['type' => 'string', 'length' => 64])
+            ->withBody($templateBody)
+            ->withExpectedContext($expectedContext);
+        $this->assertEquals($templateBody, $migration->getBody());
+
+        $operation = $migration->getOperation($actualContext);
+        $this->assertEquals($expectedContext, $migration->getExpectedContext());
+        $this->assertEquals($parsedBody, $operation->getBody());
+    }
+
+    public function testCreateFunctionWithContextSad()
+    {
+        $templateBody = "
+        IF credit > {{context_value_1}} THEN
+        SET customerLevel = '{{context_value_2}}';
+        ELSEIF credit < {{context_value_3}} THEN
+        SET customerLevel = '{{context_value_4}}';
+        END IF;
+        -- return the customer level for {{context_value_5}}
+        RETURN (customerLevel);";
+
+        $migration = FunctionMigration::create('my_function')
+            ->isDeterministic(true)
+            ->withReturnType('string', ['type' => 'string', 'length' => 256])
+            ->addParameter('someParameters', ['type' => 'integer'])
+            ->addVariable('someVariable', ['type' => 'string', 'length' => 64])
+            ->withBody($templateBody)
+            ->withExpectedContext([
+                'context_value_1',
+                'context_value_2',
+            ]);
+
+        $this->expectException(InvalidMigrationContextException::class);
+        $this->expectExceptionMessage('The current migration requires a context value which was not passed in (context_value_2).');
+
+        $migration->getOperation([
+            'context_value_1' => 'some-value'
+        ]);
+    }
+
     public function testReplaceFunction()
     {
         $operation = FunctionMigration::replace('my_replacement_function')

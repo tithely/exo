@@ -8,7 +8,7 @@ use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\VariableOperation;
 use LogicException;
 
-final class FunctionMigration
+final class FunctionMigration extends AbstractContextEnabledMigration
 {
     /**
      * @var string
@@ -19,11 +19,6 @@ final class FunctionMigration
      * @var string
      */
     private $operation;
-
-    /**
-     * @var string|null
-     */
-    private $body;
 
     /**
      * @var ReturnTypeOperation|null
@@ -88,7 +83,7 @@ final class FunctionMigration
      *
      * @param string $name
      * @param string $operation
-     * @param ReturnTypeOperation $returnType
+     * @param ReturnTypeOperation|null $returnType
      * @param bool $deterministic
      * @param bool $readsSqlData
      * @param array $parameterOperations
@@ -235,13 +230,34 @@ final class FunctionMigration
     }
 
     /**
+     * Validates the migration definition.
+     *
+     * @throws LogicException
+     * @throws InvalidMigrationContextException
+     */
+    private function validate(): void {
+        if ($this->operation !== FunctionOperation::DROP) {
+            $this->validateContext();
+            if (is_null($this->returnType)) {
+                throw new LogicException('Function Migration must include a return type.');
+            }
+            if (is_null($this->body)) {
+                throw new LogicException('Function Migration must include a body.');
+            }
+        }
+    }
+
+    /**
      * Returns the function operation.
      *
+     * @param array $context
      * @return FunctionOperation
-     * @throws LogicException
+     * @throws InvalidMigrationContextException
+     * @throws MigrationRenderException
      */
-    public function getOperation(): FunctionOperation
+    public function getOperation(array $context = []): FunctionOperation
     {
+        $this->setContext($context);
         $this->validate();
 
         return new FunctionOperation(
@@ -252,23 +268,7 @@ final class FunctionMigration
             $this->readsSqlData,
             $this->parameterOperations,
             $this->variableOperations,
-            $this->body
+            $this->renderBody()
         );
-    }
-
-    /**
-     * Validates the migration definition.
-     *
-     * @throws LogicException
-     */
-    private function validate(): void {
-        if ($this->operation !== FunctionOperation::DROP) {
-            if (is_null($this->returnType)) {
-                throw new LogicException('Function Migration must include a return type.');
-            }
-            if (is_null($this->body)) {
-                throw new LogicException('Function Migration must include a body.');
-            }
-        }
     }
 }

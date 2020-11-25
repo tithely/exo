@@ -20,15 +20,25 @@ class Handler
     private $history;
 
     /**
+     * @var array
+     */
+    private $context;
+
+    /**
      * Handler constructor.
      *
-     * @param PDO     $db
+     * @param PDO $db
      * @param History $history
+     * @param array $context
      */
-    public function __construct(PDO $db, History $history)
-    {
+    public function __construct(
+        PDO $db,
+        History $history,
+        array $context = []
+    ) {
         $this->db = $db;
         $this->history = $history;
+        $this->context = $context;
     }
 
     /**

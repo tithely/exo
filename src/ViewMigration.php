@@ -2,12 +2,9 @@
 
 namespace Exo;
 
-use Exo\Operation\ColumnOperation;
-use Exo\Operation\IndexOperation;
-use Exo\Operation\TableOperation;
 use Exo\Operation\ViewOperation;
 
-final class ViewMigration
+final class ViewMigration extends AbstractContextEnabledMigration
 {
     /**
      * @var string
@@ -18,11 +15,6 @@ final class ViewMigration
      * @var string
      */
     private $operation;
-
-    /**
-     * @var string|null
-     */
-    private $body = null;
 
     /**
      * Returns a new create view migration.
@@ -89,10 +81,19 @@ final class ViewMigration
     /**
      * Returns the table operation.
      *
+     * @param array $context
      * @return ViewOperation
+     * @throws InvalidMigrationContextException|MigrationRenderException
      */
-    public function getOperation(): ViewOperation
+    public function getOperation(array $context = []): ViewOperation
     {
-        return new ViewOperation($this->name, $this->operation, $this->body);
+        $this->setContext($context);
+        $this->validateContext();
+
+        return new ViewOperation(
+            $this->name,
+            $this->operation,
+            $this->renderBody()
+        );
     }
 }
