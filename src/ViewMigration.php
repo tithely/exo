@@ -69,7 +69,7 @@ final class ViewMigration extends AbstractContextEnabledMigration
      * @param string $body
      * @return ViewMigration
      */
-    public function withBody(string $body): ViewMigration
+    public function withBody(string $body)
     {
         if ($this->operation === ViewOperation::DROP) {
             throw new \LogicException('Cannot set view body in a view drop migration.');
@@ -85,7 +85,7 @@ final class ViewMigration extends AbstractContextEnabledMigration
      * @return ViewOperation
      * @throws InvalidMigrationContextException|MigrationRenderException
      */
-    public function getOperation(array $context = []): ViewOperation
+    public function getOperation(array $context = [])
     {
         $this->setContext($context);
         $this->validateContext();

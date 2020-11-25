@@ -51,7 +51,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param string $name
      * @return FunctionMigration
      */
-    public static function create(string $name): FunctionMigration
+    public static function create(string $name)
     {
         return new FunctionMigration($name, FunctionOperation::CREATE);
     }
@@ -62,7 +62,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param string $name
      * @return FunctionMigration
      */
-    public static function replace(string $name): FunctionMigration
+    public static function replace(string $name)
     {
         return new FunctionMigration($name, FunctionOperation::REPLACE);
     }
@@ -73,7 +73,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param string $name
      * @return FunctionMigration
      */
-    public static function drop(string $name): FunctionMigration
+    public static function drop(string $name)
     {
         return new FunctionMigration($name, FunctionOperation::DROP);
     }
@@ -116,7 +116,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param bool $deterministic
      * @return $this
      */
-    public function isDeterministic(bool $deterministic): FunctionMigration
+    public function isDeterministic(bool $deterministic)
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set deterministic property in a drop migration.');
@@ -133,7 +133,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param bool $readsSqlData
      * @return $this
      */
-    public function readsSqlData(bool $readsSqlData): FunctionMigration
+    public function readsSqlData(bool $readsSqlData)
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set readsSqlData property in a drop migration.');
@@ -151,7 +151,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param array  $options
      * @return $this
      */
-    public function withReturnType(string $type, array $options = []): FunctionMigration
+    public function withReturnType(string $type, array $options = [])
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set a return type in a drop migration.');
@@ -169,7 +169,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param array  $options
      * @return $this
      */
-    public function addParameter(string $name, array $options = []): FunctionMigration
+    public function addParameter(string $name, array $options = [])
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot add parameters in a view drop migration.');
@@ -194,7 +194,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param array  $options
      * @return $this
      */
-    public function addVariable(string $name, array $options = []): FunctionMigration
+    public function addVariable(string $name, array $options = [])
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot add variables in a view drop migration.');
@@ -218,7 +218,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @param string $body
      * @return FunctionMigration
      */
-    public function withBody(string $body): MigrationInterface
+    public function withBody(string $body)
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set view body in a view drop migration.');
@@ -255,7 +255,7 @@ final class FunctionMigration extends AbstractContextEnabledMigration
      * @throws InvalidMigrationContextException
      * @throws MigrationRenderException
      */
-    public function getOperation(array $context = []): FunctionOperation
+    public function getOperation(array $context = [])
     {
         $this->setContext($context);
         $this->validate();

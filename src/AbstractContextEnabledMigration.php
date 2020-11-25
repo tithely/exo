@@ -27,7 +27,7 @@ abstract class AbstractContextEnabledMigration implements MigrationInterface
      * @param string $body
      * @return AbstractContextEnabledMigration
      */
-    abstract public function withBody(string $body): MigrationInterface;
+    abstract public function withBody(string $body);
 
     /**
      * Returns the table operation.
@@ -35,7 +35,7 @@ abstract class AbstractContextEnabledMigration implements MigrationInterface
      * @param array $context
      * @return AbstractOperation
      */
-    abstract public function getOperation(array $context = []): AbstractOperation;
+    abstract public function getOperation(array $context = []);
 
     /**
      * Returns the operation body.
@@ -53,7 +53,7 @@ abstract class AbstractContextEnabledMigration implements MigrationInterface
      * @param array $expectedContext
      * @return AbstractContextEnabledMigration
      */
-    public function withExpectedContext(array $expectedContext): AbstractContextEnabledMigration
+    public function withExpectedContext(array $expectedContext)
     {
         $this->expectedContext = $expectedContext;
 

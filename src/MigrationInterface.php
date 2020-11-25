@@ -11,5 +11,5 @@ interface MigrationInterface
      *
      * @return AbstractOperation
      */
-    public function getOperation(): AbstractOperation;
+    public function getOperation();
 }
