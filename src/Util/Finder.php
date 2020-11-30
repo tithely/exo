@@ -61,7 +61,9 @@ class Finder {
      */
     public function requireFile(string $filepath)
     {
-        extract($this->context);
+        if (!empty($this->context)) {
+            extract($this->context);
+        }
         return require($filepath);
     }
 }
