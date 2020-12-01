@@ -4,7 +4,8 @@ namespace Exo\Util;
 
 use Exo\History;
 
-class Finder {
+class Finder
+{
 
     /**
      * @var array
