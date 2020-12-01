@@ -6,6 +6,21 @@ use Exo\History;
 
 class Finder
 {
+
+    /**
+     * @var array
+     */
+    private $context;
+
+    /**
+     * Finder constructor.
+     * @param array $context
+     */
+    public function __construct(array $context = [])
+    {
+        $this->context = $context;
+    }
+
     /**
      * Builds a migration history from a filesystem path.
      *
@@ -31,11 +46,25 @@ class Finder
             }
 
             $version = pathinfo($entry, PATHINFO_FILENAME);
-            $migration = require($path . '/' . $entry);
+            $migration = $this->requireFile($path . '/' . $entry);
 
             $history->add($version, $migration);
         }
 
         return $history;
+    }
+
+    /**
+     * Requires a file with context extracted into the local symbol table.
+     *
+     * @param string $filepath
+     * @return mixed
+     */
+    public function requireFile(string $filepath)
+    {
+        if (!empty($this->context)) {
+            extract($this->context);
+        }
+        return require($filepath);
     }
 }
