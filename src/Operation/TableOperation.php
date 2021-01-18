@@ -299,29 +299,31 @@ class TableOperation extends AbstractOperation
 
                 $indexes[$indexOperation->getName()] = $indexOperation;
             }
+        }
 
-            // Remove non-existent columns from indexes
-            foreach ($indexes as $name => $index) {
-                $indexColumns = [];
-                foreach ($index->getColumns() as $indexColumn) {
-                    foreach ($columns as $column) {
-                        if ($column->getName() === $indexColumn) {
-                            $indexColumns[] = $indexColumn;
-                        }
+        // Remove non-existent columns from indexes
+        foreach ($indexes as $name => $index) {
+            $indexColumns = [];
+
+            foreach ($index->getColumns() as $indexColumn) {
+                foreach ($columns as $column) {
+                    if ($column->getName() === $indexColumn) {
+                        $indexColumns[] = $indexColumn;
                     }
                 }
-
-                if (empty($indexColumns)) {
-                    continue;
-                }
-
-                $indexes[$name] = new IndexOperation(
-                    $index->getName(),
-                    $index->getOperation(),
-                    $indexColumns,
-                    $index->getOptions()
-                );
             }
+
+            if ($index->getOperation() === IndexOperation::ADD && empty($indexColumns)) {
+                unset($indexes[$name]);
+                continue;
+            }
+
+            $indexes[$name] = new IndexOperation(
+                $index->getName(),
+                $index->getOperation(),
+                $indexColumns,
+                $index->getOptions()
+            );
         }
 
         return new TableOperation(
