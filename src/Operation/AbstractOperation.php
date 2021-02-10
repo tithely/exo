@@ -23,5 +23,5 @@ abstract class AbstractOperation
      *
      * @return AbstractOperation
      */
-    abstract public function getOperation(): string;
+    abstract public function getOperation();
 }
