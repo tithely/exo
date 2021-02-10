@@ -22,7 +22,7 @@ final class ExecMigration implements MigrationInterface
     private $body = null;
 
     /**
-     * Returns a new create view migration.
+     * Returns a new create exec migration.
      *
      * @param string $name
      * @return static
@@ -47,7 +47,7 @@ final class ExecMigration implements MigrationInterface
     }
 
     /**
-     * Pushes a new exec operation.
+     * Pushes a new exec migration.
      *
      * @param string $body
      * @return ExecMigration
@@ -58,7 +58,7 @@ final class ExecMigration implements MigrationInterface
     }
 
     /**
-     * Returns the table operation.
+     * Returns the operation of this migration.
      *
      * @return ExecOperation
      */

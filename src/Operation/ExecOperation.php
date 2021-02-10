@@ -19,7 +19,7 @@ class ExecOperation extends AbstractOperation
     private $body;
 
     /**
-     * IndexOperation constructor.
+     * ExecOperation constructor.
      *
      * @param string   $name
      * @param string   $operation

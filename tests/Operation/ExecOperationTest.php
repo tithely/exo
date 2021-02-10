@@ -6,7 +6,7 @@ use Exo\ViewMigration;
 
 class ExecOperationTest extends \PHPUnit\Framework\TestCase
 {
-    public function testApplyAlterToExec()
+    public function testApply()
     {
         $sql = 'INSERT INTO USERS (id, first_name, last_name) VALUES (\'1\', \'Bob\',\'Smith\')';
         $base = new ExecOperation('user_seed', ExecOperation::EXEC, $sql);
