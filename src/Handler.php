@@ -3,6 +3,7 @@
 namespace Exo;
 
 use Exo\Operation\AbstractOperation;
+use Exo\Operation\ExecOperation;
 use Exo\Statement\MysqlStatementBuilder;
 use Exo\Statement\StatementBuilder;
 use PDO;
@@ -104,8 +105,20 @@ class Handler
 
         foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
+
+            // Determine if transaction is required.
+            $transactionRequired = $operations instanceof ExecOperation;
+
+            // Begin trx if needed.
+            if ($transactionRequired) {
+                var_dump('YO!');
+                $this->db->beginTransaction();
+            }
+
+            // Process operation.
             $result = $this->db->exec($sql);
 
+            // Get results...
             $results[] = new HandlerResult(
                 $reduce ? null : $versions[$offset],
                 $result !== false,
@@ -113,9 +126,24 @@ class Handler
                 $result === false ? $this->db->errorInfo() : null
             );
 
-            // Stop processing if there was a failure
+            // Check for failure...
             if ($result === false) {
+                // On Failure:
+
+                // Rollback transaction if started
+                if ($transactionRequired) {
+                    $this->db->rollBack();
+                }
+
+                // Stop processing if there was a failure
                 break;
+
+            } else {
+
+                // Commit transaction on success
+                if ($transactionRequired) {
+                    $this->db->commit();
+                }
             }
         }
 

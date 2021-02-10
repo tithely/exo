@@ -21,7 +21,7 @@ abstract class AbstractOperation
     /**
      * Returns the string representation of the operation (I.E. create, alter, replace, etc.).
      *
-     * @return string
+     * @return AbstractOperation
      */
     abstract public function getOperation(): string;
 }

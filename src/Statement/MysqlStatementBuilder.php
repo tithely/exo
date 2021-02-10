@@ -4,6 +4,7 @@ namespace Exo\Statement;
 
 use Exo\Operation\AbstractOperation;
 use Exo\Operation\ColumnOperation;
+use Exo\Operation\ExecOperation;
 use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\ParameterOperation;
@@ -44,6 +45,7 @@ class MysqlStatementBuilder extends StatementBuilder
         %s
     END;';
     const FUNCTION_DROP = 'DROP FUNCTION %s;';
+    const EXECUTE_CREATE = '%s;';
 
     /**
      * Builds SQL statements for an operation.
@@ -61,17 +63,18 @@ class MysqlStatementBuilder extends StatementBuilder
             case TableOperation::class:
                 /* @var TableOperation $operation */
                 return $this->buildTable($operation);
-                break;
 
             case ViewOperation::class:
                 /* @var ViewOperation $operation */
                 return $this->buildView($operation);
-                break;
 
             case FunctionOperation::class:
                 /* @var FunctionOperation $operation */
                 return $this->buildFunction($operation);
-                break;
+
+            case ExecOperation::class:
+                /* @var ExecOperation $operation */
+                return $this->buildExecute($operation);
 
             default:
                 throw new UnsupportedOperationException($operationClass);
@@ -265,6 +268,26 @@ class MysqlStatementBuilder extends StatementBuilder
                 return sprintf(
                     self::FUNCTION_DROP,
                     $this->buildIdentifier($operation->getName())
+                );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
+        }
+    }
+
+    /**
+     * Builds SQL statement for an execute operation.
+     *
+     * @param ExecOperation $operation
+     * @return string
+     * @throws UnsupportedOperationException
+     */
+    public function buildExecute(ExecOperation $operation): string
+    {
+        switch ($operation->getOperation()) {
+            case ExecOperation::EXEC:
+                return sprintf(
+                    self::EXECUTE_CREATE,
+                    $operation->getBody()
                 );
             default:
                 throw new UnsupportedOperationException($operation->getOperation());

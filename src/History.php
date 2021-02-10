@@ -2,6 +2,7 @@
 
 namespace Exo;
 
+use Exo\Operation\ExecOperation;
 use Exo\Operation\TableOperation;
 
 class History
@@ -138,7 +139,9 @@ class History
 
                 // Reverse the operation
                 $operation = $migration->getOperation();
-                array_unshift($operations, $operation->reverse($entities[$operation->getName()] ?? null));
+                if (!$operation instanceof ExecOperation) {
+                    array_unshift($operations, $operation->reverse($entities[$operation->getName()] ?? null));
+                }
             }
 
             if (strval($version) === $from) {

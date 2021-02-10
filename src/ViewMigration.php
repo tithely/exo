@@ -2,12 +2,9 @@
 
 namespace Exo;
 
-use Exo\Operation\ColumnOperation;
-use Exo\Operation\IndexOperation;
-use Exo\Operation\TableOperation;
 use Exo\Operation\ViewOperation;
 
-final class ViewMigration
+final class ViewMigration implements MigrationInterface
 {
     /**
      * @var string

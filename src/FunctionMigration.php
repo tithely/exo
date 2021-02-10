@@ -8,7 +8,7 @@ use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\VariableOperation;
 use LogicException;
 
-final class FunctionMigration
+final class FunctionMigration implements MigrationInterface
 {
     /**
      * @var string

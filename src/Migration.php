@@ -6,7 +6,7 @@ use Exo\Operation\ColumnOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\TableOperation;
 
-final class Migration
+final class Migration implements MigrationInterface
 {
     /**
      * @var string
