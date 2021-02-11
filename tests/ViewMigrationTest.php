@@ -3,8 +3,10 @@
 namespace Exo;
 
 use Exo\Operation\ViewOperation;
+use LogicException;
+use PHPUnit\Framework\TestCase;
 
-class ViewMigrationTest extends \PHPUnit\Framework\TestCase
+class ViewMigrationTest extends TestCase
 {
     public function testCreateView()
     {
@@ -40,7 +42,7 @@ class ViewMigrationTest extends \PHPUnit\Framework\TestCase
 
     public function testPreventModifyBodyDuringDrop()
     {
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Cannot set view body in a view drop migration.');
 
         ViewMigration::drop('user_counts')

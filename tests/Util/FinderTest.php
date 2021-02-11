@@ -3,8 +3,9 @@
 namespace Exo\Util;
 
 use Exo\Operation\ViewOperation;
+use PHPUnit\Framework\TestCase;
 
-class FinderTest extends \PHPUnit\Framework\TestCase
+class FinderTest extends TestCase
 {
     public function testFromPath()
     {

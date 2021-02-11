@@ -2,10 +2,11 @@
 
 namespace Exo;
 
-use Exo\Operation\AbstractOperation;
 use Exo\Operation\ExecOperation;
+use Exo\Operation\OperationInterface;
 use Exo\Statement\MysqlStatementBuilder;
 use Exo\Statement\StatementBuilder;
+use InvalidArgumentException;
 use PDO;
 
 class Handler
@@ -13,12 +14,12 @@ class Handler
     /**
      * @var PDO
      */
-    private $db;
+    private PDO $db;
 
     /**
      * @var History
      */
-    private $history;
+    private History $history;
 
     /**
      * Handler constructor.
@@ -77,7 +78,7 @@ class Handler
             $from = array_search($target, $executed);
 
             if ($from === false) {
-                throw new \InvalidArgumentException(sprintf('Unknown target version "%s".', $target));
+                throw new InvalidArgumentException(sprintf('Unknown target version "%s".', $target));
             }
         }
 
@@ -93,7 +94,7 @@ class Handler
     }
 
     /**
-     * @param AbstractOperation[] $operations
+     * @param OperationInterface[] $operations
      * @param array               $versions
      * @param bool                $reduce
      * @return HandlerResult[]
@@ -162,7 +163,7 @@ class Handler
             case 'mysql':
                 return new MysqlStatementBuilder();
             default:
-                throw new \InvalidArgumentException(sprintf('Unsupported driver "%s".', $driver));
+                throw new InvalidArgumentException(sprintf('Unsupported driver "%s".', $driver));
         }
     }
 }

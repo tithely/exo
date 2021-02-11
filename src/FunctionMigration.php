@@ -13,42 +13,42 @@ final class FunctionMigration implements MigrationInterface
     /**
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var string|null
      */
-    private $body;
+    private ?string $body;
 
     /**
      * @var ReturnTypeOperation|null
      */
-    private $returnType;
+    private ?ReturnTypeOperation $returnType;
 
     /**
      * @var bool
      */
-    private $deterministic;
+    private bool $deterministic;
 
     /**
      * @var bool
      */
-    private $readsSqlData;
+    private bool $readsSqlData;
 
     /**
      * @var ParameterOperation[]
      */
-    private $parameterOperations;
+    private array $parameterOperations;
 
     /**
      * @var VariableOperation[]
      */
-    private $variableOperations;
+    private array $variableOperations;
 
     /**
      * Returns a new create view migration.
@@ -88,7 +88,7 @@ final class FunctionMigration implements MigrationInterface
      *
      * @param string $name
      * @param string $operation
-     * @param ReturnTypeOperation $returnType
+     * @param ?ReturnTypeOperation $returnType
      * @param bool $deterministic
      * @param bool $readsSqlData
      * @param array $parameterOperations

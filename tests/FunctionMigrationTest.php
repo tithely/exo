@@ -6,8 +6,10 @@ use Exo\Operation\FunctionOperation;
 use Exo\Operation\ParameterOperation;
 use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\VariableOperation;
+use LogicException;
+use PHPUnit\Framework\TestCase;
 
-class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
+class FunctionMigrationTest extends TestCase
 {
     const BODY_ONE = "
         IF credit > 50000 THEN
@@ -95,7 +97,7 @@ class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
 
     public function testPreventModifyBodyDuringDrop()
     {
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Cannot set view body in a view drop migration.');
 
         FunctionMigration::drop('my_deprecated_function')
@@ -104,7 +106,7 @@ class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
 
     public function testPreventAddParametersDuringDrop()
     {
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Cannot add parameters in a view drop migration.');
 
         FunctionMigration::drop('my_deprecated_function')
@@ -113,7 +115,7 @@ class FunctionMigrationTest extends \PHPUnit\Framework\TestCase
 
     public function testPreventAddVariableDuringDrop()
     {
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Cannot add variables in a view drop migration.');
 
         FunctionMigration::drop('my_deprecated_function')

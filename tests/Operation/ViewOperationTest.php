@@ -2,7 +2,9 @@
 
 namespace Exo\Operation;
 
-class ViewOperationTest extends \PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class ViewOperationTest extends TestCase
 {
     public function testApplyAlterToCreate()
     {
@@ -10,6 +12,7 @@ class ViewOperationTest extends \PHPUnit\Framework\TestCase
 
         $operation = $base->apply(new ViewOperation('user_view', ViewOperation::ALTER, 'SELECT first_name, last_name FROM USERS'));
 
+        /* @var ViewOperation $operation */
         $this->assertEquals('user_view', $operation->getName());
         $this->assertEquals(ViewOperation::CREATE, $operation->getOperation());
         $this->assertEquals('SELECT first_name, last_name FROM USERS', $operation->getBody());
@@ -30,6 +33,7 @@ class ViewOperationTest extends \PHPUnit\Framework\TestCase
 
         $operation = $base->apply(new ViewOperation('user_view', ViewOperation::ALTER, 'SELECT first_name, last_name FROM USERS'));
 
+        /* @var ViewOperation $operation */
         $this->assertEquals('user_view', $operation->getName());
         $this->assertEquals(ViewOperation::ALTER, $operation->getOperation());
         $this->assertEquals('SELECT first_name, last_name FROM USERS', $operation->getBody());

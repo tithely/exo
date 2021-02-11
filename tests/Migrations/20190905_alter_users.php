@@ -1,5 +1,5 @@
 <?php
 
-return Exo\Migration::alter('users')
+return Exo\TableMigration::alter('users')
     ->addColumn('email', ['type' => 'string', 'length' => 255, 'after' => 'id'])
     ->dropColumn('username');

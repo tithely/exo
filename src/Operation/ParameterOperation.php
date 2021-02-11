@@ -2,19 +2,19 @@
 
 namespace Exo\Operation;
 
-class ParameterOperation extends AbstractOperation
+final class ParameterOperation extends AbstractOperation
 {
     const ADD = 'add';
 
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var array
      */
-    private $options;
+    private array $options;
 
     /**
      * ColumnOperation constructor.

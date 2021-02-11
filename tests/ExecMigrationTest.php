@@ -2,9 +2,9 @@
 
 namespace Exo;
 
-use Exo\Operation\ExecOperation;
+use PHPUnit\Framework\TestCase;
 
-class ExecMigrationTest extends \PHPUnit\Framework\TestCase
+class ExecMigrationTest extends TestCase
 {
     public function testExecMigration()
     {

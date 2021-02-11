@@ -2,24 +2,24 @@
 
 namespace Exo\Operation;
 
-class ReturnTypeOperation extends AbstractOperation
+final class ReturnTypeOperation extends AbstractOperation
 {
     const ADD = 'add';
 
     /**
      * @var string
      */
-    private $type;
+    private string $type;
 
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var array
      */
-    private $options;
+    private array $options;
 
     /**
      * ColumnOperation constructor.

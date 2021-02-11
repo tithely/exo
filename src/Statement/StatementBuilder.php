@@ -2,20 +2,21 @@
 
 namespace Exo\Statement;
 
-use Exo\Operation\AbstractOperation;
 use Exo\Operation\FunctionOperation;
+use Exo\Operation\OperationInterface;
 use Exo\Operation\TableOperation;
 use Exo\Operation\ViewOperation;
+use InvalidArgumentException;
 
 abstract class StatementBuilder
 {
     /**
      * Builds SQL statements for an operation.
      *
-     * @param AbstractOperation $operation
+     * @param OperationInterface $operation
      * @return string
      */
-    abstract public function build($operation): string;
+    abstract public function build(OperationInterface $operation): string;
 
     /**
      * Builds SQL statements for a table operation.
@@ -81,7 +82,7 @@ abstract class StatementBuilder
             case 'uuid':
                 return 'CHAR(36)';
             default:
-                throw new \InvalidArgumentException(sprintf('Unknown column type "%s".', $type));
+                throw new InvalidArgumentException(sprintf('Unknown column type "%s".', $type));
         }
     }
 

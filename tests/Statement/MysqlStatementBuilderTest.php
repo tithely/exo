@@ -10,6 +10,7 @@ use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\VariableOperation;
 use Exo\Operation\ViewOperation;
+use InvalidArgumentException;
 
 class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
 {
@@ -179,7 +180,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
 
     public function testInvalidTextLengthThrowsException()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid length provided for \'text\' column type.');
 
         $operation = new TableOperation('users', TableOperation::CREATE, [

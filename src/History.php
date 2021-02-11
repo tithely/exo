@@ -2,31 +2,42 @@
 
 namespace Exo;
 
-use Exo\Operation\ExecOperation;
-use Exo\Operation\TableOperation;
+use Exo\Operation\OperationInterface;
+use Exo\Operation\ReversibleOperationInterface;
+use InvalidArgumentException;
 
 class History
 {
     /**
      * @var MigrationInterface[]
      */
-    private $migrations = [];
+    private array $migrations = [];
 
     /**
-     * Returns operations reduced by table.
+     * Returns operations reduced by name.
      *
-     * @param TableOperation[] $operations
-     * @return TableOperation[]
+     * @param OperationInterface[] $operations
+     * @return OperationInterface[]
      */
     private static function reduce(array $operations): array
     {
         $reduced = [];
 
         foreach ($operations as $operation) {
+
             if (!isset($reduced[$operation->getName()])) {
                 $reduced[$operation->getName()] = $operation;
             } else {
-                $reduced[$operation->getName()] = $reduced[$operation->getName()]->apply($operation);
+                if ($operation->getSupportsReduction()) {
+                    $reduced[$operation->getName()] = $reduced[$operation->getName()]->apply($operation);
+                } else {
+                    throw new InvalidArgumentException(sprintf(
+                        'The current operation and type (%s::%s) does not support reduction and has a duplicate name (%s)',
+                        get_class($operation),
+                        $operation->getOperation(),
+                        $operation->getName()
+                    ));
+                }
             }
         }
 
@@ -41,7 +52,7 @@ class History
      * @param string             $version
      * @param MigrationInterface $migrationOrView
      */
-    public function add(string $version, $migrationOrView)
+    public function add(string $version, MigrationInterface $migrationOrView)
     {
         $this->migrations[$version] = $migrationOrView;
     }
@@ -53,7 +64,7 @@ class History
      * @param array|null $versions
      * @return History
      */
-    public function clone(array $versions = null)
+    public function clone(array $versions = null): History
     {
         $history = new History();
 
@@ -74,9 +85,9 @@ class History
      * @param string $from
      * @param string $to
      * @param bool $reduce
-     * @return TableOperation[]
+     * @return OperationInterface[]
      */
-    public function play(string $from, string $to, bool $reduce = false)
+    public function play(string $from, string $to, bool $reduce = false): array
     {
         $operations = [];
         $inRange = false;
@@ -110,9 +121,9 @@ class History
      * @param string $from
      * @param string $to
      * @param bool   $reduce
-     * @return TableOperation[]
+     * @return OperationInterface[]
      */
-    public function rewind(string $from, string $to, bool $reduce = false)
+    public function rewind(string $from, string $to, bool $reduce = false): array
     {
         $operations = [];
         $entities = [];
@@ -137,9 +148,11 @@ class History
                     $entities[$operation->getName()] = $operation;
                 }
 
-                // Reverse the operation
                 $operation = $migration->getOperation();
-                if (!$operation instanceof ExecOperation) {
+
+                // Reverse the operation if supported
+                if ($operation->getSupportsReversal()) {
+                    /* @var OperationInterface|ReversibleOperationInterface $operation */
                     array_unshift($operations, $operation->reverse($entities[$operation->getName()] ?? null));
                 }
             }
@@ -161,7 +174,7 @@ class History
      *
      * @return string[]
      */
-    public function getVersions()
+    public function getVersions(): array
     {
         return array_map('strval', array_keys($this->migrations));
     }

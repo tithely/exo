@@ -2,7 +2,10 @@
 
 namespace Exo\Operation;
 
-class TableOperation extends AbstractOperation
+use InvalidArgumentException;
+use LogicException;
+
+final class TableOperation extends AbstractOperation implements ReversibleOperationInterface, ReducingOperationInterface
 {
     const CREATE = 'create';
     const ALTER = 'alter';
@@ -11,17 +14,17 @@ class TableOperation extends AbstractOperation
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var ColumnOperation[]
      */
-    private $columnOperations = [];
+    private array $columnOperations;
 
     /**
      * @var IndexOperation[]
      */
-    private $indexOperations = [];
+    private array $indexOperations;
 
     /**
      * TableOperation constructor.
@@ -42,11 +45,12 @@ class TableOperation extends AbstractOperation
     /**
      * Returns the reverse of the operation.
      *
-     * @param TableOperation|null $original
+     * @param ReversibleOperationInterface|null $originalOperation
      * @return static
      */
-    public function reverse(TableOperation $original = null)
+    public function reverse(ReversibleOperationInterface $originalOperation = null): ReversibleOperationInterface
     {
+        /* @var TableOperation $originalOperation*/
         if ($this->getOperation() === TableOperation::CREATE) {
             return new TableOperation(
                 $this->getName(),
@@ -56,22 +60,22 @@ class TableOperation extends AbstractOperation
             );
         }
 
-        if ($original && $original->getName() !== $this->getName()) {
-            throw new \InvalidArgumentException('Previous operations must apply to the same table.');
+        if ($originalOperation && $originalOperation->getName() !== $this->getName()) {
+            throw new InvalidArgumentException('Previous operations must apply to the same table.');
         }
 
         // Provide the create table operation to reverse a drop
         if ($this->getOperation() === TableOperation::DROP) {
-            return $original;
+            return $originalOperation;
         }
 
         $columnOperations = [];
         foreach ($this->columnOperations as $columnOperation) {
             // Find a column operation to reconstruct previous version of the column
             $originalColumn = null;
-            foreach ($original->getColumnOperations() as $originalOperation) {
-                if ($originalOperation->getName() === $columnOperation->getName()) {
-                    $originalColumn = $originalOperation;
+            foreach ($originalOperation->getColumnOperations() as $originalColumnOperation) {
+                if ($originalColumnOperation->getName() === $columnOperation->getName()) {
+                    $originalColumn = $originalColumnOperation;
                     break;
                 }
             }
@@ -83,7 +87,7 @@ class TableOperation extends AbstractOperation
 
             if ($columnOperation->getOperation() === ColumnOperation::DROP) {
                 if (!$originalColumn) {
-                    throw new \LogicException('Cannot revert a column that does not exist.');
+                    throw new LogicException('Cannot revert a column that does not exist.');
                 }
 
                 $columnOperations[] = $originalColumn;
@@ -91,7 +95,7 @@ class TableOperation extends AbstractOperation
 
             if ($columnOperation->getOperation() === ColumnOperation::MODIFY) {
                 if (!$originalColumn) {
-                    throw new \LogicException('Cannot revert a column that does not exist.');
+                    throw new LogicException('Cannot revert a column that does not exist.');
                 }
 
                 $columnOperations[] = new ColumnOperation(
@@ -106,9 +110,9 @@ class TableOperation extends AbstractOperation
         foreach ($this->indexOperations as $indexOperation) {
             // Find an index operation to reconstruct previous version of the index
             $originalIndex = null;
-            foreach ($original->getIndexOperations() as $originalOperation) {
-                if ($originalOperation->getName() === $indexOperation->getName()) {
-                    $originalIndex = $originalOperation;
+            foreach ($originalOperation->getIndexOperations() as $originalIndexOperation) {
+                if ($originalIndexOperation->getName() === $indexOperation->getName()) {
+                    $originalIndex = $originalIndexOperation;
                     break;
                 }
             }
@@ -120,7 +124,7 @@ class TableOperation extends AbstractOperation
 
             if ($indexOperation->getOperation() === IndexOperation::DROP) {
                 if (!$originalIndex) {
-                    throw new \LogicException('Cannot revert a index that does not exist.');
+                    throw new LogicException('Cannot revert a index that does not exist.');
                 }
 
                 $indexOperations[] = $originalIndex;
@@ -138,17 +142,18 @@ class TableOperation extends AbstractOperation
     /**
      * Returns a new operation by applying another operation.
      *
-     * @param TableOperation $operation
+     * @param ReducingOperationInterface $operation
      * @return TableOperation|null
      */
-    public function apply(TableOperation $operation)
+    public function apply(ReducingOperationInterface $operation): ?ReducingOperationInterface
     {
+        /* @var TableOperation $operation */
         if ($operation->getName() !== $this->getName()) {
-            throw new \InvalidArgumentException('Cannot apply operations for a different table.');
+            throw new InvalidArgumentException('Cannot apply operations for a different table.');
         }
 
         if ($this->getOperation() === self::DROP) {
-            throw new \InvalidArgumentException('Cannot apply further operations to a dropped table.');
+            throw new InvalidArgumentException('Cannot apply further operations to a dropped table.');
         }
 
         // Collect existing columns
@@ -165,7 +170,7 @@ class TableOperation extends AbstractOperation
 
         if ($this->getOperation() === self::CREATE) {
             if ($operation->getOperation() === self::CREATE) {
-                throw new \InvalidArgumentException('Cannot recreate an existing table.');
+                throw new InvalidArgumentException('Cannot recreate an existing table.');
             }
 
             // Skip creation of tables that will be dropped

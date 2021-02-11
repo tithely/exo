@@ -3,8 +3,9 @@
 namespace Exo;
 
 use Exo\Operation\TableOperation;
+use PHPUnit\Framework\TestCase;
 
-class HistoryTest extends \PHPUnit\Framework\TestCase
+class HistoryTest extends TestCase
 {
     public function testGetVersions()
     {
@@ -76,7 +77,7 @@ class HistoryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(['1', '3'], $cloned->getVersions());
     }
 
-    private function getHistory()
+    private function getHistory(): History
     {
         $history = new History();
 

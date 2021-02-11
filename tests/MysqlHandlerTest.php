@@ -3,21 +3,23 @@
 namespace Exo;
 
 use Exo\Tests\Traits\UsesYamlConfig;
+use PDO;
+use PHPUnit\Framework\TestCase;
 
-class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
+class MysqlHandlerTest extends TestCase
 {
     use UsesYamlConfig;
 
     /**
-     * @var \PDO
+     * @var PDO|null
      */
-    private $pdo;
+    private ?PDO $pdo;
 
     public function setUp(): void
     {
         $mysql = self::yaml('handlers.mysql');
 
-        $this->pdo = new \PDO(
+        $this->pdo = new PDO(
             sprintf('mysql:dbname=%s;host=%s;port=%s', $mysql['name'], $mysql['host'], $mysql['port']),
             $mysql['user'],
             $mysql['pass']
@@ -184,7 +186,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEmpty($results[0]->getErrorInfo());
     }
 
-    private function getHandler()
+    private function getHandler(): Handler
     {
         $history = new History();
 

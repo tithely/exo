@@ -2,11 +2,11 @@
 
 namespace Exo\Statement;
 
-use Exo\Operation\AbstractOperation;
 use Exo\Operation\ColumnOperation;
 use Exo\Operation\ExecOperation;
 use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
+use Exo\Operation\OperationInterface;
 use Exo\Operation\ParameterOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\UnsupportedOperationException;
@@ -49,11 +49,11 @@ class MysqlStatementBuilder extends StatementBuilder
     /**
      * Builds SQL statements for an operation.
      *
-     * @param AbstractOperation $operation
+     * @param OperationInterface $operation
      * @return string
      * @throws UnsupportedOperationException
      */
-    public function build($operation): string
+    public function build(OperationInterface $operation): string
     {
         $operationClass = get_class($operation);
 
@@ -391,13 +391,11 @@ class MysqlStatementBuilder extends StatementBuilder
      */
     protected function buildIndex(string $index, array $columns, array $options): string
     {
-        $definition = sprintf(
+        return sprintf(
             '%s (%s)',
             $this->buildIdentifier($index),
             implode(', ', array_map([$this, 'buildIdentifier'], $columns))
         );
-
-        return $definition;
     }
 
     /**

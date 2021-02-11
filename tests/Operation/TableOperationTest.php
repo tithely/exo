@@ -2,7 +2,9 @@
 
 namespace Exo\Operation;
 
-class TableOperationTest extends \PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class TableOperationTest extends TestCase
 {
     public function testApplyAlterToCreate()
     {

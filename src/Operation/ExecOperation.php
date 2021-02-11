@@ -2,15 +2,13 @@
 
 namespace Exo\Operation;
 
-use InvalidArgumentException;
-
-class ExecOperation extends AbstractOperation
+final class ExecOperation extends AbstractOperation
 {
 
     /**
      * @var string|null
      */
-    private $body;
+    private ?string $body;
 
     /**
      * ExecOperation constructor.
@@ -52,23 +50,4 @@ class ExecOperation extends AbstractOperation
     {
         return $this->body;
     }
-
-    /**
-     * Returns a new operation by applying another operation.
-     *
-     * @param ExecOperation $operation
-     * @return ExecOperation|null
-     */
-    public function apply(ExecOperation $operation)
-    {
-        if ($operation->getName() !== $this->getName()) {
-            throw new InvalidArgumentException('Cannot apply operations for a different execution.');
-        }
-
-        return new ExecOperation(
-            $this->getName(),
-            $operation->getBody()
-        );
-    }
-
 }

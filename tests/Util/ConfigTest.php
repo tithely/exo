@@ -3,8 +3,9 @@
 namespace Exo\Util;
 
 use Exo\Tests\Traits\UsesYamlConfig;
+use PHPUnit\Framework\TestCase;
 
-class ConfigTest extends \PHPUnit\Framework\TestCase
+class ConfigTest extends TestCase
 {
     use UsesYamlConfig;
 

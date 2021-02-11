@@ -9,11 +9,11 @@ use Exception;
 trait UsesYamlConfig
 {
     /**
-     * @param string $keys A top-level key from the parsed yaml array, or
-     * a dot-notation set of keys, e.g. toplevel.second.third
+     * @param string|null $keys A top-level key from the parsed yaml array, or
+     *                          a dot-notation set of keys, e.g. toplevel.second.third
      * @return array|string|null Depending on the sort of key given, and how
-     * deeply the full yaml array is plumbed, a string or array may be returned.
-     * When the value cannot be found by the given key, we default to null.
+     *                          deeply the full yaml array is plumbed, a string or array may be returned.
+     *                          When the value cannot be found by the given key, we default to null.
      * @throws Exception
      */
     protected static function yaml(string $keys = null)

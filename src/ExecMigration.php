@@ -9,17 +9,12 @@ final class ExecMigration implements MigrationInterface
     /**
      * @var string
      */
-    private $name;
-
-    /**
-     * @var string
-     */
-    private $operation;
+    private string $name;
 
     /**
      * @var string|null
      */
-    private $body = null;
+    private ?string $body;
 
     /**
      * Returns a new create exec migration.
