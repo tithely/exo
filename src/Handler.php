@@ -106,19 +106,18 @@ class Handler
         foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
 
-            // Determine if transaction is required.
+            // Determine if transaction is required
             $transactionRequired = $operations instanceof ExecOperation;
 
-            // Begin trx if needed.
+            // Begin transaction if needed
             if ($transactionRequired) {
-                var_dump('YO!');
                 $this->db->beginTransaction();
             }
 
-            // Process operation.
+            // Process operation
             $result = $this->db->exec($sql);
 
-            // Get results...
+            // Get results
             $results[] = new HandlerResult(
                 $reduce ? null : $versions[$offset],
                 $result !== false,
@@ -126,7 +125,7 @@ class Handler
                 $result === false ? $this->db->errorInfo() : null
             );
 
-            // Check for failure...
+            // Check for failure
             if ($result === false) {
                 // On Failure:
 
@@ -135,7 +134,7 @@ class Handler
                     $this->db->rollBack();
                 }
 
-                // Stop processing if there was a failure
+                // Stop processing
                 break;
 
             } else {
