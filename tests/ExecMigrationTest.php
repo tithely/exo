@@ -15,7 +15,7 @@ class ExecMigrationTest extends \PHPUnit\Framework\TestCase
         $operation = $migration->getOperation();
 
         $this->assertEquals('insert_user_script', $operation->getName());
-        $this->assertEquals(ExecOperation::EXEC, $operation->getOperation());
+        $this->assertEquals('execute', $operation->getOperation());
         $this->assertEquals($sql, $operation->getBody());
     }
 }

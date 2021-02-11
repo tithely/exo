@@ -45,7 +45,6 @@ class MysqlStatementBuilder extends StatementBuilder
         %s
     END;';
     const FUNCTION_DROP = 'DROP FUNCTION %s;';
-    const EXECUTE_CREATE = '%s;';
 
     /**
      * Builds SQL statements for an operation.
@@ -279,19 +278,10 @@ class MysqlStatementBuilder extends StatementBuilder
      *
      * @param ExecOperation $operation
      * @return string
-     * @throws UnsupportedOperationException
      */
     public function buildExecute(ExecOperation $operation): string
     {
-        switch ($operation->getOperation()) {
-            case ExecOperation::EXEC:
-                return sprintf(
-                    self::EXECUTE_CREATE,
-                    $operation->getBody()
-                );
-            default:
-                throw new UnsupportedOperationException($operation->getOperation());
-        }
+        return $operation->getBody();
     }
 
     /**

@@ -6,12 +6,6 @@ use InvalidArgumentException;
 
 class ExecOperation extends AbstractOperation
 {
-    const EXEC = 'execute';
-
-    /**
-     * @var string
-     */
-    private $operation;
 
     /**
      * @var string|null
@@ -22,12 +16,10 @@ class ExecOperation extends AbstractOperation
      * ExecOperation constructor.
      *
      * @param string   $name
-     * @param string   $operation
      * @param ?string   $body
      */
-    public function __construct(string $name, string $operation, string $body = null) {
+    public function __construct(string $name, string $body = null) {
         $this->name = $name;
-        $this->operation = $operation;
         $this->body = $body;
     }
 
@@ -48,7 +40,7 @@ class ExecOperation extends AbstractOperation
      */
     public function getOperation(): string
     {
-        return $this->operation;
+        return 'execute';
     }
 
     /**
@@ -73,13 +65,8 @@ class ExecOperation extends AbstractOperation
             throw new InvalidArgumentException('Cannot apply operations for a different execution.');
         }
 
-        if ($this->getOperation() !== self::EXEC) {
-            throw new InvalidArgumentException('Invalid/Incompatible Operation Type Specified.');
-        }
-
         return new ExecOperation(
             $this->getName(),
-            $this->getOperation(),
             $operation->getBody()
         );
     }

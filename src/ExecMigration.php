@@ -29,20 +29,18 @@ final class ExecMigration implements MigrationInterface
      */
     public static function create(string $name): ExecMigration
     {
-        return new self($name, ExecOperation::EXEC);
+        return new self($name);
     }
 
     /**
      * Migration constructor.
      *
      * @param string      $name
-     * @param string      $operation
      * @param string|null $body
      */
-    private function __construct(string $name, string $operation, string $body = null)
+    private function __construct(string $name, string $body = null)
     {
         $this->name = $name;
-        $this->operation = $operation;
         $this->body = $body;
     }
 
@@ -54,7 +52,7 @@ final class ExecMigration implements MigrationInterface
      */
     public function withBody(string $body): ExecMigration
     {
-        return new ExecMigration($this->name, $this->operation, $body);
+        return new ExecMigration($this->name, $body);
     }
 
     /**
@@ -64,6 +62,6 @@ final class ExecMigration implements MigrationInterface
      */
     public function getOperation(): ExecOperation
     {
-        return new ExecOperation($this->name, $this->operation, $this->body);
+        return new ExecOperation($this->name, $this->body);
     }
 }
