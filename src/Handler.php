@@ -107,7 +107,7 @@ class Handler
             $sql = $this->getBuilder()->build($operation);
 
             // Determine if transaction is required
-            $transactionRequired = $operations instanceof ExecOperation;
+            $transactionRequired = $operation instanceof ExecOperation;
 
             // Begin transaction if needed
             if ($transactionRequired) {
