@@ -33,11 +33,11 @@ class TableMigration implements MigrationInterface
      * Returns a new create table migration.
      *
      * @param string $table
-     * @return Migration
+     * @return TableMigration
      */
-    public static function create(string $table): Migration
+    public static function create(string $table): TableMigration
     {
-        return new Migration($table, TableOperation::CREATE);
+        return new TableMigration($table, TableOperation::CREATE);
     }
 
     /**
@@ -48,7 +48,7 @@ class TableMigration implements MigrationInterface
      */
     public static function alter(string $table)
     {
-        return new Migration($table, TableOperation::ALTER);
+        return new TableMigration($table, TableOperation::ALTER);
     }
 
     /**
@@ -59,11 +59,11 @@ class TableMigration implements MigrationInterface
      */
     public static function drop(string $table)
     {
-        return new Migration($table, TableOperation::DROP);
+        return new TableMigration($table, TableOperation::DROP);
     }
 
     /**
-     * Migration constructor.
+     * TableMigration constructor.
      *
      * @param string $table
      * @param string $operation
@@ -79,9 +79,9 @@ class TableMigration implements MigrationInterface
      *
      * @param string $column
      * @param array  $options
-     * @return Migration
+     * @return TableMigration
      */
-    public function addColumn(string $column, array $options = []): Migration
+    public function addColumn(string $column, array $options = []): TableMigration
     {
         if ($this->operation === TableOperation::DROP) {
             throw new LogicException('Cannot add columns in a drop migration.');
@@ -97,9 +97,9 @@ class TableMigration implements MigrationInterface
      *
      * @param string $column
      * @param array  $options
-     * @return Migration
+     * @return TableMigration
      */
-    public function modifyColumn(string $column, array $options): Migration
+    public function modifyColumn(string $column, array $options): TableMigration
     {
         if ($this->operation === TableOperation::CREATE) {
             throw new LogicException('Cannot modify columns in a create migration.');
@@ -118,9 +118,9 @@ class TableMigration implements MigrationInterface
      * Pushes a new drop column operation.
      *
      * @param string $column
-     * @return $this
+     * @return TableMigration
      */
-    public function dropColumn(string $column): self
+    public function dropColumn(string $column): TableMigration
     {
         if ($this->operation === TableOperation::CREATE) {
             throw new LogicException('Cannot drop columns in a create migration.');
@@ -141,9 +141,9 @@ class TableMigration implements MigrationInterface
      * @param string $name
      * @param array  $columns
      * @param array  $options
-     * @return $this
+     * @return TableMigration
      */
-    public function addIndex(string $name, array $columns, array $options = []): self
+    public function addIndex(string $name, array $columns, array $options = []): TableMigration
     {
         if ($this->operation === TableOperation::DROP) {
             throw new LogicException('Cannot add indexes in a drop migration.');
@@ -158,9 +158,9 @@ class TableMigration implements MigrationInterface
      * Pushes a new drop index operation.
      *
      * @param string $name
-     * @return $this
+     * @return TableMigration
      */
-    public function dropIndex(string $name): self
+    public function dropIndex(string $name): TableMigration
     {
         if ($this->operation === TableOperation::CREATE) {
             throw new LogicException('Cannot drop indexes in a create migration.');

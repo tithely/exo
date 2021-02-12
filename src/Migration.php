@@ -2,14 +2,13 @@
 
 namespace Exo;
 
-/*
- * Backward Compatibility Alias Class:
+/**
+ * Class Migration
  *
- * This file is for backwards compatibility, so that previous users need not immediately Refactor all previous
+ * This class is for backwards compatibility, so that previous users need not immediately refactor all previous
  * implementations/instances of Migration() to TableMigrations().
  *
- * NOTE: This class will be deprecated in a future release.
- * */
-
+ * @deprecated
+ */
 final class Migration extends TableMigration
 {}

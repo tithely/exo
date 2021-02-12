@@ -5,17 +5,18 @@ namespace Exo;
 use Exo\Operation\TableOperation;
 use LogicException;
 
+/**
+ * Class MigrationTest
+ *
+ * This class is duplicative to TableMigrationTest except that is uses the alias class "Migration"
+ * in its implementations/instantiations. This is to ensure proper coverage & function of the alias class.
+ *
+ * This will be removed with the Migration class in a future release.
+ *
+ * @deprecated
+ */
 class MigrationTest extends \PHPUnit\Framework\TestCase
 {
-    /*
-     * Test Cases for Backward Compatibility Alias Class:
-     *
-     * This file is duplicative to TableMigrationTest except that is uses the alias class "Migration"
-     * in its implementations/instantiations. This is to ensure proper coverage & function of the alias class.
-     *
-     * NOTE: This will be deprecated upon deprecation of the "Migration" class in a future release..
-     * */
-
     public function testCreateMigration()
     {
         $operation = Migration::create('users')
