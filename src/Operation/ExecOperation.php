@@ -4,7 +4,6 @@ namespace Exo\Operation;
 
 final class ExecOperation extends AbstractOperation
 {
-
     /**
      * @var string|null
      */

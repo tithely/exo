@@ -17,18 +17,4 @@ interface OperationInterface
      * @return string
      */
     public function getOperation(): string;
-
-    /**
-     * Returns the operations ability to support reduction.
-     *
-     * @return bool
-     */
-    public function getSupportsReduction(): bool;
-
-    /**
-     * Returns the operations ability to support reversal.
-     *
-     * @return bool
-     */
-    public function getSupportsReversal(): bool;
 }

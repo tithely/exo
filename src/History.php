@@ -3,6 +3,7 @@
 namespace Exo;
 
 use Exo\Operation\OperationInterface;
+use Exo\Operation\ReducibleOperationInterface;
 use Exo\Operation\ReversibleOperationInterface;
 use InvalidArgumentException;
 
@@ -24,11 +25,10 @@ class History
         $reduced = [];
 
         foreach ($operations as $operation) {
-
             if (!isset($reduced[$operation->getName()])) {
                 $reduced[$operation->getName()] = $operation;
             } else {
-                if ($operation->getSupportsReduction()) {
+                if ($operation instanceof ReducibleOperationInterface) {
                     $reduced[$operation->getName()] = $reduced[$operation->getName()]->apply($operation);
                 } else {
                     throw new InvalidArgumentException(sprintf(
@@ -151,8 +151,7 @@ class History
                 $operation = $migration->getOperation();
 
                 // Reverse the operation if supported
-                if ($operation->getSupportsReversal()) {
-                    /* @var OperationInterface|ReversibleOperationInterface $operation */
+                if ($operation instanceof ReversibleOperationInterface) {
                     array_unshift($operations, $operation->reverse($entities[$operation->getName()] ?? null));
                 }
             }

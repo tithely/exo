@@ -5,7 +5,7 @@ namespace Exo\Operation;
 use InvalidArgumentException;
 use LogicException;
 
-final class TableOperation extends AbstractOperation implements ReversibleOperationInterface, ReducingOperationInterface
+final class TableOperation extends AbstractOperation implements ReversibleOperationInterface, ReducibleOperationInterface
 {
     const CREATE = 'create';
     const ALTER = 'alter';
@@ -46,9 +46,9 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
      * Returns the reverse of the operation.
      *
      * @param ReversibleOperationInterface|null $originalOperation
-     * @return static
+     * @return ReversibleOperationInterface|null
      */
-    public function reverse(ReversibleOperationInterface $originalOperation = null): ReversibleOperationInterface
+    public function reverse(?ReversibleOperationInterface $originalOperation = null): ?ReversibleOperationInterface
     {
         /* @var TableOperation $originalOperation*/
         if ($this->getOperation() === TableOperation::CREATE) {
@@ -142,10 +142,10 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
     /**
      * Returns a new operation by applying another operation.
      *
-     * @param ReducingOperationInterface $operation
-     * @return TableOperation|null
+     * @param ReducibleOperationInterface $operation
+     * @return ReducibleOperationInterface|null
      */
-    public function apply(ReducingOperationInterface $operation): ?ReducingOperationInterface
+    public function apply(ReducibleOperationInterface $operation): ?ReducibleOperationInterface
     {
         /* @var TableOperation $operation */
         if ($operation->getName() !== $this->getName()) {

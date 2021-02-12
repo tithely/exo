@@ -4,7 +4,7 @@ namespace Exo\Operation;
 
 use InvalidArgumentException;
 
-final class FunctionOperation extends AbstractOperation implements ReversibleOperationInterface, ReducingOperationInterface
+final class FunctionOperation extends AbstractOperation implements ReversibleOperationInterface, ReducibleOperationInterface
 {
     const CREATE = 'create';
     const REPLACE = 'replace';
@@ -81,9 +81,9 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
      * Returns the reverse of the operation.
      *
      * @param ReversibleOperationInterface|null $originalOperation
-     * @return static
+     * @return ReversibleOperationInterface|null
      */
-    public function reverse(ReversibleOperationInterface $originalOperation = null): ReversibleOperationInterface
+    public function reverse(?ReversibleOperationInterface $originalOperation = null): ?ReversibleOperationInterface
     {
         /* @var FunctionOperation $originalOperation */
         if (!is_null($originalOperation) && $originalOperation->getName() !== $this->getName()) {
@@ -103,10 +103,10 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
     /**
      * Returns a new operation by applying another operation.
      *
-     * @param ReducingOperationInterface $operation
-     * @return ReducingOperationInterface|null
+     * @param ReducibleOperationInterface $operation
+     * @return ReducibleOperationInterface|null
      */
-    public function apply(ReducingOperationInterface $operation): ?ReducingOperationInterface
+    public function apply(ReducibleOperationInterface $operation): ?ReducibleOperationInterface
     {
         /* @var FunctionOperation $operation */
         if ($operation->getName() !== $this->getName()) {

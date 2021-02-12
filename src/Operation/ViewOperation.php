@@ -4,7 +4,7 @@ namespace Exo\Operation;
 
 use InvalidArgumentException;
 
-final class ViewOperation extends AbstractOperation implements ReversibleOperationInterface, ReducingOperationInterface
+final class ViewOperation extends AbstractOperation implements ReversibleOperationInterface, ReducibleOperationInterface
 {
     const CREATE = 'create';
     const ALTER = 'alter';
@@ -38,9 +38,9 @@ final class ViewOperation extends AbstractOperation implements ReversibleOperati
      * Returns the reverse of the operation.
      *
      * @param ReversibleOperationInterface|null $originalOperation
-     * @return static
+     * @return ReversibleOperationInterface|null
      */
-    public function reverse(ReversibleOperationInterface $originalOperation = null): ReversibleOperationInterface
+    public function reverse(?ReversibleOperationInterface $originalOperation = null): ?ReversibleOperationInterface
     {
         /* @var ViewOperation $originalOperation */
         if ($this->getOperation() === ViewOperation::CREATE) {
@@ -70,10 +70,10 @@ final class ViewOperation extends AbstractOperation implements ReversibleOperati
     /**
      * Returns a new operation by applying another operation.
      *
-     * @param ReducingOperationInterface $operation
-     * @return ReducingOperationInterface|null
+     * @param ReducibleOperationInterface $operation
+     * @return ReducibleOperationInterface|null
      */
-    public function apply(ReducingOperationInterface $operation): ?ReducingOperationInterface
+    public function apply(ReducibleOperationInterface $operation): ?ReducibleOperationInterface
     {
         /* @var ViewOperation $operation */
         if ($operation->getName() !== $this->getName()) {
@@ -94,7 +94,6 @@ final class ViewOperation extends AbstractOperation implements ReversibleOperati
                 return null;
             }
         } else if ($operation->getOperation() === self::DROP) {
-
             // Skip modification of views that will be dropped
             return $operation;
         }
