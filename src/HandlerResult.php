@@ -7,22 +7,22 @@ class HandlerResult
     /**
      * @var string|null
      */
-    private $version;
+    private ?string $version;
 
     /**
      * @var bool
      */
-    private $success;
+    private bool $success;
 
     /**
      * @var string
      */
-    private $sql;
+    private string $sql;
 
     /**
      * @var array|null
      */
-    private $errorInfo;
+    private ?array $errorInfo;
 
     /**
      * HandlerResult constructor.

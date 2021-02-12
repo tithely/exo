@@ -3,21 +3,23 @@
 namespace Exo;
 
 use Exo\Tests\Traits\UsesYamlConfig;
+use PDO;
+use PHPUnit\Framework\TestCase;
 
-class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
+class MysqlHandlerTest extends TestCase
 {
     use UsesYamlConfig;
 
     /**
-     * @var \PDO
+     * @var PDO|null
      */
-    private $pdo;
+    private ?PDO $pdo;
 
     public function setUp(): void
     {
         $mysql = self::yaml('handlers.mysql');
 
-        $this->pdo = new \PDO(
+        $this->pdo = new PDO(
             sprintf('mysql:dbname=%s;host=%s;port=%s', $mysql['name'], $mysql['host'], $mysql['port']),
             $mysql['user'],
             $mysql['pass']
@@ -39,7 +41,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler = $this->getHandler();
         $results = $handler->migrate([], null, false);
 
-        $this->assertCount(6, $results);
+        $this->assertCount(7, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('1', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
@@ -52,6 +54,26 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('5', $results[4]->getVersion());
         $this->assertTrue($results[5]->isSuccess());
         $this->assertEquals('6', $results[5]->getVersion());
+        $this->assertTrue($results[6]->isSuccess());
+        $this->assertEquals('7', $results[6]->getVersion());
+
+        // Verify Exec Results
+        $seedCheck = $this->pdo->query('select * from users')->fetchAll();
+        $this->assertEquals('7', $results[6]->getVersion());
+
+        // 1 Row Expected
+        $this->assertCount(1, $seedCheck);
+
+        // Get First Row
+        $seedRow = $seedCheck[0];
+
+        // Validate Data
+        $this->assertEquals('1', $seedRow[0]);
+        $this->assertEquals('1', $seedRow['id']);
+        $this->assertEquals('bob@smith.com', $seedRow[1]);
+        $this->assertEquals('bob@smith.com', $seedRow['email']);
+        $this->assertEquals('some_password!', $seedRow[2]);
+        $this->assertEquals('some_password!', $seedRow['password']);
     }
 
     public function testFullMigrationReduced()
@@ -59,14 +81,17 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler = $this->getHandler();
         $results = $handler->migrate([], null, true);
 
-        $this->assertCount(4, $results);
+        $this->assertCount(5, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertNull($results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
         $this->assertNull($results[1]->getVersion());
         $this->assertTrue($results[2]->isSuccess());
         $this->assertNull($results[2]->getVersion());
+        $this->assertTrue($results[3]->isSuccess());
         $this->assertNull($results[3]->getVersion());
+        $this->assertTrue($results[4]->isSuccess());
+        $this->assertNull($results[4]->getVersion());
     }
 
     public function testPartialMigration()
@@ -86,7 +111,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $handler->migrate(['1', '2'], '3', false);
 
         $results = $handler->migrate(['1', '3'], null, false);
-        $this->assertCount(4, $results);
+        $this->assertCount(5, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('2', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
@@ -95,6 +120,8 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('5', $results[2]->getVersion());
         $this->assertTrue($results[3]->isSuccess());
         $this->assertEquals('6', $results[3]->getVersion());
+        $this->assertTrue($results[4]->isSuccess());
+        $this->assertEquals('7', $results[4]->getVersion());
     }
 
     public function testFailingMigration()
@@ -159,7 +186,7 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertNotEmpty($results[0]->getErrorInfo());
     }
 
-    private function getHandler()
+    private function getHandler(): Handler
     {
         $history = new History();
 
@@ -190,7 +217,12 @@ class MysqlHandlerTest extends \PHPUnit\Framework\TestCase
 
         $history->add('6', FunctionMigration::create('user_count_function')
             ->withReturnType('integer')
+            ->readsSqlData(true)
             ->withBody('RETURN \'example value\';')
+        );
+
+        $history->add('7', ExecMigration::create('user_seed')
+            ->withBody('INSERT INTO users (id, email, password) VALUES (1, \'bob@smith.com\',\'some_password!\');')
         );
 
         return new Handler($this->pdo, $history);

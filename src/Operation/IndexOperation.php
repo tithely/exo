@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class IndexOperation extends AbstractOperation
+final class IndexOperation extends AbstractOperation
 {
     const ADD = 'add';
     const DROP = 'DROP';
@@ -10,17 +10,17 @@ class IndexOperation extends AbstractOperation
     /**
      * @var string[]
      */
-    private $columns = [];
+    private array $columns = [];
 
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var array
      */
-    private $options = [];
+    private array $options = [];
 
     /**
      * IndexOperation constructor.

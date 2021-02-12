@@ -3,6 +3,7 @@
 namespace Exo\Util;
 
 use Exo\History;
+use InvalidArgumentException;
 
 class Finder
 {
@@ -10,7 +11,7 @@ class Finder
     /**
      * @var array
      */
-    private $context;
+    private array $context;
 
     /**
      * Finder constructor.
@@ -27,12 +28,12 @@ class Finder
      * @param string $path
      * @return History
      */
-    public function fromPath(string $path)
+    public function fromPath(string $path): History
     {
         $path = realpath(rtrim($path, '/'));
 
         if (!is_dir($path)) {
-            throw new \InvalidArgumentException(sprintf('%s is not a valid directory.', $path));
+            throw new InvalidArgumentException(sprintf('%s is not a valid directory.', $path));
         }
 
         $history = new History();

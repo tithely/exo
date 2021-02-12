@@ -1,6 +1,6 @@
 <?php
 
-return Exo\Migration::create('posts')
+return Exo\TableMigration::create('posts')
     ->addColumn('id', ['type' => 'uuid'])
     ->addColumn('user_id', ['type' => 'uuid'])
     ->addColumn('title', ['type' => 'text'])

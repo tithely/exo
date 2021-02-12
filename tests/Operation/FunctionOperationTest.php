@@ -2,9 +2,9 @@
 
 namespace Exo\Operation;
 
-use phpDocumentor\Reflection\Types\Integer;
+use PHPUnit\Framework\TestCase;
 
-class FunctionOperationTest extends \PHPUnit\Framework\TestCase
+class FunctionOperationTest extends TestCase
 {
     const BODY_ONE = "
         IF credit > 50000 THEN
@@ -98,21 +98,17 @@ class FunctionOperationTest extends \PHPUnit\Framework\TestCase
             self::BODY_TWO
         );
 
+        /* @var FunctionOperation $operation */
         $operation = $base->apply($new);
 
         $this->assertEquals('customer_level', $operation->getName());
-
         $this->assertEquals('integer', $operation->getReturnType()->getType());
         $this->assertEquals(ReturnTypeOperation::ADD, $operation->getReturnType()->getOperation());
         $this->assertEquals([], $operation->getReturnType()->getOptions());
-
         $this->assertFalse($operation->getDeterministic());
         $this->assertTrue($operation->getReadsSqlData());
-
         $this->assertCount(0, $operation->getParameterOperations());
-
         $this->assertCount(0, $operation->getVariableOperations());
-
         $this->assertEquals(self::BODY_TWO, $operation->getBody());
     }
 

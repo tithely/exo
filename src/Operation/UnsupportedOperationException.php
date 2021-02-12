@@ -2,7 +2,9 @@
 
 namespace Exo\Operation;
 
-class UnsupportedOperationException extends \Exception
+use Exception;
+
+class UnsupportedOperationException extends Exception
 {
     public function __construct(string $className = '')
     {

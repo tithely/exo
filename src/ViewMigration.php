@@ -2,27 +2,24 @@
 
 namespace Exo;
 
-use Exo\Operation\ColumnOperation;
-use Exo\Operation\IndexOperation;
-use Exo\Operation\TableOperation;
 use Exo\Operation\ViewOperation;
 
-final class ViewMigration
+final class ViewMigration implements MigrationInterface
 {
     /**
      * @var string
      */
-    private $name;
+    private string $name;
 
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var string|null
      */
-    private $body = null;
+    private ?string $body = null;
 
     /**
      * Returns a new create view migration.
