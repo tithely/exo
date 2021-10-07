@@ -126,6 +126,12 @@ class MysqlStatementBuilder extends StatementBuilder
                                 $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions())
                             );
                             break;
+                        case ColumnOperation::CHANGE:
+                            $specifications[] = sprintf(
+                                'CHANGE COLUMN %s',
+                                $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions())
+                            );
+                            break;
                         case ColumnOperation::DROP:
                             $specifications[] = sprintf(
                                 'DROP COLUMN %s',
@@ -344,7 +350,16 @@ class MysqlStatementBuilder extends StatementBuilder
      */
     protected function buildColumn(string $column, array $options): string
     {
-        $definition = sprintf('%s %s', $this->buildIdentifier($column), $this->buildType($options));
+        if ($options['name'] ?? null) {
+            $definition = sprintf(
+                '%s %s %s',
+                $this->buildIdentifier($column),
+                $this->buildIdentifier($options['name']),
+                $this->buildType($options)
+            );
+        } else {
+            $definition = sprintf('%s %s', $this->buildIdentifier($column), $this->buildType($options));
+        }
 
         if (!($options['null'] ?? true)) {
             $definition .= ' NOT NULL';

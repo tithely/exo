@@ -104,6 +104,18 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                     $originalColumn->getOptions()
                 );
             }
+
+            if ($columnOperation->getOperation() === ColumnOperation::CHANGE) {
+                if (!$originalColumn) {
+                    throw new LogicException('Cannot revert a column that does not exist.');
+                }
+
+                $columnOperations[] = new ColumnOperation(
+                    $columnOperation->getName(),
+                    ColumnOperation::CHANGE,
+                    $originalColumn->getOptions()
+                );
+            }
         }
 
         $indexOperations = [];
@@ -274,6 +286,7 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         }
                         break;
                     case ColumnOperation::MODIFY:
+                    case ColumnOperation::CHANGE:
                         $columns[] = new ColumnOperation(
                             $columnOperation->getName(),
                             $originalOperation,
