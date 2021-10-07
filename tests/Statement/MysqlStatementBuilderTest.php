@@ -6,6 +6,7 @@ use Exo\Operation\ColumnOperation;
 use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\ParameterOperation;
+use Exo\Operation\ProcedureOperation;
 use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\VariableOperation;
@@ -174,6 +175,82 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     FunctionOperation::DROP
                 ),
                 'DROP FUNCTION `user_defined_function`;'
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::CREATE,
+                    false,
+                    'NO SQL',
+                    [new ParameterOperation('inValue', ParameterOperation::ADD, ['type' => 'integer'])],
+                    [new ParameterOperation('outValue', ParameterOperation::ADD, ['type' => 'integer'])],
+                    'SELECT inValue INTO outValue;'
+                ),
+                implode("\n",
+                    [
+                        'DELIMITER //',
+                        '    CREATE PROCEDURE `user_defined_procedure`(IN inValue INTEGER, OUT outValue INTEGER)',
+                        '    NOT DETERMINISTIC',
+                        '    NO SQL',
+                        '    BEGIN',
+                        '        SELECT inValue INTO outValue;',
+                        '    END //',
+                        '    DELIMITER ;'
+                    ]
+               )
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::CREATE,
+                    false,
+                    'READS SQL DATA',
+                    [],
+                    [],
+                    'SELECT \'Number of Users:\', COUNT(*) FROM users;'
+                ),
+                implode("\n",
+                    [
+                        'DELIMITER //',
+                        '    CREATE PROCEDURE `user_defined_procedure`()',
+                        '    NOT DETERMINISTIC',
+                        '    READS SQL DATA',
+                        '    BEGIN',
+                        '        SELECT \'Number of Users:\', COUNT(*) FROM users;',
+                        '    END //',
+                        '    DELIMITER ;'
+                    ]
+                )
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::CREATE,
+                    false,
+                    'READS SQL DATA',
+                    [],
+                    [new ParameterOperation('total', ParameterOperation::ADD, ['type' => 'integer'])],
+                    'SELECT COUNT(*) INTO total FROM users;'
+                ),
+                implode("\n",
+                    [
+                        'DELIMITER //',
+                        '    CREATE PROCEDURE `user_defined_procedure`(OUT total INTEGER)',
+                        '    NOT DETERMINISTIC',
+                        '    READS SQL DATA',
+                        '    BEGIN',
+                        '        SELECT COUNT(*) INTO total FROM users;',
+                        '    END //',
+                        '    DELIMITER ;'
+                    ]
+                )
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::DROP
+                ),
+                'DROP PROCEDURE `user_defined_procedure`;'
             ]
         ];
     }
