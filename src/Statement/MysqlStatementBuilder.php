@@ -21,14 +21,12 @@ class MysqlStatementBuilder extends StatementBuilder
     const VIEW_ALTER = 'ALTER VIEW %s AS (%s);';
     const VIEW_DROP = 'DROP VIEW %s;';
 
-    const PROCEDURE_CREATE = 'DELIMITER //
-    CREATE PROCEDURE %s(%s%s)
+    const PROCEDURE_CREATE = 'CREATE PROCEDURE %s(%s%s)
     %s
     %s
     BEGIN
         %s
-    END //
-    DELIMITER ;';
+    END;';
     const PROCEDURE_DROP = 'DROP PROCEDURE %s;';
 
     const FUNCTION_CREATE = '

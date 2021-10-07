@@ -188,14 +188,12 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 ),
                 implode("\n",
                     [
-                        'DELIMITER //',
-                        '    CREATE PROCEDURE `user_defined_procedure`(IN inValue INTEGER, OUT outValue INTEGER)',
+                        'CREATE PROCEDURE `user_defined_procedure`(IN inValue INTEGER, OUT outValue INTEGER)',
                         '    NOT DETERMINISTIC',
                         '    NO SQL',
                         '    BEGIN',
                         '        SELECT inValue INTO outValue;',
-                        '    END //',
-                        '    DELIMITER ;'
+                        '    END;',
                     ]
                )
             ],
@@ -211,14 +209,12 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 ),
                 implode("\n",
                     [
-                        'DELIMITER //',
-                        '    CREATE PROCEDURE `user_defined_procedure`()',
+                        'CREATE PROCEDURE `user_defined_procedure`()',
                         '    NOT DETERMINISTIC',
                         '    READS SQL DATA',
                         '    BEGIN',
                         '        SELECT \'Number of Users:\', COUNT(*) FROM users;',
-                        '    END //',
-                        '    DELIMITER ;'
+                        '    END;',
                     ]
                 )
             ],
@@ -234,14 +230,12 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 ),
                 implode("\n",
                     [
-                        'DELIMITER //',
-                        '    CREATE PROCEDURE `user_defined_procedure`(OUT total INTEGER)',
+                        'CREATE PROCEDURE `user_defined_procedure`(OUT total INTEGER)',
                         '    NOT DETERMINISTIC',
                         '    READS SQL DATA',
                         '    BEGIN',
                         '        SELECT COUNT(*) INTO total FROM users;',
-                        '    END //',
-                        '    DELIMITER ;'
+                        '    END;',
                     ]
                 )
             ],
