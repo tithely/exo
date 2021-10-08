@@ -21,7 +21,7 @@ class MysqlStatementBuilder extends StatementBuilder
     const VIEW_ALTER = 'ALTER VIEW %s AS (%s);';
     const VIEW_DROP = 'DROP VIEW %s;';
 
-    const PROCEDURE_CREATE = 'CREATE PROCEDURE %s(%s%s)
+    const PROCEDURE_CREATE = 'CREATE PROCEDURE %s(%s%s%s)
     %s
     %s
     BEGIN
@@ -222,7 +222,8 @@ class MysqlStatementBuilder extends StatementBuilder
                 return sprintf(
                     self::PROCEDURE_CREATE,
                     $this->buildIdentifier($operation->getName()), // NAME (for create)
-                    implode(',', $inParameters) . (count($inParameters) && count($outParameters) ? ', ' : ''), // IN PARAMETERS
+                    implode(',', $inParameters), // IN PARAMETERS
+                    (count($inParameters) && count($outParameters) ? ', ' : ''), // COMMA SEPARATOR FOR IN & OUT PARAMETERS
                     implode(',', $outParameters), // OUT PARAMETERS
                     $determinism, // 'DETERMINISTIC' | 'NOT DETERMINISTIC'
                     $readsSqlData, // 'CONTAINS SQL' | 'NO SQL' | 'READS SQL DATA' | 'MODIFIES SQL DATA'

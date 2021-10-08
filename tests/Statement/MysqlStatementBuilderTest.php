@@ -186,16 +186,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     [new ParameterOperation('outValue', ParameterOperation::ADD, ['type' => 'integer'])],
                     'SELECT inValue INTO outValue;'
                 ),
-                implode("\n",
-                    [
-                        'CREATE PROCEDURE `user_defined_procedure`(IN inValue INTEGER, OUT outValue INTEGER)',
-                        '    NOT DETERMINISTIC',
-                        '    NO SQL',
-                        '    BEGIN',
-                        '        SELECT inValue INTO outValue;',
-                        '    END;',
-                    ]
-               )
+                "CREATE PROCEDURE `user_defined_procedure`(IN inValue INTEGER, OUT outValue INTEGER)\n    NOT DETERMINISTIC\n    NO SQL\n    BEGIN\n        SELECT inValue INTO outValue;\n    END;"
             ],
             [
                 new ProcedureOperation(
@@ -205,18 +196,9 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'READS SQL DATA',
                     [],
                     [],
-                    'SELECT \'Number of Users:\', COUNT(*) FROM users;'
+                    'SELECT \'Number of Users:\', COUNT(*) FROM test.users;'
                 ),
-                implode("\n",
-                    [
-                        'CREATE PROCEDURE `user_defined_procedure`()',
-                        '    NOT DETERMINISTIC',
-                        '    READS SQL DATA',
-                        '    BEGIN',
-                        '        SELECT \'Number of Users:\', COUNT(*) FROM users;',
-                        '    END;',
-                    ]
-                )
+                "CREATE PROCEDURE `user_defined_procedure`()\n    NOT DETERMINISTIC\n    READS SQL DATA\n    BEGIN\n        SELECT 'Number of Users:', COUNT(*) FROM test.users;\n    END;"
             ],
             [
                 new ProcedureOperation(
@@ -226,18 +208,9 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'READS SQL DATA',
                     [],
                     [new ParameterOperation('total', ParameterOperation::ADD, ['type' => 'integer'])],
-                    'SELECT COUNT(*) INTO total FROM users;'
+                    'SELECT COUNT(*) INTO total FROM test.users;'
                 ),
-                implode("\n",
-                    [
-                        'CREATE PROCEDURE `user_defined_procedure`(OUT total INTEGER)',
-                        '    NOT DETERMINISTIC',
-                        '    READS SQL DATA',
-                        '    BEGIN',
-                        '        SELECT COUNT(*) INTO total FROM users;',
-                        '    END;',
-                    ]
-                )
+                "CREATE PROCEDURE `user_defined_procedure`(OUT total INTEGER)\n    NOT DETERMINISTIC\n    READS SQL DATA\n    BEGIN\n        SELECT COUNT(*) INTO total FROM test.users;\n    END;"
             ],
             [
                 new ProcedureOperation(
