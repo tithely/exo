@@ -186,7 +186,16 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     [new ParameterOperation('outValue', ParameterOperation::ADD, ['type' => 'integer'])],
                     'SELECT inValue INTO outValue;'
                 ),
-                "CREATE PROCEDURE `user_defined_procedure`(IN inValue INTEGER, OUT outValue INTEGER)\n    NOT DETERMINISTIC\n    NO SQL\n    BEGIN\n        SELECT inValue INTO outValue;\n    END;"
+                sprintf(
+                    MysqlStatementBuilder::PROCEDURE_CREATE,
+                    '`user_defined_procedure`',
+                    'IN inValue INTEGER',
+                    ', ',
+                    'OUT outValue INTEGER',
+                    'NOT DETERMINISTIC',
+                    'NO SQL',
+                    'SELECT inValue INTO outValue;'
+                )
             ],
             [
                 new ProcedureOperation(
@@ -198,7 +207,16 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     [],
                     'SELECT \'Number of Users:\', COUNT(*) FROM test.users;'
                 ),
-                "CREATE PROCEDURE `user_defined_procedure`()\n    NOT DETERMINISTIC\n    READS SQL DATA\n    BEGIN\n        SELECT 'Number of Users:', COUNT(*) FROM test.users;\n    END;"
+                sprintf(
+                    MysqlStatementBuilder::PROCEDURE_CREATE,
+                    '`user_defined_procedure`',
+                    '',
+                    '',
+                    '',
+                    'NOT DETERMINISTIC',
+                    'READS SQL DATA',
+                    'SELECT \'Number of Users:\', COUNT(*) FROM test.users;'
+                )
             ],
             [
                 new ProcedureOperation(
@@ -210,7 +228,16 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     [new ParameterOperation('total', ParameterOperation::ADD, ['type' => 'integer'])],
                     'SELECT COUNT(*) INTO total FROM test.users;'
                 ),
-                "CREATE PROCEDURE `user_defined_procedure`(OUT total INTEGER)\n    NOT DETERMINISTIC\n    READS SQL DATA\n    BEGIN\n        SELECT COUNT(*) INTO total FROM test.users;\n    END;"
+                sprintf(
+                    MysqlStatementBuilder::PROCEDURE_CREATE,
+                    '`user_defined_procedure`',
+                    '',
+                    '',
+                    'OUT total INTEGER',
+                    'NOT DETERMINISTIC',
+                    'READS SQL DATA',
+                    'SELECT COUNT(*) INTO total FROM test.users;'
+                )
             ],
             [
                 new ProcedureOperation(
