@@ -180,7 +180,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 new ProcedureOperation(
                     'user_defined_procedure',
                     ProcedureOperation::CREATE,
-                    false,
+                    true,
                     'CONTAINS SQL',
                     [new ParameterOperation('inValue', ParameterOperation::ADD, ['type' => 'integer'])],
                     [new ParameterOperation('outValue', ParameterOperation::ADD, ['type' => 'integer'])],
@@ -192,7 +192,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     'IN inValue INTEGER',
                     ', ',
                     'OUT outValue INTEGER',
-                    'NOT DETERMINISTIC',
+                    'DETERMINISTIC',
                     'CONTAINS SQL',
                     'SELECT inValue INTO outValue;'
                 )
