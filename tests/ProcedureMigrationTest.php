@@ -67,10 +67,13 @@ class ProcedureMigrationTest extends TestCase
 
     private function expectExceptionModifyingDuringDrop(string $method): void
     {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage($this->methods[$method]['message']);
-
-        $this->callMigrationMethod($method, ProcedureOperation::DROP);
+        try {
+            $this->callMigrationMethod($method, ProcedureOperation::DROP);
+            $this->assertTrue(false);
+        } catch (\Exception $exception) {
+            $this->assertInstanceOf(LogicException::class, $exception);
+            $this->assertEquals($this->methods[$method]['message'], $exception->getMessage());
+        }
     }
 
     public function testPreventModifyDuringDrop(): void
