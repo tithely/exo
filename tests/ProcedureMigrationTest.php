@@ -2,7 +2,6 @@
 
 namespace Exo;
 
-use Exo\Operation\ParameterOperation;
 use Exo\Operation\ProcedureOperation;
 use PHPUnit\Framework\TestCase;
 use LogicException;
@@ -10,86 +9,90 @@ use LogicException;
 class ProcedureMigrationTest extends TestCase
 {
     const BODY_ONE = "SELECT COUNT(*) INTO total FROM posts;";
-    const BODY_TWO = "UPDATE users SET email = userEmail WHERE id = uid;";
 
-    public function testCreateFunction()
+    private ?array $methods = [];
+    private string $procedureName = 'my_procedure';
+
+    protected function setUp(): void
     {
-        $operation = ProcedureMigration::create('my_procedure')
-            ->isDeterministic(true)
-            ->addInParameter('inParameter', ['type' => 'integer'])
-            ->addOutParameter('outParameter', ['type' => 'integer'])
-            ->withBody(self::BODY_ONE)
-            ->getOperation();
-
-        $this->assertEquals('my_procedure', $operation->getName());
-
-        $this->assertEquals(ProcedureOperation::CREATE, $operation->getOperation());
-
-        $this->assertCount(1, $operation->getInParameterOperations());
-        $this->assertEquals('inParameter', $operation->getInParameterOperations()[0]->getName());
-        $this->assertEquals(ParameterOperation::ADD, $operation->getInParameterOperations()[0]->getOperation());
-        $this->assertEquals(['type' => 'integer'], $operation->getInParameterOperations()[0]->getOptions());
-
-        $this->assertCount(1, $operation->getOutParameterOperations());
-        $this->assertEquals('outParameter', $operation->getOutParameterOperations()[0]->getName());
-        $this->assertEquals(ParameterOperation::ADD, $operation->getOutParameterOperations()[0]->getOperation());
-        $this->assertEquals(['type' => 'integer'], $operation->getOutParameterOperations()[0]->getOptions());
-
-        $this->assertEquals(self::BODY_ONE, $operation->getBody());
+        $this->methods = [
+            'withBody' => ['param' => self::BODY_ONE, 'message' => 'Procedure body can only be set in a procedure create migration.'],
+            'addInParameter' => ['name' => 'inParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
+            'addOutParameter' => ['name' => 'outParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
+            'isDeterministic' => ['param' => false, 'message' => 'Cannot set deterministic property in a procedure drop migration.'],
+            'readsSqlData' => ['param' => 'CONTAINS SQL', 'message' => 'Cannot set readsSqlData property in a procedure drop migration.']
+        ];
     }
 
-    public function testDropProcedure()
+    protected function tearDown(): void
     {
-        $operation = ProcedureMigration::drop('my_deprecated_function')
-            ->getOperation();
+        $this->methods = null;
+    }
 
-        $this->assertEquals('my_deprecated_function', $operation->getName());
+    private function callMigrationMethod(string $method, string $action): ProcedureOperation
+    {
+        if ($action === ProcedureOperation::CREATE) {
+            $migration = ProcedureMigration::create($this->procedureName);
+        } else {
+            $migration = ProcedureMigration::drop($this->procedureName);
+        }
+        $param = $this->methods[$method]['param'] ?? '';
+        $name = $this->methods[$method]['name'] ?? '';
+        switch ($method) {
+            case 'withBody';
+                $migration->withBody($param);
+                $this->assertEquals($param, $migration->getOperation()->getBody());
+                break;
+            case 'addInParameter':
+                $migration->addInParameter($name, $param);
+                $this->assertEquals($name, $migration->getOperation()->getInParameterOperations()[0]->getName());
+                $this->assertEquals($param, $migration->getOperation()->getInParameterOperations()[0]->getOptions());
+                break;
+            case 'addOutParameter':
+                $migration->addOutParameter($name, $param);
+                $this->assertEquals($name, $migration->getOperation()->getOutParameterOperations()[0]->getName());
+                $this->assertEquals($param, $migration->getOperation()->getOutParameterOperations()[0]->getOptions());
+                break;
+            case 'isDeterministic':
+                $migration->isDeterministic($param);
+                $this->assertEquals($param, $migration->getOperation()->getDeterministic());
+                break;
+            case 'readsSqlData':
+                $migration->readsSqlData($param);
+                $this->assertEquals($param, $migration->getOperation()->getReadsSqlData());
+                break;
+        }
+        return $migration->getOperation();
+    }
+
+    private function expectExceptionModifyingDuringDrop(string $method): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage($this->methods[$method]['message']);
+
+        $this->callMigrationMethod($method, ProcedureOperation::DROP);
+    }
+
+    public function testPreventModifyDuringDrop(): void
+    {
+        foreach ($this->methods as $method => $options) {
+            $this->expectExceptionModifyingDuringDrop($method);
+        }
+    }
+
+    public function testCreate(): void
+    {
+        foreach ($this->methods as $method => $options) {
+           $this->callMigrationMethod($method, ProcedureOperation::CREATE);
+        }
+    }
+
+    public function testDrop(): void
+    {
+        $operation = $this->callMigrationMethod('', ProcedureOperation::DROP);
+
+        $this->assertEquals($this->procedureName, $operation->getName());
         $this->assertEquals(ProcedureOperation::DROP, $operation->getOperation());
         $this->assertNull($operation->getBody());
-    }
-
-    public function testPreventModifyBodyDuringDrop()
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Procedure body can only be set in a procedure create migration.');
-
-        ProcedureMigration::drop('my_deprecated_function')
-            ->withBody(self::BODY_TWO);
-    }
-
-    public function testPreventAddInParametersDuringDrop()
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot add parameters in a procedure drop migration.');
-
-        ProcedureMigration::drop('my_deprecated_function')
-            ->addInParameter('someParam');
-    }
-
-    public function testPreventAddOutParametersDuringDrop()
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot add parameters in a procedure drop migration.');
-
-        ProcedureMigration::drop('my_deprecated_function')
-            ->addOutParameter('someParam');
-    }
-
-    public function testPreventIsDeterministicDuringDrop()
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot set deterministic property in a procedure drop migration.');
-
-        ProcedureMigration::drop('my_deprecated_function')
-            ->isDeterministic(true);
-    }
-
-    public function testPreventReadsSqlDataDuringDrop()
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Cannot set readsSqlData property in a procedure drop migration.');
-
-        ProcedureMigration::drop('my_deprecated_function')
-            ->readsSqlData('CONTAINS SQL');
     }
 }
