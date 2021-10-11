@@ -29,9 +29,9 @@ class ProcedureMigrationTest extends TestCase
         $this->methods = null;
     }
 
-    private function callMigrationMethod(string $method, string $action): ProcedureOperation
+    private function callMigrationMethod(string $method, string $operation): ProcedureOperation
     {
-        if ($action === ProcedureOperation::CREATE) {
+        if ($operation === ProcedureOperation::CREATE) {
             $migration = ProcedureMigration::create($this->procedureName);
         } else {
             $migration = ProcedureMigration::drop($this->procedureName);
