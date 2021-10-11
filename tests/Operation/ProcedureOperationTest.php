@@ -24,8 +24,8 @@ class ProcedureOperationTest extends TestCase
 
         $this->assertEquals('total_posts_create', $operation->getName());
 
-        $this->assertFalse($operation->getDeterministic());
-        $this->assertEquals('READS SQL DATA', $operation->getReadsSqlData());
+        $this->assertFalse($operation->getDeterminism());
+        $this->assertEquals('READS SQL DATA', $operation->getDataUse());
 
         $this->assertCount(1, $operation->getInParameterOperations());
 

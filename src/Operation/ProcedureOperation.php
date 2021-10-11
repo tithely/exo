@@ -22,7 +22,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
     /**
      * @var string
      */
-    private string $readsSqlData;
+    private string $dataUse;
 
     /**
      * @var ParameterOperation[]
@@ -45,7 +45,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
      * @param string      $name
      * @param string      $operation
      * @param bool        $deterministic
-     * @param string      $readsSqlData
+     * @param string      $dataUse
      * @param array       $inParameterOperations
      * @param array       $outParameterOperations
      * @param string|null $body
@@ -54,7 +54,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
         string $name,
         string $operation,
         bool $deterministic = false,
-        string $readsSqlData = 'READS SQL DATA',
+        string $dataUse = 'READS SQL DATA',
         array $inParameterOperations = [],
         array $outParameterOperations = [],
         string $body = null
@@ -62,7 +62,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
         $this->name = $name;
         $this->operation = $operation;
         $this->deterministic = $deterministic;
-        $this->readsSqlData = $readsSqlData;
+        $this->dataUse = $dataUse;
         $this->inParameterOperations = $inParameterOperations;
         $this->outParameterOperations = $outParameterOperations;
         $this->body = $body;
@@ -140,19 +140,19 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
      *
      * @return bool
      */
-    public function getDeterministic(): bool
+    public function getDeterminism(): bool
     {
         return $this->deterministic;
     }
 
     /**
-     * Returns the readsSqlData characteristic.
+     * Returns the dataUse characteristic.
      *
      * @return string
      */
-    public function getReadsSqlData(): string
+    public function getDataUse(): string
     {
-        return $this->readsSqlData;
+        return $this->dataUse;
     }
 
     /**

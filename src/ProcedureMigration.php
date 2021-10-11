@@ -26,7 +26,7 @@ final class ProcedureMigration implements MigrationInterface
     /**
      * @var string
      */
-    private string $readsSqlData;
+    private string $dataUse;
 
     /**
      * @var ParameterOperation[]
@@ -71,7 +71,7 @@ final class ProcedureMigration implements MigrationInterface
      * @param string      $name
      * @param string      $operation
      * @param bool        $deterministic
-     * @param string      $readsSqlData
+     * @param string      $dataUse
      * @param array       $inParameterOperations
      * @param array       $outParameterOperations
      * @param string|null $body
@@ -80,7 +80,7 @@ final class ProcedureMigration implements MigrationInterface
         string $name,
         string $operation,
         bool $deterministic = false,
-        string $readsSqlData = 'READS SQL DATA',
+        string $dataUse = 'READS SQL DATA',
         array $inParameterOperations = [],
         array $outParameterOperations = [],
         string $body = null
@@ -88,7 +88,7 @@ final class ProcedureMigration implements MigrationInterface
         $this->name = $name;
         $this->operation = $operation;
         $this->deterministic = $deterministic;
-        $this->readsSqlData = $readsSqlData;
+        $this->dataUse = $dataUse;
         $this->inParameterOperations = $inParameterOperations;
         $this->outParameterOperations = $outParameterOperations;
         $this->body = $body;
@@ -122,7 +122,7 @@ final class ProcedureMigration implements MigrationInterface
             $this->name,
             $this->operation,
             $this->deterministic,
-            $this->readsSqlData,
+            $this->dataUse,
             $this->inParameterOperations,
             $this->outParameterOperations,
             $this->body
@@ -135,7 +135,7 @@ final class ProcedureMigration implements MigrationInterface
      * @param bool $deterministic
      * @return $this
      */
-    public function isDeterministic(bool $deterministic): ProcedureMigration
+    public function withDeterminism(bool $deterministic): ProcedureMigration
     {
         if ($this->operation === ProcedureOperation::DROP) {
             throw new LogicException('Cannot set deterministic property in a procedure drop migration.');
@@ -149,20 +149,20 @@ final class ProcedureMigration implements MigrationInterface
     /**
      * Sets the reads sql data property of the function.
      *
-     * @param string $readsSqlData
+     * @param string $dataUse
      * @return $this
      */
-    public function readsSqlData(string $readsSqlData): ProcedureMigration
+    public function withDataUse(string $dataUse): ProcedureMigration
     {
         if ($this->operation === ProcedureOperation::DROP) {
-            throw new LogicException('Cannot set readsSqlData property in a procedure drop migration.');
+            throw new LogicException('Cannot set dataUse property in a procedure drop migration.');
         }
 
-        if (!in_array($readsSqlData, ['CONTAINS SQL', 'NO SQL', 'READS SQL DATA', 'MODIFIES SQL DATA'])) {
-            throw new LogicException('Cannot set readsSqlData, not a valid option.');
+        if (!in_array($dataUse, ['CONTAINS SQL', 'NO SQL', 'READS SQL DATA', 'MODIFIES SQL DATA'])) {
+            throw new LogicException('Cannot set dataUse, not a valid option.');
         }
 
-        $this->readsSqlData = $readsSqlData;
+        $this->dataUse = $dataUse;
 
         return $this;
     }

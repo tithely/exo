@@ -19,8 +19,8 @@ class ProcedureMigrationTest extends TestCase
             'withBody' => ['param' => self::BODY_ONE, 'message' => 'Procedure body can only be set in a procedure create migration.'],
             'addInParameter' => ['name' => 'inParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
             'addOutParameter' => ['name' => 'outParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
-            'isDeterministic' => ['param' => false, 'message' => 'Cannot set deterministic property in a procedure drop migration.'],
-            'readsSqlData' => ['param' => 'CONTAINS SQL', 'message' => 'Cannot set readsSqlData property in a procedure drop migration.']
+            'withDeterminism' => ['param' => false, 'message' => 'Cannot set deterministic property in a procedure drop migration.'],
+            'withDataUse' => ['param' => 'CONTAINS SQL', 'message' => 'Cannot set dataUse property in a procedure drop migration.']
         ];
     }
 
@@ -53,13 +53,13 @@ class ProcedureMigrationTest extends TestCase
                 $this->assertEquals($name, $migration->getOperation()->getOutParameterOperations()[0]->getName());
                 $this->assertEquals($param, $migration->getOperation()->getOutParameterOperations()[0]->getOptions());
                 break;
-            case 'isDeterministic':
-                $migration->isDeterministic($param);
-                $this->assertEquals($param, $migration->getOperation()->getDeterministic());
+            case 'withDeterminism':
+                $migration->withDeterminism($param);
+                $this->assertEquals($param, $migration->getOperation()->getDeterminism());
                 break;
-            case 'readsSqlData':
-                $migration->readsSqlData($param);
-                $this->assertEquals($param, $migration->getOperation()->getReadsSqlData());
+            case 'withDataUse':
+                $migration->withDataUse($param);
+                $this->assertEquals($param, $migration->getOperation()->getDataUse());
                 break;
         }
         return $migration->getOperation();

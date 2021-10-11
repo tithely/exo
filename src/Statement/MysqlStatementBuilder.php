@@ -211,11 +211,11 @@ class MysqlStatementBuilder extends StatementBuilder
             );
         }, $operation->getOutParameterOperations());
 
-        $determinism = ($operation->getDeterministic())
+        $determinism = ($operation->getDeterminism())
             ? 'DETERMINISTIC'
             : 'NOT DETERMINISTIC';
 
-        $readsSqlData = $operation->getReadsSqlData();
+        $dataUse = $operation->getDataUse();
 
         switch ($operation->getOperation()) {
             case ProcedureOperation::CREATE:
@@ -226,7 +226,7 @@ class MysqlStatementBuilder extends StatementBuilder
                     (count($inParameters) && count($outParameters) ? ', ' : ''), // COMMA SEPARATOR FOR IN & OUT PARAMETERS
                     implode(',', $outParameters), // OUT PARAMETERS
                     $determinism, // 'DETERMINISTIC' | 'NOT DETERMINISTIC'
-                    $readsSqlData, // 'CONTAINS SQL' | 'NO SQL' | 'READS SQL DATA' | 'MODIFIES SQL DATA'
+                    $dataUse, // 'CONTAINS SQL' | 'NO SQL' | 'READS SQL DATA' | 'MODIFIES SQL DATA'
                     $operation->getBody() // BODY
                 );
             case ProcedureOperation::DROP:
