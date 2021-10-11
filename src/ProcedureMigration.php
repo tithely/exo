@@ -174,7 +174,7 @@ final class ProcedureMigration implements MigrationInterface
      * @param array  $options
      * @return $this
      */
-    public function addInParameter(string $name, array $options = []): ProcedureMigration
+    public function withInParameter(string $name, array $options = []): ProcedureMigration
     {
         if ($this->operation === ProcedureOperation::DROP) {
             throw new LogicException('Cannot add parameters in a procedure drop migration.');
@@ -195,7 +195,7 @@ final class ProcedureMigration implements MigrationInterface
      * @param array  $options
      * @return $this
      */
-    public function addOutParameter(string $name, array $options = []): ProcedureMigration
+    public function withOutParameter(string $name, array $options = []): ProcedureMigration
     {
         if ($this->operation === ProcedureOperation::DROP) {
             throw new LogicException('Cannot add parameters in a procedure drop migration.');

@@ -17,8 +17,8 @@ class ProcedureMigrationTest extends TestCase
     {
         $this->methods = [
             'withBody' => ['param' => self::BODY_ONE, 'message' => 'Procedure body can only be set in a procedure create migration.'],
-            'addInParameter' => ['name' => 'inParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
-            'addOutParameter' => ['name' => 'outParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
+            'withInParameter' => ['name' => 'inParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
+            'withOutParameter' => ['name' => 'outParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
             'withDeterminism' => ['param' => false, 'message' => 'Cannot set deterministic property in a procedure drop migration.'],
             'withDataUse' => ['param' => 'CONTAINS SQL', 'message' => 'Cannot set dataUse property in a procedure drop migration.']
         ];
@@ -43,13 +43,13 @@ class ProcedureMigrationTest extends TestCase
                 $migration->withBody($param);
                 $this->assertEquals($param, $migration->getOperation()->getBody());
                 break;
-            case 'addInParameter':
-                $migration->addInParameter($name, $param);
+            case 'withInParameter':
+                $migration->withInParameter($name, $param);
                 $this->assertEquals($name, $migration->getOperation()->getInParameterOperations()[0]->getName());
                 $this->assertEquals($param, $migration->getOperation()->getInParameterOperations()[0]->getOptions());
                 break;
-            case 'addOutParameter':
-                $migration->addOutParameter($name, $param);
+            case 'withOutParameter':
+                $migration->withOutParameter($name, $param);
                 $this->assertEquals($name, $migration->getOperation()->getOutParameterOperations()[0]->getName());
                 $this->assertEquals($param, $migration->getOperation()->getOutParameterOperations()[0]->getOptions());
                 break;
