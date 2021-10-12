@@ -117,11 +117,12 @@ class TableMigration implements MigrationInterface
     /**
      * Pushes a new change column operation.
      *
-     * @param string $column
+     * @param string $oldColumn
+     * @param string $newColumn
      * @param array  $options
      * @return TableMigration
      */
-    public function changeColumn(string $column, array $options): TableMigration
+    public function changeColumn(string $oldColumn, string $newColumn, array $options): TableMigration
     {
         if ($this->operation === TableOperation::CREATE) {
             throw new LogicException('Cannot change columns in a create migration.');
@@ -131,7 +132,12 @@ class TableMigration implements MigrationInterface
             throw new LogicException('Cannot change columns in a drop migration.');
         }
 
-        $this->columnOperations[] = new ColumnOperation($column, ColumnOperation::CHANGE, $options);
+        if ($oldColumn === $newColumn) {
+            $this->columnOperations[] = new ColumnOperation($oldColumn, ColumnOperation::MODIFY, $options);
+        } else {
+            $options['new_name'] = $newColumn;
+            $this->columnOperations[] = new ColumnOperation($oldColumn, ColumnOperation::CHANGE, $options);
+        }
 
         return $this;
     }
