@@ -117,12 +117,9 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
             if ($operation->getOperation() === self::DROP) {
                 return null;
             }
-        } else if ($operation->getOperation() === self::DROP) {
-            // Skip modification of procedures that will be dropped
-            return $operation;
         }
 
-        return $operation;
+        throw new InvalidArgumentException('Only CREATE and DROP operations can be applied to procedures.');
     }
 
     /**
