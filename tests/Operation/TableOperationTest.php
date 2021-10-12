@@ -209,9 +209,9 @@ class TableOperationTest extends TestCase
         $this->assertEquals('users', $operation->getName());
         $this->assertEquals(TableOperation::ALTER, $operation->getOperation());
 
-        $this->assertEquals('username', $operation->getColumnOperations()[0]->getName());
+        $this->assertEquals('email', $operation->getColumnOperations()[0]->getName());
         $this->assertEquals(ColumnOperation::CHANGE, $operation->getColumnOperations()[0]->getOperation());
-        $this->assertEquals(['type' => 'string', 'length' => 64], $operation->getColumnOperations()[0]->getOptions());
+        $this->assertEquals(['new_name' => 'username', 'type' => 'string', 'length' => 64], $operation->getColumnOperations()[0]->getOptions());
 
         $this->assertCount(0, $operation->getIndexOperations());
     }
