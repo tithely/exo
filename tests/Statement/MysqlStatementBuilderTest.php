@@ -103,7 +103,7 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
             ],
             [
                 new TableOperation('users', TableOperation::ALTER, [
-                    new ColumnOperation('meta', ColumnOperation::CHANGE, ['name' => 'metadata', 'type' => 'json']),
+                    new ColumnOperation('meta', ColumnOperation::CHANGE, ['new_name' => 'metadata', 'type' => 'json']),
                 ], []),
                 'ALTER TABLE `users` CHANGE COLUMN `meta` `metadata` JSON;'
             ],

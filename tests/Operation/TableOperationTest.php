@@ -98,7 +98,7 @@ class TableOperationTest extends TestCase
 
         $operation = $base->apply(new TableOperation('users', TableOperation::ALTER, [
             new ColumnOperation('email', ColumnOperation::DROP, []),
-            new ColumnOperation('username', ColumnOperation::CHANGE, ['type' => 'string', 'length' => 255, 'name' => 'email'])
+            new ColumnOperation('username', ColumnOperation::CHANGE, ['type' => 'string', 'length' => 255, 'new_name' => 'email'])
         ], []));
 
         $this->assertEquals('users', $operation->getName());
@@ -109,13 +109,13 @@ class TableOperationTest extends TestCase
         $this->assertEquals('id', $operation->getColumnOperations()[0]->getName());
         $this->assertEquals(ColumnOperation::DROP, $operation->getColumnOperations()[0]->getOperation());
 
-        $this->assertEquals('username', $operation->getColumnOperations()[1]->getName());
+        $this->assertEquals('email', $operation->getColumnOperations()[1]->getName());
         $this->assertEquals(ColumnOperation::ADD, $operation->getColumnOperations()[1]->getOperation());
-        $this->assertEquals(['type' => 'string', 'length' => 255, 'name' => 'email'], $operation->getColumnOperations()[1]->getOptions());
+        $this->assertEquals(['type' => 'string', 'length' => 255, 'new_name' => 'email'], $operation->getColumnOperations()[1]->getOptions());
 
         $this->assertEquals('email_username', $operation->getIndexOperations()[0]->getName());
         $this->assertEquals(IndexOperation::ADD, $operation->getIndexOperations()[0]->getOperation());
-        $this->assertEquals(['username'], $operation->getIndexOperations()[0]->getColumns());
+        $this->assertEquals(['email'], $operation->getIndexOperations()[0]->getColumns());
         $this->assertEquals(['unique' => true], $operation->getIndexOperations()[0]->getOptions());
     }
 
@@ -194,7 +194,7 @@ class TableOperationTest extends TestCase
     public function testReverseAlterWithColumnChange()
     {
         $base = new TableOperation('users', TableOperation::ALTER, [
-            new ColumnOperation('username', ColumnOperation::CHANGE, ['name' => 'email', 'type' => 'string', 'length' => 255])
+            new ColumnOperation('username', ColumnOperation::CHANGE, ['new_name' => 'email', 'type' => 'string', 'length' => 255])
         ], []);
 
         $create = new TableOperation('users', TableOperation::CREATE, [
