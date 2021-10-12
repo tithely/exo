@@ -218,6 +218,15 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
 
                         array_splice($columns, $offset, 0, [$addOperation]);
                         break;
+                    case ColumnOperation::CHANGE:
+                        $addOperation = new ColumnOperation(
+                            $columnOperation->getOptions()['new_name'],
+                            ColumnOperation::ADD,
+                            $options
+                        );
+
+                        array_splice($columns, $offset, 0, [$addOperation]);
+                        break;
                 }
             }
 
@@ -277,9 +286,15 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         }
                         break;
                     case ColumnOperation::MODIFY:
-                    case ColumnOperation::CHANGE:
                         $columns[] = new ColumnOperation(
                             $columnOperation->getName(),
+                            $originalOperation,
+                            $columnOperation->getOptions()
+                        );
+                        break;
+                    case ColumnOperation::CHANGE:
+                        $columns[] = new ColumnOperation(
+                            $columnOperation->getOptions()['new_name'],
                             $originalOperation,
                             $columnOperation->getOptions()
                         );
