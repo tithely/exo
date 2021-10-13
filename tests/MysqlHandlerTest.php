@@ -29,6 +29,7 @@ class MysqlHandlerTest extends TestCase
         $this->pdo->exec('DROP VIEW IF EXISTS user_counts;');
         $this->pdo->exec('DROP FUNCTION IF EXISTS user_level;');
         $this->pdo->exec('DROP FUNCTION IF EXISTS user_count_function;');
+        $this->pdo->exec('DROP PROCEDURE IF EXISTS post_count;');
     }
 
     public function tearDown(): void
@@ -41,7 +42,7 @@ class MysqlHandlerTest extends TestCase
         $handler = $this->getHandler();
         $results = $handler->migrate([], null, false);
 
-        $this->assertCount(7, $results);
+        $this->assertCount(9, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('1', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
@@ -56,6 +57,10 @@ class MysqlHandlerTest extends TestCase
         $this->assertEquals('6', $results[5]->getVersion());
         $this->assertTrue($results[6]->isSuccess());
         $this->assertEquals('7', $results[6]->getVersion());
+        $this->assertTrue($results[7]->isSuccess());
+        $this->assertEquals('8', $results[7]->getVersion());
+        $this->assertTrue($results[8]->isSuccess());
+        $this->assertEquals('9', $results[8]->getVersion());
 
         // Verify Exec Results
         $seedCheck = $this->pdo->query('select * from users')->fetchAll();
@@ -111,7 +116,7 @@ class MysqlHandlerTest extends TestCase
         $handler->migrate(['1', '2'], '3', false);
 
         $results = $handler->migrate(['1', '3'], null, false);
-        $this->assertCount(5, $results);
+        $this->assertCount(7, $results);
         $this->assertTrue($results[0]->isSuccess());
         $this->assertEquals('2', $results[0]->getVersion());
         $this->assertTrue($results[1]->isSuccess());
@@ -122,6 +127,10 @@ class MysqlHandlerTest extends TestCase
         $this->assertEquals('6', $results[3]->getVersion());
         $this->assertTrue($results[4]->isSuccess());
         $this->assertEquals('7', $results[4]->getVersion());
+        $this->assertTrue($results[5]->isSuccess());
+        $this->assertEquals('8', $results[5]->getVersion());
+        $this->assertTrue($results[6]->isSuccess());
+        $this->assertEquals('9', $results[6]->getVersion());
     }
 
     public function testFailingMigration()
@@ -140,11 +149,11 @@ class MysqlHandlerTest extends TestCase
     {
         $handler = $this->getHandler();
         $handler->migrate([], null, false);
-        $results = $handler->rollback(['1', '2', '3'], '2', false);
+        $results = $handler->rollback(['1', '2', '3', '4', '5', '6', '7', '8', '9'], '2', false);
 
-        $this->assertCount(1, $results);
+        $this->assertCount(6, $results);
         $this->assertTrue($results[0]->isSuccess());
-        $this->assertEquals('3', $results[0]->getVersion());
+        $this->assertEquals('9', $results[0]->getVersion());
     }
 
     public function testRollbackWithMissed()
@@ -224,6 +233,14 @@ class MysqlHandlerTest extends TestCase
         $history->add('7', ExecMigration::create('user_seed')
             ->withBody('INSERT INTO users (id, email, password) VALUES (1, \'bob@smith.com\',\'some_password!\');')
         );
+
+        $history->add('8', ProcedureMigration::create('post_count')
+            ->withDeterminism(false)
+            ->withDataUse('READS SQL DATA')
+            ->withBody("SELECT 'Total Posts:', COUNT(*) FROM posts;")
+        );
+
+        $history->add('9', ProcedureMigration::drop('post_count'));
 
         return new Handler($this->pdo, $history);
     }

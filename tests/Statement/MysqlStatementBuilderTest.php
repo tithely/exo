@@ -6,6 +6,7 @@ use Exo\Operation\ColumnOperation;
 use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\ParameterOperation;
+use Exo\Operation\ProcedureOperation;
 use Exo\Operation\ReturnTypeOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\VariableOperation;
@@ -174,6 +175,76 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                     FunctionOperation::DROP
                 ),
                 'DROP FUNCTION `user_defined_function`;'
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::CREATE,
+                    true,
+                    'CONTAINS SQL',
+                    [new ParameterOperation('inValue', ParameterOperation::ADD, ['type' => 'integer'])],
+                    [new ParameterOperation('outValue', ParameterOperation::ADD, ['type' => 'integer'])],
+                    'SELECT inValue INTO outValue;'
+                ),
+                sprintf(
+                    MysqlStatementBuilder::PROCEDURE_CREATE,
+                    '`user_defined_procedure`',
+                    'IN inValue INTEGER',
+                    ', ',
+                    'OUT outValue INTEGER',
+                    'DETERMINISTIC',
+                    'CONTAINS SQL',
+                    'SELECT inValue INTO outValue;'
+                )
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::CREATE,
+                    false,
+                    'READS SQL DATA',
+                    [],
+                    [],
+                    'SELECT \'Number of Users:\', COUNT(*) FROM test.users;'
+                ),
+                sprintf(
+                    MysqlStatementBuilder::PROCEDURE_CREATE,
+                    '`user_defined_procedure`',
+                    '',
+                    '',
+                    '',
+                    'NOT DETERMINISTIC',
+                    'READS SQL DATA',
+                    'SELECT \'Number of Users:\', COUNT(*) FROM test.users;'
+                )
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::CREATE,
+                    false,
+                    'READS SQL DATA',
+                    [],
+                    [new ParameterOperation('total', ParameterOperation::ADD, ['type' => 'integer'])],
+                    'SELECT COUNT(*) INTO total FROM test.users;'
+                ),
+                sprintf(
+                    MysqlStatementBuilder::PROCEDURE_CREATE,
+                    '`user_defined_procedure`',
+                    '',
+                    '',
+                    'OUT total INTEGER',
+                    'NOT DETERMINISTIC',
+                    'READS SQL DATA',
+                    'SELECT COUNT(*) INTO total FROM test.users;'
+                )
+            ],
+            [
+                new ProcedureOperation(
+                    'user_defined_procedure',
+                    ProcedureOperation::DROP
+                ),
+                'DROP PROCEDURE `user_defined_procedure`;'
             ]
         ];
     }

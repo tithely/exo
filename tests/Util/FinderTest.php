@@ -11,7 +11,7 @@ class FinderTest extends TestCase
     {
         $finder = new Finder();
         $history = $finder->fromPath(__DIR__ . '/../Migrations');
-        $operations = $history->play('20190901_create_users', '20210210_create_user_data_seed');
+        $operations = $history->play('20190901_create_users', '20211007_create_post_count_procedure');
 
         $this->assertEquals([
             '20190901_create_users',
@@ -20,7 +20,8 @@ class FinderTest extends TestCase
             '20200602_create_user_counts_view',
             '20200604_create_user_level_function',
             '20200605_create_user_counts_view_with_context',
-            '20210210_create_user_data_seed'
+            '20210210_create_user_data_seed',
+            '20211007_create_post_count_procedure'
         ], $history->getVersions());
         $this->assertEquals('users', $operations[0]->getName());
         $this->assertEquals('users', $operations[1]->getName());
@@ -29,6 +30,7 @@ class FinderTest extends TestCase
         $this->assertEquals('user_level', $operations[4]->getName());
         $this->assertEquals('user_counts', $operations[5]->getName());
         $this->assertEquals('user_data_seed', $operations[6]->getName());
+        $this->assertEquals('post_count', $operations[7]->getName());
     }
 
     public function testFromPathWithContextHappyPath()

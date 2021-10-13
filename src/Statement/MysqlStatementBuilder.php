@@ -8,6 +8,7 @@ use Exo\Operation\FunctionOperation;
 use Exo\Operation\IndexOperation;
 use Exo\Operation\OperationInterface;
 use Exo\Operation\ParameterOperation;
+use Exo\Operation\ProcedureOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\UnsupportedOperationException;
 use Exo\Operation\VariableOperation;
@@ -19,6 +20,15 @@ class MysqlStatementBuilder extends StatementBuilder
     const VIEW_CREATE = 'CREATE VIEW %s AS (%s);';
     const VIEW_ALTER = 'ALTER VIEW %s AS (%s);';
     const VIEW_DROP = 'DROP VIEW %s;';
+
+    const PROCEDURE_CREATE = 'CREATE PROCEDURE %s(%s%s%s)
+    %s
+    %s
+    BEGIN
+        %s
+    END;';
+    const PROCEDURE_DROP = 'DROP PROCEDURE %s;';
+
     const FUNCTION_CREATE = '
     CREATE FUNCTION %s(
         %s
@@ -66,6 +76,10 @@ class MysqlStatementBuilder extends StatementBuilder
             case ViewOperation::class:
                 /* @var ViewOperation $operation */
                 return $this->buildView($operation);
+
+            case ProcedureOperation::class:
+                /* @var ProcedureOperation $operation */
+                return $this->buildProcedure($operation);
 
             case FunctionOperation::class:
                 /* @var FunctionOperation $operation */
@@ -165,6 +179,59 @@ class MysqlStatementBuilder extends StatementBuilder
             case TableOperation::DROP:
                 return sprintf(
                     'DROP TABLE %s;',
+                    $this->buildIdentifier($operation->getName())
+                );
+            default:
+                throw new UnsupportedOperationException($operation->getOperation());
+        }
+    }
+
+    /**
+     * Builds SQL statements for a procedure operation.
+     *
+     * @param ProcedureOperation $operation
+     * @return string
+     * @throws UnsupportedOperationException
+     */
+    public function buildProcedure(ProcedureOperation $operation): string
+    {
+        $inParameters = array_map(function (ParameterOperation $parameterOperation) {
+            return sprintf(
+                'IN %s %s',
+                $parameterOperation->getName(),
+                $this->buildType($parameterOperation->getOptions())
+            );
+        }, $operation->getInParameterOperations());
+
+        $outParameters = array_map(function (ParameterOperation $parameterOperation) {
+            return sprintf(
+                'OUT %s %s',
+                $parameterOperation->getName(),
+                $this->buildType($parameterOperation->getOptions())
+            );
+        }, $operation->getOutParameterOperations());
+
+        $determinism = ($operation->getDeterminism())
+            ? 'DETERMINISTIC'
+            : 'NOT DETERMINISTIC';
+
+        $dataUse = $operation->getDataUse();
+
+        switch ($operation->getOperation()) {
+            case ProcedureOperation::CREATE:
+                return sprintf(
+                    self::PROCEDURE_CREATE,
+                    $this->buildIdentifier($operation->getName()), // NAME (for create)
+                    implode(',', $inParameters), // IN PARAMETERS
+                    (count($inParameters) && count($outParameters) ? ', ' : ''), // COMMA SEPARATOR FOR IN & OUT PARAMETERS
+                    implode(',', $outParameters), // OUT PARAMETERS
+                    $determinism, // 'DETERMINISTIC' | 'NOT DETERMINISTIC'
+                    $dataUse, // 'CONTAINS SQL' | 'NO SQL' | 'READS SQL DATA' | 'MODIFIES SQL DATA'
+                    $operation->getBody() // BODY
+                );
+            case ProcedureOperation::DROP:
+                return sprintf(
+                    self::PROCEDURE_DROP,
                     $this->buildIdentifier($operation->getName())
                 );
             default:

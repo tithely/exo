@@ -4,6 +4,7 @@ namespace Exo\Statement;
 
 use Exo\Operation\FunctionOperation;
 use Exo\Operation\OperationInterface;
+use Exo\Operation\ProcedureOperation;
 use Exo\Operation\TableOperation;
 use Exo\Operation\ViewOperation;
 use InvalidArgumentException;
@@ -33,6 +34,14 @@ abstract class StatementBuilder
      * @return string
      */
     abstract public function buildView(ViewOperation $operation): string;
+
+    /**
+     * Builds SQL statements for a procedure operation.
+     *
+     * @param ProcedureOperation $operation
+     * @return string
+     */
+    abstract public function buildProcedure(ProcedureOperation $operation): string;
 
     /**
      * Builds SQL statements for a function operation.
