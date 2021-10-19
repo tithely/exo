@@ -21,7 +21,6 @@ jobs:
       mysql:
         image: mysql:${{ matrix.mysql-versions }}
         env:
-          MYSQL_USER: root
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_HOST: 127.0.0.1
