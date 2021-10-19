@@ -4,7 +4,7 @@ namespace Exo\Operation;
 
 use InvalidArgumentException;
 
-class FunctionOperation extends AbstractOperation
+final class FunctionOperation extends AbstractOperation implements ReversibleOperationInterface, ReducibleOperationInterface
 {
     const CREATE = 'create';
     const REPLACE = 'replace';
@@ -13,37 +13,37 @@ class FunctionOperation extends AbstractOperation
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var ReturnTypeOperation
      */
-    private $returnType;
+    private ReturnTypeOperation $returnType;
 
     /**
      * @var bool
      */
-    private $deterministic;
+    private bool $deterministic;
 
     /**
      * @var bool
      */
-    private $readsSqlData;
+    private bool $readsSqlData;
 
     /**
      * @var ParameterOperation[]
      */
-    private $parameterOperations;
+    private array $parameterOperations;
 
     /**
      * @var VariableOperation[]
      */
-    private $variableOperations;
+    private array $variableOperations;
 
     /**
-     * @var string
+     * @var string|null
      */
-    private $body;
+    private ?string $body;
 
     /**
      * FunctionOperation constructor.
@@ -80,12 +80,13 @@ class FunctionOperation extends AbstractOperation
     /**
      * Returns the reverse of the operation.
      *
-     * @param FunctionOperation|null $original
-     * @return static
+     * @param ReversibleOperationInterface|null $originalOperation
+     * @return ReversibleOperationInterface|null
      */
-    public function reverse(FunctionOperation $original = null): ?FunctionOperation
+    public function reverse(?ReversibleOperationInterface $originalOperation = null): ?ReversibleOperationInterface
     {
-        if (!is_null($original) && $original->getName() !== $this->getName()) {
+        /* @var FunctionOperation $originalOperation */
+        if (!is_null($originalOperation) && $originalOperation->getName() !== $this->getName()) {
             throw new InvalidArgumentException('Previous operations must apply to the same function.');
         }
 
@@ -96,17 +97,18 @@ class FunctionOperation extends AbstractOperation
             );
         }
 
-        return $original;
+        return $originalOperation;
     }
 
     /**
      * Returns a new operation by applying another operation.
      *
-     * @param FunctionOperation $operation
-     * @return FunctionOperation|null
+     * @param ReducibleOperationInterface $operation
+     * @return ReducibleOperationInterface|null
      */
-    public function apply(FunctionOperation $operation)
+    public function apply(ReducibleOperationInterface $operation): ?ReducibleOperationInterface
     {
+        /* @var FunctionOperation $operation */
         if ($operation->getName() !== $this->getName()) {
             throw new InvalidArgumentException('Cannot apply operations for a different name.');
         }

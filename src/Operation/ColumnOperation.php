@@ -2,7 +2,7 @@
 
 namespace Exo\Operation;
 
-class ColumnOperation extends AbstractOperation
+final class ColumnOperation extends AbstractOperation
 {
     const ADD = 'add';
     const MODIFY = 'modify';
@@ -11,12 +11,12 @@ class ColumnOperation extends AbstractOperation
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var array
      */
-    private $options = [];
+    private array $options = [];
 
     /**
      * ColumnOperation constructor.

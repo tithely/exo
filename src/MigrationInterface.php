@@ -2,14 +2,14 @@
 
 namespace Exo;
 
-use Exo\Operation\AbstractOperation;
+use Exo\Operation\OperationInterface;
 
 interface MigrationInterface
 {
     /**
      * Returns the table operation.
      *
-     * @return AbstractOperation
+     * @return OperationInterface
      */
-    public function getOperation(): AbstractOperation;
+    public function getOperation(): OperationInterface;
 }

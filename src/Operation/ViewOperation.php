@@ -2,7 +2,9 @@
 
 namespace Exo\Operation;
 
-class ViewOperation extends AbstractOperation
+use InvalidArgumentException;
+
+final class ViewOperation extends AbstractOperation implements ReversibleOperationInterface, ReducibleOperationInterface
 {
     const CREATE = 'create';
     const ALTER = 'alter';
@@ -11,12 +13,12 @@ class ViewOperation extends AbstractOperation
     /**
      * @var string
      */
-    private $operation;
+    private string $operation;
 
     /**
      * @var string|null
      */
-    private $body;
+    private ?string $body;
 
     /**
      * ViewOperation constructor.
@@ -35,11 +37,12 @@ class ViewOperation extends AbstractOperation
     /**
      * Returns the reverse of the operation.
      *
-     * @param ViewOperation|null $original
-     * @return static
+     * @param ReversibleOperationInterface|null $originalOperation
+     * @return ReversibleOperationInterface|null
      */
-    public function reverse(ViewOperation $original = null): ViewOperation
+    public function reverse(?ReversibleOperationInterface $originalOperation = null): ?ReversibleOperationInterface
     {
+        /* @var ViewOperation $originalOperation */
         if ($this->getOperation() === ViewOperation::CREATE) {
             return new ViewOperation(
                 $this->getName(),
@@ -48,41 +51,42 @@ class ViewOperation extends AbstractOperation
             );
         }
 
-        if ($original && $original->getName() !== $this->name) {
-            throw new \InvalidArgumentException('Previous operations must apply to the same view.');
+        if ($originalOperation && $originalOperation->getName() !== $this->name) {
+            throw new InvalidArgumentException('Previous operations must apply to the same view.');
         }
 
         // Provide the create view operation to reverse a drop
         if ($this->getOperation() === ViewOperation::DROP) {
-            return $original;
+            return $originalOperation;
         }
 
         return new ViewOperation(
             $this->getName(),
             ViewOperation::ALTER,
-            $original->getBody()
+            $originalOperation->getBody()
         );
     }
 
     /**
      * Returns a new operation by applying another operation.
      *
-     * @param ViewOperation $operation
-     * @return ViewOperation|null
+     * @param ReducibleOperationInterface $operation
+     * @return ReducibleOperationInterface|null
      */
-    public function apply(ViewOperation $operation)
+    public function apply(ReducibleOperationInterface $operation): ?ReducibleOperationInterface
     {
+        /* @var ViewOperation $operation */
         if ($operation->getName() !== $this->getName()) {
-            throw new \InvalidArgumentException('Cannot apply operations for a different view.');
+            throw new InvalidArgumentException('Cannot apply operations for a different view.');
         }
 
         if ($this->getOperation() === self::DROP) {
-            throw new \InvalidArgumentException('Cannot apply further operations to a dropped view.');
+            throw new InvalidArgumentException('Cannot apply further operations to a dropped view.');
         }
 
         if ($this->getOperation() === self::CREATE) {
             if ($operation->operation === self::CREATE) {
-                throw new \InvalidArgumentException('Cannot recreate an existing view.');
+                throw new InvalidArgumentException('Cannot recreate an existing view.');
             }
 
             // Skip creation of views that will be dropped
@@ -90,7 +94,6 @@ class ViewOperation extends AbstractOperation
                 return null;
             }
         } else if ($operation->getOperation() === self::DROP) {
-
             // Skip modification of views that will be dropped
             return $operation;
         }

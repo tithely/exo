@@ -2,9 +2,11 @@
 
 namespace Exo;
 
-use Exo\Operation\AbstractOperation;
+use Exo\Operation\ExecOperation;
+use Exo\Operation\OperationInterface;
 use Exo\Statement\MysqlStatementBuilder;
 use Exo\Statement\StatementBuilder;
+use InvalidArgumentException;
 use PDO;
 
 class Handler
@@ -12,12 +14,12 @@ class Handler
     /**
      * @var PDO
      */
-    private $db;
+    private PDO $db;
 
     /**
      * @var History
      */
-    private $history;
+    private History $history;
 
     /**
      * Handler constructor.
@@ -76,7 +78,7 @@ class Handler
             $from = array_search($target, $executed);
 
             if ($from === false) {
-                throw new \InvalidArgumentException(sprintf('Unknown target version "%s".', $target));
+                throw new InvalidArgumentException(sprintf('Unknown target version "%s".', $target));
             }
         }
 
@@ -92,7 +94,7 @@ class Handler
     }
 
     /**
-     * @param AbstractOperation[] $operations
+     * @param OperationInterface[] $operations
      * @param array               $versions
      * @param bool                $reduce
      * @return HandlerResult[]
@@ -108,8 +110,19 @@ class Handler
 
         foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
+
+            // Determine if transaction is required
+            $transactionRequired = $operation instanceof ExecOperation;
+
+            // Begin transaction if needed
+            if ($transactionRequired) {
+                $this->db->beginTransaction();
+            }
+
+            // Process operation
             $result = $this->db->exec($sql);
 
+            // Get results
             $results[] = new HandlerResult(
                 $reduce ? null : $versions[$offset],
                 $result !== false,
@@ -117,9 +130,24 @@ class Handler
                 $result === false ? $this->db->errorInfo() : null
             );
 
-            // Stop processing if there was a failure
+            // Check for failure
             if ($result === false) {
+                // On Failure:
+
+                // Rollback transaction if started
+                if ($transactionRequired) {
+                    $this->db->rollBack();
+                }
+
+                // Stop processing
                 break;
+
+            } else {
+
+                // Commit transaction on success
+                if ($transactionRequired) {
+                    $this->db->commit();
+                }
             }
         }
 
@@ -142,7 +170,7 @@ class Handler
             case 'mysql':
                 return new MysqlStatementBuilder();
             default:
-                throw new \InvalidArgumentException(sprintf('Unsupported driver "%s".', $driver));
+                throw new InvalidArgumentException(sprintf('Unsupported driver "%s".', $driver));
         }
     }
 }

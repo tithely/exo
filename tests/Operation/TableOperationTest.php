@@ -2,7 +2,9 @@
 
 namespace Exo\Operation;
 
-class TableOperationTest extends \PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+class TableOperationTest extends TestCase
 {
     public function testApplyAlterToCreate()
     {
@@ -170,5 +172,23 @@ class TableOperationTest extends \PHPUnit\Framework\TestCase
         $operation = $base->reverse($create);
 
         $this->assertEquals($create, $operation);
+    }
+
+    public function testDropColumnReferencedByIndex()
+    {
+        $base = new TableOperation('users_roles', TableOperation::CREATE, [
+            new ColumnOperation('user_id', ColumnOperation::ADD, ['type' => 'uuid']),
+            new ColumnOperation('role', ColumnOperation::ADD, ['type' => 'string']),
+            new ColumnOperation('deleted_at', ColumnOperation::ADD, ['type' => 'datetime'])
+        ], [
+            new IndexOperation('user_role', IndexOperation::ADD, ['user_id', 'role', 'deleted_at'], [])
+        ]);
+
+        $alter = new TableOperation('users_roles', TableOperation::ALTER, [
+            new ColumnOperation('deleted_at', ColumnOperation::DROP, [])
+        ], []);
+
+        $operation = $base->apply($alter);
+        $this->assertNotContains('deleted_at', $operation->getIndexOperations()[0]->getColumns());
     }
 }
