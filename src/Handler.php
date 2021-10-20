@@ -104,6 +104,10 @@ class Handler
     {
         $results = [];
 
+        // Set connection error mode
+        $errorMode = $this->db->getAttribute(PDO::ATTR_ERRMODE);
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
         foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
 
@@ -146,6 +150,9 @@ class Handler
                 }
             }
         }
+
+        // Restore connection error mode
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, $errorMode);
 
         return $results;
     }

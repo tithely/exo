@@ -4,4 +4,4 @@ handlers:
     port: 3306
     name: 'test'
     user: 'root'
-    pass: ''
+    pass: 'rootpassword'
