@@ -15,6 +15,7 @@ class ProcedureOperationTest extends TestCase
             ProcedureOperation::CREATE,
             false,
             'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('total', ParameterOperation::ADD, ['type' => 'integer'])
             ],
@@ -43,6 +44,7 @@ class ProcedureOperationTest extends TestCase
             ProcedureOperation::CREATE,
             false,
             'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('total', ParameterOperation::ADD, ['type' => 'integer'])
             ],
@@ -72,6 +74,7 @@ class ProcedureOperationTest extends TestCase
             ProcedureOperation::CREATE,
             false,
             'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('total', ParameterOperation::ADD, ['type' => 'integer'])
             ],
