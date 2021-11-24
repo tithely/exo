@@ -36,9 +36,14 @@ final class FunctionMigration implements MigrationInterface
     private bool $deterministic;
 
     /**
-     * @var bool
+     * @var string
      */
-    private bool $readsSqlData;
+    private string $dataUse;
+
+    /**
+     * @var string
+     */
+    private string $language;
 
     /**
      * @var ParameterOperation[]
@@ -86,21 +91,23 @@ final class FunctionMigration implements MigrationInterface
     /**
      * FunctionMigration constructor.
      *
-     * @param string $name
-     * @param string $operation
-     * @param ?ReturnTypeOperation $returnType
-     * @param bool $deterministic
-     * @param bool $readsSqlData
-     * @param array $parameterOperations
-     * @param array $variableOperations
-     * @param string|null $body
+     * @param string                $name
+     * @param string                $operation
+     * @param ?ReturnTypeOperation  $returnType
+     * @param bool                  $deterministic
+     * @param string                $dataUse
+     * @param string                $language
+     * @param array                 $parameterOperations
+     * @param array                 $variableOperations
+     * @param string|null           $body
      */
     private function __construct(
         string $name,
         string $operation,
         ReturnTypeOperation $returnType = null,
         bool $deterministic = false,
-        bool $readsSqlData = false,
+        string $dataUse = 'READS SQL DATA',
+        string $language = 'plpgsql',
         array $parameterOperations = [],
         array $variableOperations = [],
         string $body = null
@@ -109,7 +116,8 @@ final class FunctionMigration implements MigrationInterface
         $this->operation = $operation;
         $this->returnType = $returnType;
         $this->deterministic = $deterministic;
-        $this->readsSqlData = $readsSqlData;
+        $this->dataUse = $dataUse;
+        $this->language = $language;
         $this->parameterOperations = $parameterOperations;
         $this->variableOperations = $variableOperations;
         $this->body = $body;
@@ -121,7 +129,7 @@ final class FunctionMigration implements MigrationInterface
      * @param bool $deterministic
      * @return $this
      */
-    public function isDeterministic(bool $deterministic): FunctionMigration
+    public function withDeterminism(bool $deterministic): FunctionMigration
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot set deterministic property in a drop migration.');
@@ -135,16 +143,41 @@ final class FunctionMigration implements MigrationInterface
     /**
      * Sets the reads sql data property of the function.
      *
-     * @param bool $readsSqlData
+     * @param string $dataUse
      * @return $this
      */
-    public function readsSqlData(bool $readsSqlData): FunctionMigration
+    public function withDataUse(string $dataUse): FunctionMigration
     {
         if ($this->operation === FunctionOperation::DROP) {
-            throw new LogicException('Cannot set readsSqlData property in a drop migration.');
+            throw new LogicException('Cannot set dataUse property in a drop migration.');
         }
 
-        $this->readsSqlData = $readsSqlData;
+        if (!in_array($dataUse, ['CONTAINS SQL', 'NO SQL', 'READS SQL DATA', 'MODIFIES SQL DATA'])) {
+            throw new LogicException('Cannot set dataUse, not a valid option.');
+        }
+
+        $this->dataUse = $dataUse;
+
+        return $this;
+    }
+
+    /**
+     * Sets the language property of the function.
+     *
+     * @param string $language
+     * @return $this
+     */
+    public function withLanguage(string $language): FunctionMigration
+    {
+        if ($this->operation === FunctionOperation::DROP) {
+            throw new LogicException('Cannot set language property in a drop migration.');
+        }
+
+        if (!in_array($language, ['SQL', 'plpgsql'])) {
+            throw new LogicException('Cannot set language, not a valid option.');
+        }
+
+        $this->language = $language;
 
         return $this;
     }
@@ -174,7 +207,7 @@ final class FunctionMigration implements MigrationInterface
      * @param array  $options
      * @return $this
      */
-    public function addParameter(string $name, array $options = []): FunctionMigration
+    public function withParameter(string $name, array $options = []): FunctionMigration
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot add parameters in a view drop migration.');
@@ -199,7 +232,7 @@ final class FunctionMigration implements MigrationInterface
      * @param array  $options
      * @return $this
      */
-    public function addVariable(string $name, array $options = []): FunctionMigration
+    public function withVariable(string $name, array $options = []): FunctionMigration
     {
         if ($this->operation === FunctionOperation::DROP) {
             throw new LogicException('Cannot add variables in a view drop migration.');
@@ -249,7 +282,8 @@ final class FunctionMigration implements MigrationInterface
             $this->operation,
             $this->returnType,
             $this->deterministic,
-            $this->readsSqlData,
+            $this->dataUse,
+            $this->language,
             $this->parameterOperations,
             $this->variableOperations,
             $this->body
