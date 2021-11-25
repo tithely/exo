@@ -26,5 +26,5 @@ $pdo = new PDO('mysql:dbname=tenant_1234;host=dbhost', 'user', 'pass');
 $handler = new Handler($pdo, $history);
 
 // Migrate from version '1' to '2'
-$handler->migrate('1', '2', true);
+$handler->migrate(['1'], '2', true);
 ```
