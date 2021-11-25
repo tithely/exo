@@ -285,7 +285,7 @@ class PostgresqlStatementBuilder extends StatementBuilder
                     $this->buildIdentifier($operation->getName()), implode(', ', $definitions),
                 );
                 $index = (count($indices)) ? implode(' ', $indices) : '';
-                return "$definition $index";
+                return sprintf('%s %s', $definition, $index);
             case TableOperation::ALTER:
                 $specifications = [];
                 $indices = [];
@@ -357,7 +357,7 @@ class PostgresqlStatementBuilder extends StatementBuilder
                     );
                 }
                 $index = (count($indices)) ? implode(' ', $indices) : '';
-                return "$definition $index";
+                return sprintf('%s %s', $definition, $index);
             case TableOperation::DROP:
                 return sprintf(
                     'DROP TABLE %s;',
