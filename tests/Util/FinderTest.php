@@ -11,18 +11,18 @@ class FinderTest extends TestCase
     {
         $finder = new Finder();
         $history = $finder->fromPath(__DIR__ . '/../Migrations');
-        $operations = $history->play('20190901_create_users', '20211122_create_all_columns_and_types');
+        $operations = $history->play('20190901_create_users_table', '20211122_create_all_columns_and_types_table');
 
         $this->assertEquals([
-            '20190901_create_users',
-            '20190905_alter_users',
-            '20190912_create_posts',
+            '20190901_create_users_table',
+            '20190905_alter_users_table',
+            '20190912_create_posts_table',
             '20200602_create_user_counts_view',
             '20200604_create_user_level_function',
-            '20200605_alter_user_counts_view_with_context',
+            '20200605_alter_user_counts_view-with_context',
             '20210210_create_user_data_seed',
             '20211007_create_post_count_procedure',
-            '20211122_create_all_columns_and_types'
+            '20211122_create_all_columns_and_types_table'
         ], $history->getVersions());
         $this->assertEquals('users', $operations[0]->getName());
         $this->assertEquals('users', $operations[1]->getName());
@@ -41,7 +41,7 @@ class FinderTest extends TestCase
             'tenant_database_name' => 'test'
         ]);
         $history = $finder->fromPath(__DIR__ . '/../Migrations');
-        $operations = $history->play('20200605_alter_user_counts_view_with_context', '20200605_create_user_counts_view_with_context');
+        $operations = $history->play('20200605_alter_user_counts_view-with_context', '20200605_alter_user_counts_view-with_context');
 
         /* @var ViewOperation $operation */
         $operation = $operations[0];
@@ -59,7 +59,7 @@ class FinderTest extends TestCase
     {
         $finder = new Finder([]);
         $history = $finder->fromPath(__DIR__ . '/../Migrations');
-        $operations = $history->play('20200605_alter_user_counts_view_with_context', '20200605_create_user_counts_view_with_context');
+        $operations = $history->play('20200605_alter_user_counts_view-with_context', '20200605_alter_user_counts_view-with_context');
 
         /* @var ViewOperation $operation */
         $operation = $operations[0];
