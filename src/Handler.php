@@ -5,6 +5,7 @@ namespace Exo;
 use Exo\Operation\ExecOperation;
 use Exo\Operation\OperationInterface;
 use Exo\Statement\MysqlStatementBuilder;
+use Exo\Statement\PostgresqlStatementBuilder;
 use Exo\Statement\StatementBuilder;
 use InvalidArgumentException;
 use PDO;
@@ -169,6 +170,8 @@ class Handler
         switch ($driver) {
             case 'mysql':
                 return new MysqlStatementBuilder();
+            case 'pgsql':
+                return new PostgresqlStatementBuilder();
             default:
                 throw new InvalidArgumentException(sprintf('Unsupported driver "%s".', $driver));
         }

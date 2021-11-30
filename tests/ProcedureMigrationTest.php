@@ -20,7 +20,8 @@ class ProcedureMigrationTest extends TestCase
             'withInParameter' => ['name' => 'inParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
             'withOutParameter' => ['name' => 'outParameter', 'param' => ['type' => 'integer'], 'message' => 'Cannot add parameters in a procedure drop migration.'],
             'withDeterminism' => ['param' => false, 'message' => 'Cannot set deterministic property in a procedure drop migration.'],
-            'withDataUse' => ['param' => 'CONTAINS SQL', 'message' => 'Cannot set dataUse property in a procedure drop migration.']
+            'withDataUse' => ['param' => 'CONTAINS SQL', 'message' => 'Cannot set dataUse property in a procedure drop migration.'],
+            'withLanguage' => ['param' => 'SQL', 'message' => 'Cannot set language property in a procedure drop migration.']
         ];
     }
 
@@ -56,6 +57,10 @@ class ProcedureMigrationTest extends TestCase
             case 'withDeterminism':
                 $migration->withDeterminism($param);
                 $this->assertEquals($param, $migration->getOperation()->getDeterminism());
+                break;
+            case 'withLanguage':
+                $migration->withLanguage($param);
+                $this->assertEquals($param, $migration->getOperation()->getLanguage());
                 break;
             case 'withDataUse':
                 $migration->withDataUse($param);

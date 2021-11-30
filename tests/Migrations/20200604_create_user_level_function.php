@@ -1,9 +1,8 @@
 <?php
 
 return Exo\FunctionMigration::create('user_level')
-    ->withReturnType('integer')
-    ->addParameter('inputValue', ['type' => 'integer'])
-    ->isDeterministic(true)
-    ->readsSqlData(false)
-    ->addVariable('suffixValue', ['length' => '20'])
-    ->withBody('RETURN CONCAT(CAST(inputValue AS CHAR(25), suffixValue);');
+    ->withParameter('input', ['type' => 'integer'])
+    ->withVariable('suffix', ['type' => 'string', 'length' => '20'])
+    ->withDeterminism(true)
+    ->withReturnType('string', ['type' => 'string', 'length' => 128])
+    ->withBody('RETURN CONCAT(CAST(input AS CHAR(25)), suffix);');

@@ -25,6 +25,11 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
     private string $dataUse;
 
     /**
+     * @var string
+     */
+    private string $language;
+
+    /**
      * @var ParameterOperation[]
      */
     private array $inParameterOperations;
@@ -46,6 +51,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
      * @param string      $operation
      * @param bool        $deterministic
      * @param string      $dataUse
+     * @param string      $language
      * @param array       $inParameterOperations
      * @param array       $outParameterOperations
      * @param string|null $body
@@ -55,6 +61,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
         string $operation,
         bool $deterministic = false,
         string $dataUse = 'READS SQL DATA',
+        string $language = 'plpgsql',
         array $inParameterOperations = [],
         array $outParameterOperations = [],
         string $body = null
@@ -63,6 +70,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
         $this->operation = $operation;
         $this->deterministic = $deterministic;
         $this->dataUse = $dataUse;
+        $this->language = $language;
         $this->inParameterOperations = $inParameterOperations;
         $this->outParameterOperations = $outParameterOperations;
         $this->body = $body;
@@ -150,6 +158,16 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
     public function getDataUse(): string
     {
         return $this->dataUse;
+    }
+
+    /**
+     * Returns the language characteristic.
+     *
+     * @return string
+     */
+    public function getLanguage(): string
+    {
+        return $this->language;
     }
 
     /**

@@ -26,9 +26,14 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
     private bool $deterministic;
 
     /**
-     * @var bool
+     * @var string
      */
-    private bool $readsSqlData;
+    private string $dataUse;
+
+    /**
+     * @var string
+     */
+    private string $language;
 
     /**
      * @var ParameterOperation[]
@@ -48,21 +53,23 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
     /**
      * FunctionOperation constructor.
      *
-     * @param string $name
-     * @param string $operation
-     * @param ReturnTypeOperation|null $returnType
-     * @param bool $deterministic
-     * @param bool $readsSqlData
-     * @param array $parameterOperations
-     * @param array $variableOperations
-     * @param string|null $body
+     * @param string                    $name
+     * @param string                    $operation
+     * @param ReturnTypeOperation|null  $returnType
+     * @param bool                      $deterministic
+     * @param string                    $dataUse
+     * @param string                    $language
+     * @param array                     $parameterOperations
+     * @param array                     $variableOperations
+     * @param string|null               $body
      */
     public function __construct(
         string $name,
         string $operation,
         ReturnTypeOperation $returnType = null,
         bool $deterministic = false,
-        bool $readsSqlData = false,
+        string $dataUse = 'READS SQL DATA',
+        string $language = 'plpgsql',
         array $parameterOperations = [],
         array $variableOperations = [],
         string $body = null
@@ -71,7 +78,8 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
         $this->operation = $operation;
         $this->returnType = $returnType ?? new ReturnTypeOperation('string', ReturnTypeOperation::ADD);
         $this->deterministic = $deterministic;
-        $this->readsSqlData = $readsSqlData;
+        $this->dataUse = $dataUse;
+        $this->language = $language;
         $this->parameterOperations = $parameterOperations;
         $this->variableOperations = $variableOperations;
         $this->body = $body;
@@ -152,19 +160,29 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
      *
      * @return bool
      */
-    public function getDeterministic(): bool
+    public function getDeterminism(): bool
     {
         return $this->deterministic;
     }
 
     /**
-     * Returns the readsSqlData flag.
+     * Returns the dataUse characteristic.
      *
-     * @return bool
+     * @return string
      */
-    public function getReadsSqlData(): bool
+    public function getDataUse(): string
     {
-        return $this->readsSqlData;
+        return $this->dataUse;
+    }
+
+    /**
+     * Returns the language characteristic.
+     *
+     * @return string
+     */
+    public function getLanguage(): string
+    {
+        return $this->language;
     }
 
     /**

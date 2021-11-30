@@ -29,6 +29,11 @@ final class ProcedureMigration implements MigrationInterface
     private string $dataUse;
 
     /**
+     * @var string
+     */
+    private string $language;
+
+    /**
      * @var ParameterOperation[]
      */
     private array $inParameterOperations;
@@ -72,6 +77,7 @@ final class ProcedureMigration implements MigrationInterface
      * @param string      $operation
      * @param bool        $deterministic
      * @param string      $dataUse
+     * @param string      $language
      * @param array       $inParameterOperations
      * @param array       $outParameterOperations
      * @param string|null $body
@@ -81,6 +87,7 @@ final class ProcedureMigration implements MigrationInterface
         string $operation,
         bool $deterministic = false,
         string $dataUse = 'READS SQL DATA',
+        string $language = 'plpgsql',
         array $inParameterOperations = [],
         array $outParameterOperations = [],
         string $body = null
@@ -89,6 +96,7 @@ final class ProcedureMigration implements MigrationInterface
         $this->operation = $operation;
         $this->deterministic = $deterministic;
         $this->dataUse = $dataUse;
+        $this->language = $language;
         $this->inParameterOperations = $inParameterOperations;
         $this->outParameterOperations = $outParameterOperations;
         $this->body = $body;
@@ -123,6 +131,7 @@ final class ProcedureMigration implements MigrationInterface
             $this->operation,
             $this->deterministic,
             $this->dataUse,
+            $this->language,
             $this->inParameterOperations,
             $this->outParameterOperations,
             $this->body
@@ -163,6 +172,27 @@ final class ProcedureMigration implements MigrationInterface
         }
 
         $this->dataUse = $dataUse;
+
+        return $this;
+    }
+
+    /**
+     * Sets the language property of the procedure.
+     *
+     * @param string $language
+     * @return $this
+     */
+    public function withLanguage(string $language): ProcedureMigration
+    {
+        if ($this->operation === ProcedureOperation::DROP) {
+            throw new LogicException('Cannot set language property in a procedure drop migration.');
+        }
+
+        if (!in_array($language, ['SQL', 'plpgsql'])) {
+            throw new LogicException('Cannot set language, not a valid option.');
+        }
+
+        $this->language = $language;
 
         return $this;
     }
