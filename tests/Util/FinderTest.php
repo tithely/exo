@@ -19,7 +19,7 @@ class FinderTest extends TestCase
             '20190912_create_posts',
             '20200602_create_user_counts_view',
             '20200604_create_user_level_function',
-            '20200605_create_user_counts_view_with_context',
+            '20200605_alter_user_counts_view_with_context',
             '20210210_create_user_data_seed',
             '20211007_create_post_count_procedure',
             '20211122_create_all_columns_and_types'
@@ -41,7 +41,7 @@ class FinderTest extends TestCase
             'tenant_database_name' => 'test'
         ]);
         $history = $finder->fromPath(__DIR__ . '/../Migrations');
-        $operations = $history->play('20200605_create_user_counts_view_with_context', '20200605_create_user_counts_view_with_context');
+        $operations = $history->play('20200605_alter_user_counts_view_with_context', '20200605_create_user_counts_view_with_context');
 
         /* @var ViewOperation $operation */
         $operation = $operations[0];
@@ -50,7 +50,7 @@ class FinderTest extends TestCase
         $this->assertEquals('alter', $operation->getOperation());
 
         $this->assertEquals(
-            'SELECT COUNT(DISTINCT id) AS user_count FROM test.users',
+            'SELECT COUNT(id) AS user_count FROM test.users',
             $operation->getBody()
         );
     }
@@ -59,7 +59,7 @@ class FinderTest extends TestCase
     {
         $finder = new Finder([]);
         $history = $finder->fromPath(__DIR__ . '/../Migrations');
-        $operations = $history->play('20200605_create_user_counts_view_with_context', '20200605_create_user_counts_view_with_context');
+        $operations = $history->play('20200605_alter_user_counts_view_with_context', '20200605_create_user_counts_view_with_context');
 
         /* @var ViewOperation $operation */
         $operation = $operations[0];
@@ -68,7 +68,7 @@ class FinderTest extends TestCase
         $this->assertEquals('alter', $operation->getOperation());
 
         $this->assertEquals(
-            'SELECT COUNT(DISTINCT id) AS user_count FROM undefined.users',
+            'SELECT COUNT(id) AS user_count FROM undefined.users',
             $operation->getBody()
         );
     }
