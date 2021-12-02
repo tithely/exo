@@ -100,8 +100,22 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
 
                 $columnOperations[] = new ColumnOperation(
                     $columnOperation->getName(),
-                    ColumnOperation::MODIFY,
+                    $columnOperation->getOperation(),
                     $originalColumn->getOptions()
+                );
+            }
+
+            if ($columnOperation->getOperation() === ColumnOperation::CHANGE) {
+                if (!$originalColumn) {
+                    throw new LogicException('Cannot revert a column that does not exist.');
+                }
+
+                $options = $originalColumn->getOptions();
+                $options['new_name'] = $columnOperation->getName();
+                $columnOperations[] = new ColumnOperation(
+                    $columnOperation->getOptions()['new_name'],
+                    $columnOperation->getOperation(),
+                    $options
                 );
             }
         }
@@ -215,6 +229,15 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
 
                         array_splice($columns, $offset, 0, [$addOperation]);
                         break;
+                    case ColumnOperation::CHANGE:
+                        $addOperation = new ColumnOperation(
+                            $columnOperation->getOptions()['new_name'],
+                            ColumnOperation::ADD,
+                            $options
+                        );
+
+                        array_splice($columns, $offset, 0, [$addOperation]);
+                        break;
                 }
             }
 
@@ -276,6 +299,13 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                     case ColumnOperation::MODIFY:
                         $columns[] = new ColumnOperation(
                             $columnOperation->getName(),
+                            $originalOperation,
+                            $columnOperation->getOptions()
+                        );
+                        break;
+                    case ColumnOperation::CHANGE:
+                        $columns[] = new ColumnOperation(
+                            $columnOperation->getOptions()['new_name'],
                             $originalOperation,
                             $columnOperation->getOptions()
                         );

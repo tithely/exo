@@ -25,11 +25,12 @@ class TableMigrationTest extends \PHPUnit\Framework\TestCase
             ->addColumn('email', ['type' => 'string', 'length' => 255])
             ->modifyColumn('password', ['type' => 'string', 'length' => 255])
             ->dropColumn('username')
+            ->changeColumn('id', 'uid', ['type' => 'string'])
             ->getOperation();
 
         $this->assertEquals('users', $operation->getName());
         $this->assertEquals(TableOperation::ALTER, $operation->getOperation());
-        $this->assertCount(3, $operation->getColumnOperations());
+        $this->assertCount(4, $operation->getColumnOperations());
     }
 
     public function testDropMigration()

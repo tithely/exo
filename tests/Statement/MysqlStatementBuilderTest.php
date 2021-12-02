@@ -103,6 +103,12 @@ class MysqlStatementBuilderTest extends \PHPUnit\Framework\TestCase
                 'DROP COLUMN `created_at`, ADD UNIQUE INDEX `meta` (`meta`), DROP INDEX `username`;'
             ],
             [
+                new TableOperation('users', TableOperation::ALTER, [
+                    new ColumnOperation('meta', ColumnOperation::CHANGE, ['new_name' => 'metadata', 'type' => 'json']),
+                ], []),
+                'ALTER TABLE `users` CHANGE COLUMN `meta` `metadata` JSON;'
+            ],
+            [
                 new TableOperation('users', TableOperation::DROP, [], []),
                 'DROP TABLE `users`;'
             ],

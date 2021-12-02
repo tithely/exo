@@ -6,6 +6,7 @@ final class ColumnOperation extends AbstractOperation
 {
     const ADD = 'add';
     const MODIFY = 'modify';
+    const CHANGE = 'change';
     const DROP = 'drop';
 
     /**
