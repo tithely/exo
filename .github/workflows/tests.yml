@@ -1,0 +1,123 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: '*'
+
+jobs:
+
+  postgresql_tests:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        php-versions: [ '7.4', '8.0', '8.1', '8.2', '8.3', '8.4' ]
+        postgresql-versions: [ '12',  '14' ]
+    name: PHP ${{ matrix.php-versions }} with postgreSQL ${{ matrix.postgresql-versions }}
+
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgresql-versions }}
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: test
+        ports:
+          [ '5432:5432' ]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Check Out Code
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: pdo_pgsql
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Setup Database
+        run: |
+          sudo apt update
+          cp tests/db.yml.example tests/db.yml
+
+      - name: Run test suite
+        run: ./vendor/bin/phpunit
+
+  mysql_tests:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        php-versions: [ '7.4', '8.0', '8.1', '8.2', '8.3', '8.4' ]
+        mysql-versions: [ '5.7', '8.0' ]
+    name: PHP ${{ matrix.php-versions }} with MySQL ${{ matrix.mysql-versions }}
+
+    services:
+      mysql:
+        image: mysql:${{ matrix.mysql-versions }}
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_HOST: 127.0.0.1
+        ports:
+          [ '3306:3306' ]
+        options: --health-cmd "mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Check Out Code
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: pdo_mysql
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Setup Database
+        run: |
+          sudo apt update
+          cp tests/db.yml.example tests/db.yml
+
+      - name: Run test suite
+        run: ./vendor/bin/phpunit
