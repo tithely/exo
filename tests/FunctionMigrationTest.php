@@ -35,10 +35,10 @@ class FunctionMigrationTest extends TestCase
     public function testCreateFunction()
     {
         $operation = FunctionMigration::create('my_function')
-            ->isDeterministic(true)
+            ->withDeterminism(true)
             ->withReturnType('string', ['type' => 'string', 'length' => 256])
-            ->addParameter('someParameters', ['type' => 'integer'])
-            ->addVariable('someVariable', ['type' => 'string', 'length' => 64])
+            ->withParameter('someParameters', ['type' => 'integer'])
+            ->withVariable('someVariable', ['type' => 'string', 'length' => 64])
             ->withBody(self::BODY_ONE)
             ->getOperation();
 
@@ -110,7 +110,7 @@ class FunctionMigrationTest extends TestCase
         $this->expectExceptionMessage('Cannot add parameters in a view drop migration.');
 
         FunctionMigration::drop('my_deprecated_function')
-            ->addParameter('someParam');
+            ->withParameter('someParam');
     }
 
     public function testPreventAddVariableDuringDrop()
@@ -119,6 +119,6 @@ class FunctionMigrationTest extends TestCase
         $this->expectExceptionMessage('Cannot add variables in a view drop migration.');
 
         FunctionMigration::drop('my_deprecated_function')
-            ->addVariable('someVar');
+            ->withVariable('someVar');
     }
 }

@@ -4,21 +4,15 @@ namespace Exo\Operation;
 
 use InvalidArgumentException;
 
-final class FunctionOperation extends AbstractOperation implements ReversibleOperationInterface, ReducibleOperationInterface
+final class ProcedureOperation extends AbstractOperation implements ReversibleOperationInterface, ReducibleOperationInterface
 {
     const CREATE = 'create';
-    const REPLACE = 'replace';
     const DROP = 'drop';
 
     /**
      * @var string
      */
     private string $operation;
-
-    /**
-     * @var ReturnTypeOperation
-     */
-    private ReturnTypeOperation $returnType;
 
     /**
      * @var bool
@@ -38,12 +32,12 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
     /**
      * @var ParameterOperation[]
      */
-    private array $parameterOperations;
+    private array $inParameterOperations;
 
     /**
-     * @var VariableOperation[]
+     * @var ParameterOperation[]
      */
-    private array $variableOperations;
+    private array $outParameterOperations;
 
     /**
      * @var string|null
@@ -51,37 +45,34 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
     private ?string $body;
 
     /**
-     * FunctionOperation constructor.
+     * ProcedureOperation constructor.
      *
-     * @param string                    $name
-     * @param string                    $operation
-     * @param ReturnTypeOperation|null  $returnType
-     * @param bool                      $deterministic
-     * @param string                    $dataUse
-     * @param string                    $language
-     * @param array                     $parameterOperations
-     * @param array                     $variableOperations
-     * @param string|null               $body
+     * @param string      $name
+     * @param string      $operation
+     * @param bool        $deterministic
+     * @param string      $dataUse
+     * @param string      $language
+     * @param array       $inParameterOperations
+     * @param array       $outParameterOperations
+     * @param string|null $body
      */
     public function __construct(
         string $name,
         string $operation,
-        ReturnTypeOperation $returnType = null,
         bool $deterministic = false,
         string $dataUse = 'READS SQL DATA',
         string $language = 'plpgsql',
-        array $parameterOperations = [],
-        array $variableOperations = [],
+        array $inParameterOperations = [],
+        array $outParameterOperations = [],
         string $body = null
     ) {
         $this->name = $name;
         $this->operation = $operation;
-        $this->returnType = $returnType ?? new ReturnTypeOperation('string', ReturnTypeOperation::ADD);
         $this->deterministic = $deterministic;
         $this->dataUse = $dataUse;
         $this->language = $language;
-        $this->parameterOperations = $parameterOperations;
-        $this->variableOperations = $variableOperations;
+        $this->inParameterOperations = $inParameterOperations;
+        $this->outParameterOperations = $outParameterOperations;
         $this->body = $body;
     }
 
@@ -93,15 +84,15 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
      */
     public function reverse(?ReversibleOperationInterface $originalOperation = null): ?ReversibleOperationInterface
     {
-        /* @var FunctionOperation $originalOperation */
-        if (!is_null($originalOperation) && $originalOperation->getName() !== $this->getName()) {
-            throw new InvalidArgumentException('Previous operations must apply to the same function.');
+        /* @var ProcedureOperation $originalOperation */
+        if ($originalOperation && $originalOperation->getName() !== $this->name) {
+            throw new InvalidArgumentException('Previous operations must apply to the same procedure.');
         }
 
-        if ($this->getOperation() === FunctionOperation::CREATE) {
-            return new FunctionOperation(
+        if ($this->getOperation() === ProcedureOperation::CREATE) {
+            return new ProcedureOperation(
                 $this->getName(),
-                TableOperation::DROP
+                ProcedureOperation::DROP
             );
         }
 
@@ -116,23 +107,27 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
      */
     public function apply(ReducibleOperationInterface $operation): ?ReducibleOperationInterface
     {
-        /* @var FunctionOperation $operation */
+        /* @var ProcedureOperation $operation */
         if ($operation->getName() !== $this->getName()) {
-            throw new InvalidArgumentException('Cannot apply operations for a different name.');
+            throw new InvalidArgumentException('Cannot apply operations for a different procedure.');
         }
 
         if ($this->getOperation() === self::DROP) {
-            throw new InvalidArgumentException('Cannot apply further operations to a dropped name.');
+            throw new InvalidArgumentException('Cannot apply further operations to a dropped procedure.');
         }
 
-        // Skip creation of functions that will be dropped
-        if (in_array($this->getOperation(), [self::CREATE, self::REPLACE])) {
-            if ($operation->operation === self::DROP) {
+        if ($this->getOperation() === self::CREATE) {
+            if ($operation->operation === self::CREATE) {
+                throw new InvalidArgumentException('Cannot recreate an existing procedure.');
+            }
+
+            // Skip creation of procedures that will be dropped
+            if ($operation->getOperation() === self::DROP) {
                 return null;
             }
         }
 
-        return $operation;
+        throw new InvalidArgumentException('Only CREATE and DROP operations can be applied to procedures.');
     }
 
     /**
@@ -143,16 +138,6 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
     public function getOperation(): string
     {
         return $this->operation;
-    }
-
-    /**
-     * Returns the return type.
-     *
-     * @return ReturnTypeOperation|null
-     */
-    public function getReturnType(): ?ReturnTypeOperation
-    {
-        return $this->returnType;
     }
 
     /**
@@ -186,23 +171,23 @@ final class FunctionOperation extends AbstractOperation implements ReversibleOpe
     }
 
     /**
-     * Returns the parameter operations.
+     * Returns the IN parameter operations.
      *
      * @return ParameterOperation[]
      */
-    public function getParameterOperations(): array
+    public function getInParameterOperations(): array
     {
-        return $this->parameterOperations;
+        return $this->inParameterOperations;
     }
 
     /**
-     * Returns the parameter operations.
+     * Returns the OUT parameter operations.
      *
-     * @return VariableOperation[]
+     * @return ParameterOperation[]
      */
-    public function getVariableOperations(): array
+    public function getOutParameterOperations(): array
     {
-        return $this->variableOperations;
+        return $this->outParameterOperations;
     }
 
     /**

@@ -32,7 +32,8 @@ class FunctionOperationTest extends TestCase
         $operation = new FunctionOperation('customer_level', FunctionOperation::CREATE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
-            false,
+            'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('arg1', ParameterOperation::ADD),
                 new ParameterOperation('arg2', ParameterOperation::ADD, ['type' => 'integer']),
@@ -48,8 +49,9 @@ class FunctionOperationTest extends TestCase
         $this->assertEquals(ReturnTypeOperation::ADD, $operation->getReturnType()->getOperation());
         $this->assertEquals([], $operation->getReturnType()->getOptions());
 
-        $this->assertTrue($operation->getDeterministic());
-        $this->assertFalse($operation->getReadsSqlData());
+        $this->assertTrue($operation->getDeterminism());
+        $this->assertEquals('READS SQL DATA', $operation->getDataUse());
+        $this->assertEquals('SQL', $operation->getLanguage());
 
         $this->assertCount(3, $operation->getParameterOperations());
 
@@ -79,7 +81,8 @@ class FunctionOperationTest extends TestCase
         $base = new FunctionOperation('customer_level', FunctionOperation::CREATE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
-            false,
+            'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('arg1', ParameterOperation::ADD),
                 new ParameterOperation('arg2', ParameterOperation::ADD, ['type' => 'integer']),
@@ -92,7 +95,8 @@ class FunctionOperationTest extends TestCase
         $new = new FunctionOperation('customer_level', FunctionOperation::REPLACE,
             new ReturnTypeOperation('integer', ReturnTypeOperation::ADD),
             false,
-            true,
+            'READS SQL DATA',
+            'SQL',
             [],
             [],
             self::BODY_TWO
@@ -105,8 +109,9 @@ class FunctionOperationTest extends TestCase
         $this->assertEquals('integer', $operation->getReturnType()->getType());
         $this->assertEquals(ReturnTypeOperation::ADD, $operation->getReturnType()->getOperation());
         $this->assertEquals([], $operation->getReturnType()->getOptions());
-        $this->assertFalse($operation->getDeterministic());
-        $this->assertTrue($operation->getReadsSqlData());
+        $this->assertFalse($operation->getDeterminism());
+        $this->assertEquals('READS SQL DATA', $operation->getDataUse());
+        $this->assertEquals('SQL', $operation->getLanguage());
         $this->assertCount(0, $operation->getParameterOperations());
         $this->assertCount(0, $operation->getVariableOperations());
         $this->assertEquals(self::BODY_TWO, $operation->getBody());
@@ -117,7 +122,8 @@ class FunctionOperationTest extends TestCase
         $base = new FunctionOperation('any_name', FunctionOperation::REPLACE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
-            false,
+            'READS SQL DATA',
+            'SQL',
             [],
             [],
             self::BODY_ONE
@@ -149,7 +155,8 @@ class FunctionOperationTest extends TestCase
             FunctionOperation::REPLACE,
             new ReturnTypeOperation('integer', ReturnTypeOperation::ADD),
             false,
-            true,
+            'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('id', ParameterOperation::ADD, []),
                 new ParameterOperation('email', ParameterOperation::ADD, ['type' => 'string', 'length' => 255]),
@@ -167,7 +174,8 @@ class FunctionOperationTest extends TestCase
             FunctionOperation::REPLACE,
             new ReturnTypeOperation('string', ReturnTypeOperation::ADD),
             true,
-            false,
+            'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('id', ParameterOperation::ADD, ['type' => 'uuid']),
                 new ParameterOperation('username', ParameterOperation::ADD, ['type' => 'string', 'length' => 64])
@@ -209,7 +217,8 @@ class FunctionOperationTest extends TestCase
             FunctionOperation::REPLACE,
             new ReturnTypeOperation('integer', ReturnTypeOperation::ADD),
             false,
-            true,
+            'READS SQL DATA',
+            'SQL',
             [
                 new ParameterOperation('id', ParameterOperation::ADD, []),
                 new ParameterOperation('email', ParameterOperation::ADD, ['type' => 'string', 'length' => 255, 'first' => true]),

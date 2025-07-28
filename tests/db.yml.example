@@ -4,4 +4,10 @@ handlers:
     port: 3306
     name: 'test'
     user: 'root'
-    pass: ''
+    pass: 'rootpassword'
+  pgsql:
+    host: '127.0.0.1'
+    port: 5432
+    name: 'test'
+    user: 'root'
+    pass: 'rootpassword'

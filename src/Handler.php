@@ -5,6 +5,7 @@ namespace Exo;
 use Exo\Operation\ExecOperation;
 use Exo\Operation\OperationInterface;
 use Exo\Statement\MysqlStatementBuilder;
+use Exo\Statement\PostgresqlStatementBuilder;
 use Exo\Statement\StatementBuilder;
 use InvalidArgumentException;
 use PDO;
@@ -104,6 +105,10 @@ class Handler
     {
         $results = [];
 
+        // Set connection error mode
+        $errorMode = $this->db->getAttribute(PDO::ATTR_ERRMODE);
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
         foreach ($operations as $offset => $operation) {
             $sql = $this->getBuilder()->build($operation);
 
@@ -147,6 +152,9 @@ class Handler
             }
         }
 
+        // Restore connection error mode
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, $errorMode);
+
         return $results;
     }
 
@@ -162,6 +170,8 @@ class Handler
         switch ($driver) {
             case 'mysql':
                 return new MysqlStatementBuilder();
+            case 'pgsql':
+                return new PostgresqlStatementBuilder();
             default:
                 throw new InvalidArgumentException(sprintf('Unsupported driver "%s".', $driver));
         }
