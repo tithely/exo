@@ -118,9 +118,9 @@ class MigrationIntegrationTest extends TestCase
         $usersTable = $this->pdo->query('DESCRIBE users')->fetchAll();
 
         $this->assertSame('email', $usersTable[0]['Field']);
-        $this->contains('varchar', $usersTable[0]['Type']);
+        $this->assertStringContainsString('varchar', $usersTable[0]['Type']);
         $this->assertSame('user_id', $usersTable[1]['Field']);
-        $this->contains('int', $usersTable[1]['Type']);
+        $this->assertStringContainsString('int', $usersTable[1]['Type']);
     }
 
     public function testRollbackMigrationsWithMysql()
@@ -144,8 +144,8 @@ class MigrationIntegrationTest extends TestCase
         $usersTable = $this->pdo->query('DESCRIBE users')->fetchAll();
 
         $this->assertSame('email', $usersTable[0]['Field']);
-        $this->contains('varchar', $usersTable[0]['Type']);
+        $this->assertStringContainsString('varchar', $usersTable[0]['Type']);
         $this->assertSame('username', $usersTable[1]['Field']);
-        $this->contains('varchar', $usersTable[1]['Type']);
+        $this->assertStringContainsString('varchar', $usersTable[1]['Type']);
     }
 }
