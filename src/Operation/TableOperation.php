@@ -111,9 +111,9 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                 }
 
                 $options = $originalColumn->getOptions();
-                $options['new_name'] = $columnOperation->getName();
+                $options['new_name'] = $columnOperation->getBeforeName();
                 $columnOperations[] = new ColumnOperation(
-                    $columnOperation->getOptions()['new_name'],
+                    $columnOperation->getAfterName(),
                     $columnOperation->getOperation(),
                     $options
                 );
@@ -206,9 +206,9 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                     $offset = array_search($options['after'], array_keys($columns)) + 1;
                 }
 
-                // Remove existing operation for the column
+                // Remove existing operation for the column using before/after name matching
                 foreach ($columns as $existing => $column) {
-                    if ($column->getName() === $columnOperation->getName()) {
+                    if ($column->getAfterName() === $columnOperation->getBeforeName()) {
                         unset($columns[$existing]);
                         break;
                     }
@@ -231,7 +231,7 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         break;
                     case ColumnOperation::CHANGE:
                         $addOperation = new ColumnOperation(
-                            $columnOperation->getOptions()['new_name'],
+                            $columnOperation->getAfterName(),
                             ColumnOperation::ADD,
                             $options
                         );
@@ -277,9 +277,9 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
             foreach ($operation->getColumnOperations() as $columnOperation) {
                 $originalOperation = $columnOperation->getOperation();
 
-                // Remove existing operation for the column
+                // Remove existing operation for the column using before/after name matching
                 foreach ($columns as $existing => $column) {
-                    if ($column->getName() === $columnOperation->getName()) {
+                    if ($column->getAfterName() === $columnOperation->getBeforeName()) {
                         unset($columns[$existing]);
                         $originalOperation = $column->getOperation();
                         break;
@@ -305,7 +305,7 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         break;
                     case ColumnOperation::CHANGE:
                         $columns[] = new ColumnOperation(
-                            $columnOperation->getOptions()['new_name'],
+                            $columnOperation->getAfterName(),
                             $originalOperation,
                             $columnOperation->getOptions()
                         );
