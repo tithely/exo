@@ -206,9 +206,17 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                     $offset = array_search($options['after'], array_keys($columns)) + 1;
                 }
 
-                // Remove existing operation for the column using before/after name matching
+                // Remove existing operation for the column using proper name matching
                 foreach ($columns as $existing => $column) {
-                    if ($column->getAfterName() === $columnOperation->getBeforeName()) {
+                    $shouldRemove = false;
+                    
+                    if ($columnOperation->getOperation() === ColumnOperation::CHANGE) {
+                        $shouldRemove = ($column->getAfterName() === $columnOperation->getBeforeName());
+                    } else {
+                        $shouldRemove = ($column->getName() === $columnOperation->getName());
+                    }
+                    
+                    if ($shouldRemove) {
                         unset($columns[$existing]);
                         break;
                     }
@@ -277,9 +285,17 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
             foreach ($operation->getColumnOperations() as $columnOperation) {
                 $originalOperation = $columnOperation->getOperation();
 
-                // Remove existing operation for the column using before/after name matching
+                // Remove existing operation for the column using proper name matching
                 foreach ($columns as $existing => $column) {
-                    if ($column->getAfterName() === $columnOperation->getBeforeName()) {
+                    $shouldRemove = false;
+                    
+                    if ($columnOperation->getOperation() === ColumnOperation::CHANGE) {
+                        $shouldRemove = ($column->getAfterName() === $columnOperation->getBeforeName());
+                    } else {
+                        $shouldRemove = ($column->getName() === $columnOperation->getName());
+                    }
+                    
+                    if ($shouldRemove) {
                         unset($columns[$existing]);
                         $originalOperation = $column->getOperation();
                         break;
