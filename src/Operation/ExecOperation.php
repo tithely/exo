@@ -15,7 +15,7 @@ final class ExecOperation extends AbstractOperation
      * @param string   $name
      * @param ?string   $body
      */
-    public function __construct(string $name, string $body = null) {
+    public function __construct(string $name, ?string $body = null) {
         $this->name = $name;
         $this->body = $body;
     }

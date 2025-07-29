@@ -104,13 +104,13 @@ final class FunctionMigration implements MigrationInterface
     private function __construct(
         string $name,
         string $operation,
-        ReturnTypeOperation $returnType = null,
+        ?ReturnTypeOperation $returnType = null,
         bool $deterministic = false,
         string $dataUse = 'READS SQL DATA',
         string $language = 'plpgsql',
         array $parameterOperations = [],
         array $variableOperations = [],
-        string $body = null
+        ?string $body = null
     ) {
         $this->name = $name;
         $this->operation = $operation;
