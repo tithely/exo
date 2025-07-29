@@ -93,30 +93,26 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                 $columnOperations[] = $originalColumn;
             }
 
-            if ($columnOperation->getOperation() === ColumnOperation::MODIFY) {
+            if ($columnOperation->getOperation() === ColumnOperation::MODIFY || $columnOperation->getOperation() === ColumnOperation::CHANGE) {
                 if (!$originalColumn) {
                     throw new LogicException('Cannot revert a column that does not exist.');
                 }
 
-                $columnOperations[] = new ColumnOperation(
-                    $columnOperation->getName(),
-                    $columnOperation->getOperation(),
-                    $originalColumn->getOptions()
-                );
-            }
-
-            if ($columnOperation->getOperation() === ColumnOperation::CHANGE) {
-                if (!$originalColumn) {
-                    throw new LogicException('Cannot revert a column that does not exist.');
+                if ($columnOperation->getOperation() === ColumnOperation::MODIFY) {
+                    $columnOperations[] = new ColumnOperation(
+                        $columnOperation->getName(),
+                        $columnOperation->getOperation(),
+                        $originalColumn->getOptions()
+                    );
+                } else {
+                    $options = $originalColumn->getOptions();
+                    $options['new_name'] = $columnOperation->getBeforeName();
+                    $columnOperations[] = new ColumnOperation(
+                        $columnOperation->getAfterName(),
+                        $columnOperation->getOperation(),
+                        $options
+                    );
                 }
-
-                $options = $originalColumn->getOptions();
-                $options['new_name'] = $columnOperation->getBeforeName();
-                $columnOperations[] = new ColumnOperation(
-                    $columnOperation->getAfterName(),
-                    $columnOperation->getOperation(),
-                    $options
-                );
             }
         }
 
