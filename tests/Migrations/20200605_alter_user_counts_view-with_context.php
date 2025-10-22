@@ -4,4 +4,4 @@
 $tenant_database_name = $tenant_database_name ?? 'undefined';
 
 return Exo\ViewMigration::alter('user_counts')
-    ->withBody("SELECT COUNT(id) AS user_count FROM ${tenant_database_name}.users");
+    ->withBody("SELECT COUNT(id) AS user_count FROM {$tenant_database_name}.users");
