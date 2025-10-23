@@ -22,13 +22,17 @@ class MigrationIntegrationTest extends TestCase
     public function setUp(): void
     {
         if ($mysql = self::yaml('handlers.mysql')) {
-            $this->mysql = new PDO(
-                sprintf('mysql:dbname=%s;host=%s;port=%s', $mysql['name'], $mysql['host'], $mysql['port']),
-                $mysql['user'],
-                $mysql['pass']
-            );
+            try {
+                $this->mysql = new PDO(
+                    sprintf('mysql:dbname=%s;host=%s;port=%s', $mysql['name'], $mysql['host'], $mysql['port']),
+                    $mysql['user'],
+                    $mysql['pass']
+                );
 
-            $this->mysql->exec('DROP TABLE IF EXISTS users;');
+                $this->mysql->exec('DROP TABLE IF EXISTS users;');
+            } catch (\PDOException $e) {
+                $this->markTestSkipped('No MySQL connection');
+            }
         }
     }
 
