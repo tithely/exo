@@ -303,15 +303,25 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         }
                         break;
                     case ColumnOperation::MODIFY:
+                        $options = $columnOperation->getOptions();
+
+                        if ($originalOperation == ColumnOperation::CHANGE) {
+                            $options['new_name'] = $columnOperation->getName();
+                        }
+
                         $columns[] = new ColumnOperation(
                             $columnOperation->getName(),
                             $originalOperation,
-                            $columnOperation->getOptions()
+                            $options
                         );
                         break;
                     case ColumnOperation::CHANGE:
+                        if ($originalOperation == ColumnOperation::MODIFY) {
+                            $originalOperation = ColumnOperation::CHANGE;
+                        }
+
                         $columns[] = new ColumnOperation(
-                            $columnOperation->getAfterName(),
+                            $columnOperation->getName(),
                             $originalOperation,
                             $columnOperation->getOptions()
                         );
