@@ -202,9 +202,9 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                     $offset = array_search($options['after'], array_keys($columns)) + 1;
                 }
 
-                // Remove existing operation for the column
+                // Remove existing operation for the column using proper name matching
                 foreach ($columns as $existing => $column) {
-                    if ($column->getAfterName() === $columnOperation->getName()) {
+                    if ($column->getName() === $columnOperation->getName()) {
                         unset($columns[$existing]);
                         break;
                     }
@@ -272,12 +272,14 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
 
             foreach ($operation->getColumnOperations() as $columnOperation) {
                 $originalOperation = $columnOperation->getOperation();
+                $originalName = $columnOperation->getName();
 
-                // Remove existing operation for the column
+                // Remove existing operation for the column using proper name matching
                 foreach ($columns as $existing => $column) {
                     if ($column->getAfterName() === $columnOperation->getName()) {
                         unset($columns[$existing]);
                         $originalOperation = $column->getOperation();
+                        $originalName = $column->getBeforeName();
                         break;
                     }
                 }
@@ -288,6 +290,14 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         $columns[] = $columnOperation;
                         break;
                     case ColumnOperation::DROP:
+                        if ($originalOperation == ColumnOperation::CHANGE) {
+                            $columnOperation = new ColumnOperation(
+                                $originalName,
+                                $columnOperation->getOperation(),
+                                $columnOperation->getOptions()
+                            );
+                        }
+
                         if ($originalOperation !== ColumnOperation::ADD) {
                             $columns[] = $columnOperation;
                         }

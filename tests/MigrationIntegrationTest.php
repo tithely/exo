@@ -3,6 +3,7 @@
 namespace Exo\Tests;
 
 use Exo\Handler;
+use Exo\Statement\MysqlStatementBuilder;
 use PDO;
 use Exo\Operation\ColumnOperation;
 use Exo\Operation\TableOperation;
@@ -100,16 +101,11 @@ class MigrationIntegrationTest extends TestCase
 
         $this->assertSame('users', $operation->getName());
         $this->assertSame(TableOperation::ALTER, $operation->getOperation());
-        $this->assertCount(2, $operation->getColumnOperations());
+        $this->assertCount(1, $operation->getColumnOperations());
 
-        list($operation1, $operation2) = $operation->getColumnOperations();
-
+        list($operation1) = $operation->getColumnOperations();
         $this->assertSame('user_id', $operation1->getName());
-        $this->assertSame(ColumnOperation::CHANGE, $operation1->getOperation());
-        $this->assertSame('username', $operation1->getOptions()['new_name']);
-
-        $this->assertSame('username', $operation2->getName());
-        $this->assertSame(ColumnOperation::DROP, $operation2->getOperation());
+        $this->assertSame(ColumnOperation::DROP, $operation1->getOperation());
     }
 
     public function testMigrateMigrationsWithMysql()
