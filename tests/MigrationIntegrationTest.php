@@ -17,23 +17,24 @@ class MigrationIntegrationTest extends TestCase
     /**
      * @var PDO|null
      */
-    private ?PDO $pdo;
+    private ?PDO $mysql;
 
     public function setUp(): void
     {
-        $mysql = self::yaml('handlers.mysql');
+        if ($mysql = self::yaml('handlers.mysql')) {
+            $this->mysql = new PDO(
+                sprintf('mysql:dbname=%s;host=%s;port=%s', $mysql['name'], $mysql['host'], $mysql['port']),
+                $mysql['user'],
+                $mysql['pass']
+            );
 
-        $this->pdo = new PDO(
-            sprintf('mysql:dbname=%s;host=%s;port=%s', $mysql['name'], $mysql['host'], $mysql['port']),
-            $mysql['user'],
-            $mysql['pass']
-        );
-        $this->pdo->exec('DROP TABLE IF EXISTS users;');
+            $this->mysql->exec('DROP TABLE IF EXISTS users;');
+        }
     }
 
     public function tearDown(): void
     {
-        $this->pdo = null;
+        $this->mysql = null;
     }
 
     public function testReduceMigrationsWithChange()
@@ -109,13 +110,17 @@ class MigrationIntegrationTest extends TestCase
 
     public function testMigrateMigrationsWithMysql()
     {
+        if (!$this->mysql) {
+            $this->markTestSkipped('No MySQL connection');
+        }
+
         $finder = new Finder([]);
         $history = $finder->fromPath(__DIR__ . '/Fixtures/TestChange');
-        $handler = new Handler($this->pdo, $history);
+        $handler = new Handler($this->mysql, $history);
 
         $handler->migrate([], null, true);
 
-        $usersTable = $this->pdo->query('DESCRIBE users')->fetchAll();
+        $usersTable = $this->mysql->query('DESCRIBE users')->fetchAll();
 
         $this->assertSame('email', $usersTable[0]['Field']);
         $this->assertStringContainsString('varchar', $usersTable[0]['Type']);
@@ -125,9 +130,13 @@ class MigrationIntegrationTest extends TestCase
 
     public function testRollbackMigrationsWithMysql()
     {
+        if (!$this->mysql) {
+            $this->markTestSkipped('No MySQL connection');
+        }
+
         $finder = new Finder([]);
         $history = $finder->fromPath(__DIR__ . '/Fixtures/TestChange');
-        $handler = new Handler($this->pdo, $history);
+        $handler = new Handler($this->mysql, $history);
         $handler->migrate([], null, true);
 
         $handler->rollback(
@@ -141,7 +150,7 @@ class MigrationIntegrationTest extends TestCase
             true
         );
 
-        $usersTable = $this->pdo->query('DESCRIBE users')->fetchAll();
+        $usersTable = $this->mysql->query('DESCRIBE users')->fetchAll();
 
         $this->assertSame('email', $usersTable[0]['Field']);
         $this->assertStringContainsString('varchar', $usersTable[0]['Type']);
