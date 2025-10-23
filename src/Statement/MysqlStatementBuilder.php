@@ -278,6 +278,16 @@ class MysqlStatementBuilder extends StatementBuilder
                                 $this->buildColumn($columnOperation->getName(), $columnOperation->getOptions())
                             );
                             break;
+                        case ColumnOperation::CHANGE:
+                            $specifications[] = sprintf(
+                                'CHANGE COLUMN %s %s',
+                                $this->buildIdentifier($columnOperation->getName()),
+                                $this->buildColumn(
+                                    $columnOperation->getOptions()['new_name'],
+                                    $columnOperation->getOptions()
+                                )
+                            );
+                            break;
                         case ColumnOperation::DROP:
                             $specifications[] = sprintf(
                                 'DROP COLUMN %s',

@@ -64,7 +64,7 @@ final class ProcedureOperation extends AbstractOperation implements ReversibleOp
         string $language = 'plpgsql',
         array $inParameterOperations = [],
         array $outParameterOperations = [],
-        string $body = null
+        ?string $body = null
     ) {
         $this->name = $name;
         $this->operation = $operation;

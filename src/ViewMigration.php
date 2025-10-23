@@ -61,7 +61,7 @@ final class ViewMigration implements MigrationInterface
      * @param string      $operation
      * @param string|null $body
      */
-    private function __construct(string $name, string $operation, string $body = null)
+    private function __construct(string $name, string $operation, ?string $body = null)
     {
         $this->name = $name;
         $this->operation = $operation;

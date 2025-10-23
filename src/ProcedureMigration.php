@@ -90,7 +90,7 @@ final class ProcedureMigration implements MigrationInterface
         string $language = 'plpgsql',
         array $inParameterOperations = [],
         array $outParameterOperations = [],
-        string $body = null
+        ?string $body = null
     ) {
         $this->name = $name;
         $this->operation = $operation;

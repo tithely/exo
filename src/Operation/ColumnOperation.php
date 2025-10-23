@@ -6,12 +6,23 @@ final class ColumnOperation extends AbstractOperation
 {
     const ADD = 'add';
     const MODIFY = 'modify';
+    const CHANGE = 'change';
     const DROP = 'drop';
 
     /**
      * @var string
      */
     private string $operation;
+
+    /**
+     * @var string
+     */
+    private string $beforeName;
+
+    /**
+     * @var string
+     */
+    private string $afterName;
 
     /**
      * @var array
@@ -30,6 +41,14 @@ final class ColumnOperation extends AbstractOperation
         $this->name = $name;
         $this->operation = $operation;
         $this->options = $options;
+        
+        if ($operation === self::CHANGE && isset($options['new_name'])) {
+            $this->beforeName = $name;
+            $this->afterName = $options['new_name'];
+        } else {
+            $this->beforeName = $name;
+            $this->afterName = $name;
+        }
     }
 
     /**
@@ -50,5 +69,25 @@ final class ColumnOperation extends AbstractOperation
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    /**
+     * Returns the before name (original name for CHANGE operations).
+     *
+     * @return string
+     */
+    public function getBeforeName(): string
+    {
+        return $this->beforeName;
+    }
+
+    /**
+     * Returns the after name (new name for CHANGE operations).
+     *
+     * @return string
+     */
+    public function getAfterName(): string
+    {
+        return $this->afterName;
     }
 }

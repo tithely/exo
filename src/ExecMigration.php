@@ -33,7 +33,7 @@ final class ExecMigration implements MigrationInterface
      * @param string      $name
      * @param string|null $body
      */
-    private function __construct(string $name, string $body = null)
+    private function __construct(string $name, ?string $body = null)
     {
         $this->name = $name;
         $this->body = $body;

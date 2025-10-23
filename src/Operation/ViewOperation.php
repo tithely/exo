@@ -27,7 +27,7 @@ final class ViewOperation extends AbstractOperation implements ReversibleOperati
      * @param string      $operation
      * @param string|null $body
      */
-    public function __construct(string $name, string $operation, string $body = null)
+    public function __construct(string $name, string $operation, ?string $body = null)
     {
         $this->name = $name;
         $this->operation = $operation;
