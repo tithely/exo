@@ -310,7 +310,7 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         }
 
                         $columns[] = new ColumnOperation(
-                            $columnOperation->getName(),
+                            $originalName,
                             $originalOperation,
                             $options
                         );
