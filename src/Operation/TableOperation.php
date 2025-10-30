@@ -316,7 +316,7 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         );
                         break;
                     case ColumnOperation::CHANGE:
-                        $columnName = $columnOperation->getName();
+                        $columnName = $originalName;
 
                         if ($originalOperation == ColumnOperation::ADD) {
                             $columnName = $columnOperation->getAfterName();

@@ -119,6 +119,29 @@ class TableOperationTest extends TestCase
         $this->assertEquals(['unique' => true], $operation->getIndexOperations()[0]->getOptions());
     }
 
+    public function testApplyAlterToAlterWithModifyColumnChange()
+    {
+        $base = new TableOperation('users', TableOperation::ALTER, [
+            new ColumnOperation('id', ColumnOperation::DROP, []),
+            new ColumnOperation('email', ColumnOperation::CHANGE, ['new_name' => 'username', 'type' => 'string', 'length' => 255, 'first' => true]),
+        ], []);
+
+        $operation = $base->apply(new TableOperation('users', TableOperation::ALTER, [
+            new ColumnOperation('username', ColumnOperation::MODIFY, ['type' => 'char', 'length' => 64])
+        ], []));
+
+        $this->assertEquals('users', $operation->getName());
+        $this->assertEquals(TableOperation::ALTER, $operation->getOperation());
+        $this->assertCount(2, $operation->getColumnOperations());
+
+        $this->assertEquals('id', $operation->getColumnOperations()[0]->getName());
+        $this->assertEquals(ColumnOperation::DROP, $operation->getColumnOperations()[0]->getOperation());
+
+        $this->assertEquals('email', $operation->getColumnOperations()[1]->getName());
+        $this->assertEquals(ColumnOperation::CHANGE, $operation->getColumnOperations()[1]->getOperation());
+        $this->assertEquals(['type' => 'char', 'length' => 64, 'new_name' => 'username'], $operation->getColumnOperations()[1]->getOptions());
+    }
+
     public function testApplyDropToAlter()
     {
         $base = new TableOperation('users', TableOperation::ALTER, [
