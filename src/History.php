@@ -64,7 +64,7 @@ class History
      * @param array|null $versions
      * @return History
      */
-    public function clone(array $versions = null): History
+    public function clone(?array $versions = null): History
     {
         $history = new History();
 

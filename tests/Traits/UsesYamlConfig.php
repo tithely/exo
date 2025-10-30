@@ -16,7 +16,7 @@ trait UsesYamlConfig
      *                          When the value cannot be found by the given key, we default to null.
      * @throws Exception
      */
-    protected static function yaml(string $keys = null)
+    protected static function yaml(?string $keys = null)
     {
         $yaml = self::readYamlFile();
 
