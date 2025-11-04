@@ -287,6 +287,14 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                 // Apply new column operation
                 switch ($columnOperation->getOperation()) {
                     case ColumnOperation::ADD:
+                        if ($originalOperation == ColumnOperation::DROP) {
+                            $columnOperation = new ColumnOperation(
+                                $columnOperation->getName(),
+                                ColumnOperation::MODIFY,
+                                $columnOperation->getOptions()
+                            );
+                        }
+
                         $columns[] = $columnOperation;
                         break;
                     case ColumnOperation::DROP:
@@ -317,9 +325,11 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         break;
                     case ColumnOperation::CHANGE:
                         $columnName = $originalName;
+                        $options = $columnOperation->getOptions();
 
                         if ($originalOperation == ColumnOperation::ADD) {
                             $columnName = $columnOperation->getAfterName();
+                            unset($options['new_name']);
                         }
 
                         if ($originalOperation == ColumnOperation::MODIFY) {
@@ -329,7 +339,7 @@ final class TableOperation extends AbstractOperation implements ReversibleOperat
                         $columns[] = new ColumnOperation(
                             $columnName,
                             $originalOperation,
-                            $columnOperation->getOptions()
+                            $options
                         );
                         break;
                 }
