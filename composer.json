@@ -12,10 +12,12 @@
         "symfony/yaml": "^5.0",
         "phpspec/prophecy": "^1.22.0",
         "doctrine/instantiator": "^1.5",
-        "symfony/deprecation-contracts": "^2.4"
+        "symfony/deprecation-contracts": "^2.4",
+        "vimeo/psalm": "^5.26"
     },
     "scripts":{
-        "test": "./vendor/bin/phpunit -c phpunit.xml"
+        "test": "./vendor/bin/phpunit -c phpunit.xml",
+        "psalm": "vendor/bin/psalm --config=psalm.xml"
     },
     "autoload": {
         "psr-4": {
